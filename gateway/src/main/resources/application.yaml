@@ -1,0 +1,36 @@
+server:
+  port: 8088
+
+
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR}
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**, /verify
+        - id: email-service
+          uri: lb://email-service
+          predicates:
+            - Path=/email/**
+
+
+joinup:
+  jwt:
+    location: classpath:joinup.jks
+    alias: joinup
+    password: ${JWT_PASSWORD}
+    tokenTTL: 30m
+
+  auth:
+    excludePaths:
+      - /user/wxLogin
+      - /user/register
+      - /verify/**
