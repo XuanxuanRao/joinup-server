@@ -1,0 +1,55 @@
+name: Build backend and deploy to server
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [gateway, user-service, email-service, team-service]
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 设置 JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 构建 ${{ matrix.service }}
+        run: mvn clean package -DskipTests -pl ${{ matrix.service }} -am
+
+      - name: 登录 Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username=${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ vars.DOCKER_HUB_ADDR }}
+
+      - name: 构建 Docker 镜像
+        run: |
+          cd ${{ matrix.service }}
+          docker build -t ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest .
+
+      - name: 推送 Docker 镜像
+        run: docker push ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 连接服务器并部署
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd /home/project
+            docker compose down
+            for service in gateway user-service email-service team-service; do
+              docker pull ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/$service:latest
+            done
+            docker compose --project-name joinup up -d
