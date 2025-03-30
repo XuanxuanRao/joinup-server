@@ -14,7 +14,7 @@
         <module>gateway</module>
         <module>joinup-api</module>
         <module>email-service</module>
-        <module>team-serivice</module>
+        <module>team-service</module>
     </modules>
 
 
