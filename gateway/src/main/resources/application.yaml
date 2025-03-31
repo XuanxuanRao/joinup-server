@@ -38,3 +38,4 @@ joinup:
       - /user/wxLogin
       - /user/register
       - /verify/**
+      - /course/**
