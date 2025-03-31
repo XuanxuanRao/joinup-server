@@ -20,6 +20,10 @@ spring:
           uri: lb://email-service
           predicates:
             - Path=/email/**
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+              - Path=/course/**
 
 
 joinup:
