@@ -6,7 +6,9 @@ import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.dto.ResetPasswordDTO;
+import cn.org.joinup.user.domain.dto.VerifyIdentityDTO;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.org.joinup.common.constant.RedisConstant;
 import cn.org.joinup.common.exception.BadRequestException;
@@ -161,6 +163,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + resetPasswordDTO.getEmail());
 
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> verifyIdentity(VerifyIdentityDTO verifyIdentityDTO) {
+        Long userId = UserContext.getUser();
+        User user = getById(userId);
+
+        String correctCode = stringRedisTemplate.opsForValue().get(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
+        if (!verifyIdentityDTO.getVerifyCode().equals(correctCode)) {
+            return Result.error("验证码错误");
+        }
+
+        user.setVerified(true);
+        user.setUpdateTime(LocalDateTime.now());
+        user.setStudentId(verifyIdentityDTO.getEmail().split("@")[0]);
+        if (!updateById(user)) {
+            return Result.error("系统错误，请稍后再试");
+        }
+
+        stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
         return Result.success();
     }
 }

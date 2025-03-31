@@ -1,6 +1,7 @@
 package cn.org.joinup.common.util;
 
 public class RegexUtil {
+    public static final String BUAA_EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@buaa\\.edu\\.cn$";
     public static final String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
     public static final String PHONE_REGEX = "^1[3-9]\\d{9}$";
     public static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,20}$";
@@ -12,6 +13,9 @@ public class RegexUtil {
 
     public static boolean isEmailValid(String email) {
         return email.matches(EMAIL_REGEX);
+    }
+    public static boolean isBuaaEmailValid(String email) {
+        return email.matches(BUAA_EMAIL_REGEX);
     }
 
     public static boolean isPhoneValid(String phone) {

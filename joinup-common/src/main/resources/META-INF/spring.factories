@@ -2,4 +2,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.org.joinup.common.config.HandlerConfig,\
   cn.org.joinup.common.config.MyBatisConfig,\
   cn.org.joinup.common.config.MvcConfig,\
+  cn.org.joinup.common.config.MQConfig,\
   cn.org.joinup.common.config.JsonConfig

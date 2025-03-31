@@ -12,4 +12,6 @@ public interface IVerifyService {
 
     Result<Void> sendVerifyCodeForReset(String email);
 
+    Result<Void> sendVerifyCodeForIdentity(String email);
+
 }

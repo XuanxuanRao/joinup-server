@@ -1,6 +1,8 @@
 package cn.org.joinup.user.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.org.joinup.common.util.UserContext;
+import com.alibaba.nacos.api.naming.pojo.healthcheck.impl.Http;
 import lombok.extern.slf4j.Slf4j;
 import cn.org.joinup.api.client.EmailClient;
 import cn.org.joinup.api.dto.SendEmailDTO;
@@ -10,6 +12,7 @@ import cn.org.joinup.common.util.RegexUtil;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.service.IUserService;
 import cn.org.joinup.user.service.IVerifyService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 @Service
 @Slf4j
@@ -51,8 +53,7 @@ public class VerifyServiceImpl implements IVerifyService {
         }
 
         // 生成验证码
-        String code = RandomUtil.randomNumbers(6);
-        stringRedisTemplate.opsForValue().set(RedisConstant.VERIFY_CODE_PREFIX + email, code, RedisConstant.VERIFY_CODE_EXPIRE, TimeUnit.SECONDS);
+        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
 
         // 生成邮件内容
         final String body = loadTemplate("templates/email_register.html")
@@ -75,9 +76,7 @@ public class VerifyServiceImpl implements IVerifyService {
             return Result.error("该邮箱未注册");
         }
 
-        // 生成验证码
-        String code = RandomUtil.randomNumbers(6);
-        stringRedisTemplate.opsForValue().set(RedisConstant.VERIFY_CODE_PREFIX + email, code, RedisConstant.VERIFY_CODE_EXPIRE, TimeUnit.SECONDS);
+        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
 
         // 生成邮件内容
         final String body = loadTemplate("templates/email_reset.html")
@@ -86,14 +85,39 @@ public class VerifyServiceImpl implements IVerifyService {
 
         // 发送邮件
         emailClient.sendEmail(SendEmailDTO.builder()
-                    .to(email)
-                    .subject("重置密码验证码")
-                    .body(body)
-                    .build());
+                .to(email)
+                .subject("重置密码验证码")
+                .body(body)
+                .build());
 
         return Result.success();
     }
 
+    @Override
+    public Result<Void> sendVerifyCodeForIdentity(String email) {
+        User user = userService.getById(UserContext.getUser());
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        // 生成验证码
+        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
+
+        // 生成邮件内容
+        final String body = loadTemplate("templates/email_identity.html")
+                .replace("{{verification_code}}", code)
+                .replace("{{username}}", user.getUsername());
+
+
+        // 发送邮件
+        emailClient.sendEmail(SendEmailDTO.builder()
+                .to(email)
+                .subject("北航身份验证")
+                .body(body)
+                .build());
+
+        return Result.success();
+    }
 
     private String loadTemplate(final String fileName) {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
@@ -107,6 +131,19 @@ public class VerifyServiceImpl implements IVerifyService {
         } catch (Exception e) {
             throw new RuntimeException("Error reading email template: " + fileName, e);
         }
+    }
+
+    /**
+     * 生成验证码，并存入redis
+     * @param redisKey redis key for storing the code
+     * @return 验证码
+     */
+    @NotNull
+    private String generateCode(String redisKey) {
+        // 生成验证码
+        String code = RandomUtil.randomNumbers(6);
+        stringRedisTemplate.opsForValue().set(redisKey, code, RedisConstant.VERIFY_CODE_EXPIRE, TimeUnit.SECONDS);
+        return code;
     }
 
 }

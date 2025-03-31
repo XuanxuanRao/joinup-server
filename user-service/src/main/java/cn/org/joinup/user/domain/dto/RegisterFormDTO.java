@@ -9,7 +9,6 @@ import javax.validation.constraints.Pattern;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 @Data
 @ApiModel(description = "用户注册账号表单")

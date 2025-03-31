@@ -8,7 +8,8 @@ import java.util.Arrays;
 public enum SendCodeType {
     REGISTER(1),
     LOGIN(2),
-    RESET_PASSWORD(3);
+    RESET_PASSWORD(3),
+    IDENTITY(4);
 
     private final int value;
 

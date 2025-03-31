@@ -2,14 +2,11 @@ package cn.org.joinup.user.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.exception.SystemException;
-import cn.org.joinup.user.domain.dto.ResetPasswordDTO;
-import cn.org.joinup.user.domain.dto.WxLoginDTO;
+import cn.org.joinup.user.domain.dto.*;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
-import cn.org.joinup.user.domain.dto.LoginFormDTO;
-import cn.org.joinup.user.domain.dto.RegisterFormDTO;
 import cn.org.joinup.user.domain.vo.UserLoginVO;
 import cn.org.joinup.user.service.IUserService;
 import io.swagger.annotations.ApiOperation;
@@ -20,7 +17,6 @@ import javax.annotation.Resource;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 @RestController
 @RequestMapping("/user")
@@ -36,7 +32,7 @@ public class UserController {
         if (user == null) {
             return Result.error("System error");
         }
-
+        System.out.println("user = " + user);
         return Result.success(BeanUtil.copyProperties(user, UserDTO.class));
     }
 
@@ -69,5 +65,18 @@ public class UserController {
             return Result.error(e.getMessage());
         }
     }
+
+    @ApiOperation("账号密码登录")
+    @PostMapping("/login")
+    public Result<UserLoginVO> login(@Validated @RequestBody LoginFormDTO loginFormDTO) {
+        return Result.success(userService.login(loginFormDTO));
+    }
+
+    @ApiOperation("进行北航身份验证")
+    @PostMapping("/verify")
+    public Result<Void> verifyIdentity(@Validated @RequestBody VerifyIdentityDTO verifyIdentityDTO) {
+        return userService.verifyIdentity(verifyIdentityDTO);
+    }
+
 
 }

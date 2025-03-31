@@ -1,7 +1,5 @@
 package cn.org.joinup.api.config;
 
-import cn.org.joinup.api.client.fallback.UserFallBackFactory;
-import cn.org.joinup.api.client.fallback.EmailFallBackFactory;
 import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.common.util.UserContext;
 import feign.Logger;
@@ -26,17 +24,6 @@ public class DefaultFeignConfig {
                 requestTemplate.header(SystemConstant.USER_ID_NAME, userId.toString());
             }
         };
-    }
-
-
-    @Bean
-    public EmailFallBackFactory emailFallBackFactory() {
-        return new EmailFallBackFactory();
-    }
-
-    @Bean
-    public UserFallBackFactory userFallBackFactory() {
-        return new UserFallBackFactory();
     }
 
 }

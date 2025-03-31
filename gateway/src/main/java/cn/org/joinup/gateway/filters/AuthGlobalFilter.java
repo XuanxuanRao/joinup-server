@@ -35,10 +35,6 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
-        if (!isNeedAuth(request.getPath().toString())) {
-            return chain.filter(exchange);
-        }
-
         String token = null;
         List<String> headers = request.getHeaders().get(SystemConstant.TOKEN_NAME);
         if (headers != null && !headers.isEmpty()) {
@@ -49,8 +45,12 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         try {
             userId = jwtTool.parseToken(token);
         } catch (UnauthorizedException e) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            if (isNeedAuth(request.getPath().toString())) {
+                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                return exchange.getResponse().setComplete();
+            } else {
+                return chain.filter(exchange);
+            }
         }
 
         // 通过请求头传递用户信息
