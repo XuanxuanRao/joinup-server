@@ -15,7 +15,7 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/user/**, /verify
+            - Path=/user/**, /verify, /test/**
         - id: email-service
           uri: lb://email-service
           predicates:
@@ -39,3 +39,4 @@ joinup:
       - /user/login
       - /user/register
       - /verify/**
+      - /test/hello
