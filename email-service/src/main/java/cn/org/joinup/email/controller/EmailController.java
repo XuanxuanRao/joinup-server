@@ -10,11 +10,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 @RestController
 @RequestMapping("/common/email")
