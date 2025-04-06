@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -48,6 +49,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         try {
             jwtPayload = jwtTool.parseToken(token);
             if (isAdminAuth(request.getPath().toString()) && !RoleConstant.ADMIN.equals(jwtPayload.getRole())) {
+                System.out.println(request.getPath());
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
             }
@@ -78,7 +80,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isAdminAuth(String path) {
-        return authProperties.getAdminPaths().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
+        return authProperties.getAdminPaths().stream()
+                .map(Pattern::compile)
+                .anyMatch(pattern -> pattern.matcher(path).matches());
     }
 
 }

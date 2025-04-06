@@ -37,4 +37,4 @@ joinup:
       - /verify/**
       - /test/hello
     admin-paths:
-      - /user/{id}
+      - ^/user/\d+$
