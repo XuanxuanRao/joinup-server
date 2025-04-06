@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -75,6 +76,19 @@ public class UserController {
     @PostMapping("/verify")
     public Result<Void> verifyIdentity(@Validated @RequestBody VerifyIdentityDTO verifyIdentityDTO) {
         return userService.verifyIdentity(verifyIdentityDTO);
+    }
+
+    @ApiOperation("修改用户信息")
+    @PutMapping
+    public Result<Void> updateUser(@Validated @RequestBody UpdateUserDTO updateUserDTO) {
+        User user = BeanUtil.copyProperties(updateUserDTO, User.class);
+        user.setId(UserContext.getUser());
+        user.setUpdateTime(LocalDateTime.now());
+        System.out.println(user);
+        if (!userService.updateById(user)) {
+            return Result.error("更新用户信息失败，请稍后再试");
+        }
+        return Result.success();
     }
 
 

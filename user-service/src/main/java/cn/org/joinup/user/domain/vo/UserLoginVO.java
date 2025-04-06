@@ -1,5 +1,6 @@
 package cn.org.joinup.user.domain.vo;
 
+import cn.org.joinup.common.enums.Gender;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,4 +14,6 @@ public class UserLoginVO {
     private String username;
     @ApiModelProperty(value = "用户头像")
     private String avatar;
+    @ApiModelProperty(value = "用户性别")
+    private Gender gender;
 }

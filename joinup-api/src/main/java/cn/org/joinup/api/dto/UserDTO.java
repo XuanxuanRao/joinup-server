@@ -1,5 +1,6 @@
 package cn.org.joinup.api.dto;
 
+import cn.org.joinup.common.enums.Gender;
 import lombok.Data;
 
 /**
@@ -11,4 +12,5 @@ public class UserDTO {
     private String avatar;
     private String createTime;
     private String studentId;
+    private Gender gender;
 }

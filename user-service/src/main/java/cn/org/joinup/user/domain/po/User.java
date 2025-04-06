@@ -1,5 +1,6 @@
 package cn.org.joinup.user.domain.po;
 
+import cn.org.joinup.common.enums.Gender;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -48,6 +49,8 @@ public class User implements Serializable {
      */
     private String studentId;
     private String openid;
+    private Gender gender;
+
     /**
      * 用户角色：ADMIN-管理员，USER-普通用户
      */
