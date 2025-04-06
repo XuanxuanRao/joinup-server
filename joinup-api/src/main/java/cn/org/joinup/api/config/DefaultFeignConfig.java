@@ -21,7 +21,7 @@ public class DefaultFeignConfig {
         return requestTemplate -> {
             Long userId = UserContext.getUser();
             if (userId != null) {
-                requestTemplate.header(SystemConstant.USER_ID_NAME, userId.toString());
+                requestTemplate.header(SystemConstant.USER_ID_HEADER_NAME, userId.toString());
             }
         };
     }

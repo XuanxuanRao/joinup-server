@@ -5,6 +5,8 @@ import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTValidator;
 import cn.hutool.jwt.signers.JWTSigner;
 import cn.hutool.jwt.signers.JWTSignerUtil;
+import cn.org.joinup.common.constant.SystemConstant;
+import cn.org.joinup.common.domain.JwtPayload;
 import cn.org.joinup.common.exception.UnauthorizedException;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +24,9 @@ public class JwtTool {
      * 解析token
      *
      * @param token token
-     * @return 解析刷新token得到的用户信息
+     * @return 解析刷新token得到的用户信息，包含用户id和权限
      */
-    public Long parseToken(String token) {
+    public JwtPayload parseToken(String token) {
         // 1.校验token是否为空
         if (token == null) {
             throw new UnauthorizedException("未登录");
@@ -47,16 +49,20 @@ public class JwtTool {
         } catch (ValidateException e) {
             throw new UnauthorizedException("token已经过期");
         }
+
         // 4.数据格式校验
-        Object userPayload = jwt.getPayload("user");
-        if (userPayload == null) {
+        Object userPayload = jwt.getPayload(SystemConstant.USER_ID_PAYLOAD_NAME);
+        Object rolePayload = jwt.getPayload(SystemConstant.USER_ROLE_PAYLOAD_NAME);
+        if (userPayload == null || rolePayload == null) {
             // 数据为空
             throw new UnauthorizedException("无效的token");
         }
 
         // 5.数据解析
         try {
-           return Long.valueOf(userPayload.toString());
+            Long userId = Long.valueOf(userPayload.toString());
+            String role = rolePayload.toString();
+            return new JwtPayload(userId, role);
         } catch (RuntimeException e) {
             // 数据格式有误
             throw new UnauthorizedException("无效的token");

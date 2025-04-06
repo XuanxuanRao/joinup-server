@@ -65,14 +65,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new RuntimeException("用户名错误");
         }
 
-        System.out.println(user.getPassword());
-
-
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
             throw new BadRequestException("用户名或密码错误");
         }
 
-        String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;
@@ -99,7 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 user.setUpdateTime(LocalDateTime.now());
                 save(user);
             }
-            String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
+            String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
@@ -135,7 +132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + registerDTO.getEmail());
 
-        String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;

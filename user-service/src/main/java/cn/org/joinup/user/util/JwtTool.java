@@ -3,6 +3,7 @@ package cn.org.joinup.user.util;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.signers.JWTSigner;
 import cn.hutool.jwt.signers.JWTSignerUtil;
+import cn.org.joinup.common.constant.SystemConstant;
 import org.springframework.stereotype.Component;
 
 import java.security.KeyPair;
@@ -24,10 +25,11 @@ public class JwtTool {
      * @param ttl    token有效期
      * @return access-token
      */
-    public String createToken(Long userId, Duration ttl) {
+    public String createToken(Long userId, String role, Duration ttl) {
         // 1.生成jws
         return JWT.create()
-                .setPayload("user", userId)
+                .setPayload(SystemConstant.USER_ID_PAYLOAD_NAME, userId)
+                .setPayload(SystemConstant.USER_ROLE_PAYLOAD_NAME, role)
                 .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis()))
                 .setSigner(jwtSigner)
                 .sign();

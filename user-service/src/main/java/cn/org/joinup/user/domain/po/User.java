@@ -48,4 +48,8 @@ public class User implements Serializable {
      */
     private String studentId;
     private String openid;
+    /**
+     * 用户角色：ADMIN-管理员，USER-普通用户
+     */
+    private String role;
 }

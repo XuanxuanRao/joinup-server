@@ -32,7 +32,6 @@ public class UserController {
         if (user == null) {
             return Result.error("System error");
         }
-        System.out.println("user = " + user);
         return Result.success(BeanUtil.copyProperties(user, UserDTO.class));
     }
 

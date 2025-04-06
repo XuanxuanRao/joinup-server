@@ -19,7 +19,7 @@ public class SendCodeDTO {
     @ApiModelProperty(value = "邮箱", required = true)
     @Pattern(regexp = RegexUtil.EMAIL_REGEX, message = "邮箱格式错误")
     private String email;
-    @ApiModelProperty(value = "验证码类型，1表示注册验证码，2表示登录验证码，3表示重置密码验证码", required = true)
+    @ApiModelProperty(value = "验证码类型，1表示注册验证码，2表示登录验证码，3表示重置密码验证码，4表示进行北航身份验证", required = true)
     @NotNull(message = "验证码类型不能为空")
     private SendCodeType type;
 }

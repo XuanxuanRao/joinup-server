@@ -1,5 +1,7 @@
 package cn.org.joinup.gateway.filters;
 
+import cn.org.joinup.common.constant.RoleConstant;
+import cn.org.joinup.common.domain.JwtPayload;
 import lombok.RequiredArgsConstructor;
 import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.common.exception.UnauthorizedException;
@@ -41,9 +43,14 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             token = headers.get(0);
         }
 
-        Long userId;
+        // 4. 解析token
+        JwtPayload jwtPayload;
         try {
-            userId = jwtTool.parseToken(token);
+            jwtPayload = jwtTool.parseToken(token);
+            if (isAdminAuth(request.getPath().toString()) && !RoleConstant.ADMIN.equals(jwtPayload.getRole())) {
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                return exchange.getResponse().setComplete();
+            }
         } catch (UnauthorizedException e) {
             if (isNeedAuth(request.getPath().toString())) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -53,9 +60,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             }
         }
 
-        // 通过请求头传递用户信息
+        // 6. 传递用户信息
         ServerWebExchange newExchange = exchange.mutate()
-                .request(builder -> builder.header(SystemConstant.USER_ID_NAME, userId.toString()))
+                .request(builder -> builder.header(SystemConstant.USER_ID_HEADER_NAME, jwtPayload.getUserId().toString()).header(SystemConstant.USER_ROLE_HEADER_NAME, jwtPayload.getRole()))
                 .build();
 
         return chain.filter(newExchange);
@@ -68,6 +75,10 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private boolean isNeedAuth(String path) {
         return authProperties.getExcludePaths().stream().noneMatch(pattern -> antPathMatcher.match(pattern, path));
+    }
+
+    private boolean isAdminAuth(String path) {
+        return authProperties.getAdminPaths().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
     }
 
 }

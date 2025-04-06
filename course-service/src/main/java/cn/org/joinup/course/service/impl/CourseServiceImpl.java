@@ -3,11 +3,18 @@ package cn.org.joinup.course.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.UserDTO;
+import cn.org.joinup.common.result.PageQuery;
+import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.course.domain.CourseQueryDTO;
 import cn.org.joinup.course.domain.ScheduleVO;
 import cn.org.joinup.course.domain.SignDTO;
+import cn.org.joinup.course.domain.po.SignLog;
+import cn.org.joinup.course.mapper.SignLogMapper;
 import cn.org.joinup.course.service.CourseService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +30,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CourseServiceImpl implements CourseService {
+public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> implements CourseService {
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -50,5 +57,11 @@ public class CourseServiceImpl implements CourseService {
         }
         rabbitTemplate.convertAndSend("course.direct", "course.sign", new SignDTO(userInfo.getStudentId(), courseId));
         return Result.success();
+    }
+
+    @Override
+    public Result<PageResult<SignLog>> query(PageQuery query, String studentId) {
+        Page<SignLog> page = page(query.toMpPage("create_time", false), new QueryWrapper<SignLog>().eq("student_id", studentId));
+        return Result.success(PageResult.of(page, SignLog.class));
     }
 }

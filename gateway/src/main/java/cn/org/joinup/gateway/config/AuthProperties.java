@@ -10,6 +10,13 @@ import java.util.List;
 @Component
 @ConfigurationProperties(prefix = "joinup.auth")
 public class AuthProperties {
-    private List<String> includePaths;
+    /**
+     * 不需要认证的路径
+     */
     private List<String> excludePaths;
+
+    /**
+     * 只有管理员可以访问的路径
+     */
+    private List<String> adminPaths;
 }

@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 @SpringBootApplication
 public class GatewayApplication {

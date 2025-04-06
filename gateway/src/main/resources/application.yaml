@@ -16,10 +16,6 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/user/**, /verify, /test/**
-        - id: email-service
-          uri: lb://email-service
-          predicates:
-            - Path=/email/**
         - id: course-service
           uri: lb://course-service
           predicates:
@@ -34,9 +30,11 @@ joinup:
     tokenTTL: 30m
 
   auth:
-    excludePaths:
+    exclude-paths:
       - /user/wxLogin
       - /user/login
       - /user/register
       - /verify/**
       - /test/hello
+    admin-paths:
+      - /user/{id}
