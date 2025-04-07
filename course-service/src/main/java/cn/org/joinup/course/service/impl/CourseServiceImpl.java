@@ -1,17 +1,16 @@
 package cn.org.joinup.course.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.course.domain.CourseQueryDTO;
-import cn.org.joinup.course.domain.ScheduleVO;
-import cn.org.joinup.course.domain.SignDTO;
+import cn.org.joinup.course.domain.dto.CourseQueryDTO;
+import cn.org.joinup.course.domain.vo.ScheduleVO;
+import cn.org.joinup.course.domain.dto.SignDTO;
 import cn.org.joinup.course.domain.po.SignLog;
 import cn.org.joinup.course.mapper.SignLogMapper;
-import cn.org.joinup.course.service.CourseService;
+import cn.org.joinup.course.service.ICourseService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -30,7 +29,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> implements CourseService {
+public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> implements ICourseService {
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -41,21 +40,25 @@ public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> imple
     @Override
     public Result<ScheduleVO> list(LocalDate date) {
         UserDTO userInfo = userClient.getUserInfo().getData();
-        log.info("userInfo = " + userInfo);
         if (userInfo == null || userInfo.getStudentId() == null) {
             return Result.error("用户未认证");
         }
-        Map res = (Map) rabbitTemplate.convertSendAndReceive("course.direct", "course.query", new CourseQueryDTO(userInfo.getStudentId(), date));
-        return Result.success(objectMapper.convertValue(res, ScheduleVO.class));
+        return Result.success(getScheduleByDate(userInfo.getStudentId(), date));
     }
 
     @Override
-    public Result<Void> sign(Integer courseId) {
+    public ScheduleVO getScheduleByDate(String studentId, LocalDate date) {
+        Map res = (Map) rabbitTemplate.convertSendAndReceive("course.direct", "course.query", new CourseQueryDTO(studentId, date));
+        return objectMapper.convertValue(res, ScheduleVO.class);
+    }
+
+    @Override
+    public Result<Void> sign(Integer courseScheduleId) {
         UserDTO userInfo = userClient.getUserInfo().getData();
         if (userInfo == null || userInfo.getStudentId() == null) {
             return Result.error("用户未认证");
         }
-        rabbitTemplate.convertAndSend("course.direct", "course.sign", new SignDTO(userInfo.getStudentId(), courseId));
+        rabbitTemplate.convertAndSend("course.direct", "course.sign", new SignDTO(userInfo.getStudentId(), courseScheduleId));
         return Result.success();
     }
 

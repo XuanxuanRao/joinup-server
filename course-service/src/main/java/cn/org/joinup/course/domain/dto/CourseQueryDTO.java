@@ -1,4 +1,4 @@
-package cn.org.joinup.course.domain;
+package cn.org.joinup.course.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

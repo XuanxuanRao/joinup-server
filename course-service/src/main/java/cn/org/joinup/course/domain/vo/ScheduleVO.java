@@ -1,6 +1,6 @@
-package cn.org.joinup.course.domain;
+package cn.org.joinup.course.domain.vo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import cn.org.joinup.course.domain.Course;
 import lombok.Data;
 
 import java.util.List;
@@ -10,7 +10,6 @@ import java.util.List;
  */
 @Data
 public class ScheduleVO {
-    @JsonProperty("STATUS")
     private String status;
     private String total;
     private List<Course> result;
