@@ -19,9 +19,8 @@ public class SignTaskAdder {
     private final SignTaskScheduler signTaskScheduler;
 
     // 每天凌晨4点执行
-    // @Scheduled(cron = "0 0 4 * * ?")
+     @Scheduled(cron = "0 0 4 * * ?")
     // 每分钟执行一次
-    @Scheduled(cron = "0 * * * * ?")
     public void scheduleDailyTask() {
         log.info("Running daily scheduling job...");
         signTaskService.list().forEach(signTaskScheduler::setDelaySignTask);
