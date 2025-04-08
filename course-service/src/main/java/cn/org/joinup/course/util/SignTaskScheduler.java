@@ -3,6 +3,7 @@ package cn.org.joinup.course.util;
 import cn.org.joinup.course.constants.MQConstants;
 import cn.org.joinup.course.domain.Course;
 import cn.org.joinup.course.domain.po.AutoSignTask;
+import cn.org.joinup.course.domain.vo.ScheduleVO;
 import cn.org.joinup.course.enums.SignStatus;
 import cn.org.joinup.course.service.ICourseService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -28,8 +30,9 @@ public class SignTaskScheduler {
         Integer courseId = autoSignTask.getCourseId();
         String studentId = autoSignTask.getStudentId();
 
-        List<Course> target = courseService.getScheduleByDate(studentId, LocalDate.now())
-                .getResult()
+        List<Course> target = Optional.ofNullable(courseService.getScheduleByDate(studentId, LocalDate.now()))
+                .map(ScheduleVO::getResult)
+                .orElseGet(List::of)
                 .stream()
                 .filter(course -> Objects.equals(course.getCourseId(), courseId))
                 .collect(Collectors.toList());
