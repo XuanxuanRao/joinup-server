@@ -7,6 +7,8 @@ import cn.org.joinup.course.domain.dto.AddSignTaskDTO;
 import cn.org.joinup.course.domain.po.AutoSignTask;
 import cn.org.joinup.course.enums.SignTaskStatus;
 import cn.org.joinup.course.service.IAutoSignTaskService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,13 +20,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/course/task")
 @RequiredArgsConstructor
+@Api(tags = "自动签到任务接口")
 public class AutoSignTaskController {
 
     private final IAutoSignTaskService signTaskService;
     private final UserClient userClient;
 
-    @GetMapping()
-    public Result<List<AutoSignTask>> list(SignTaskStatus status) {
+    @GetMapping("/list")
+    @ApiOperation("获取签到任务列表")
+    public Result<List<AutoSignTask>> list(@RequestParam SignTaskStatus status) {
         UserDTO userInfo = userClient.getUserInfo().getData();
 
         List<AutoSignTask> tasks = signTaskService.lambdaQuery()
@@ -36,11 +40,13 @@ public class AutoSignTaskController {
     }
 
     @PostMapping("/add")
+    @ApiOperation("添加签到任务")
     public Result<Void> add(@RequestBody AddSignTaskDTO addSignTaskDTO) {
         return signTaskService.addTask(addSignTaskDTO);
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation("删除签到任务")
     public Result<Void> delete(@PathVariable Long id) {
         return signTaskService.removeTask(id);
     }
