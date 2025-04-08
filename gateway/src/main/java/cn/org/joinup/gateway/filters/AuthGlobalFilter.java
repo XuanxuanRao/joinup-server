@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 @Component
 @RequiredArgsConstructor
@@ -48,8 +47,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         JwtPayload jwtPayload;
         try {
             jwtPayload = jwtTool.parseToken(token);
-            if (isAdminAuth(request.getPath().toString()) && !RoleConstant.ADMIN.equals(jwtPayload.getRole())) {
-                System.out.println(request.getPath());
+            if (isNeedAdminAuth(request.getPath().toString()) && !RoleConstant.ADMIN.equals(jwtPayload.getRole())) {
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
             }
@@ -79,10 +77,13 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         return authProperties.getExcludePaths().stream().noneMatch(pattern -> antPathMatcher.match(pattern, path));
     }
 
-    private boolean isAdminAuth(String path) {
-        return authProperties.getAdminPaths().stream()
-                .map(Pattern::compile)
-                .anyMatch(pattern -> pattern.matcher(path).matches());
-    }
+    public boolean isNeedAdminAuth(String path) {
+        if (path == null) return false;
 
+        return authProperties.getAdminAntPaths().stream()
+                .anyMatch(pattern -> antPathMatcher.match(pattern, path)) ||
+                authProperties.getAdminRegexPaths().stream()
+                 .map(Pattern::compile)
+                 .anyMatch(pattern -> pattern.matcher(path).matches());
+    }
 }

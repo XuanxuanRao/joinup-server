@@ -14,9 +14,12 @@ public class AuthProperties {
      * 不需要认证的路径
      */
     private List<String> excludePaths;
-
     /**
-     * 只有管理员可以访问的路径
+     * 只有管理员可以访问的路径（以Ant形式）
      */
-    private List<String> adminPaths;
+    private List<String> adminAntPaths;
+    /**
+     * 只有管理员可以访问的路径（正则表达式形式）
+     */
+    private List<String> adminRegexPaths;
 }

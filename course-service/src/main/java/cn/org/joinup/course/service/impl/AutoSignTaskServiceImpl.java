@@ -41,7 +41,7 @@ public class AutoSignTaskServiceImpl extends ServiceImpl<AutoSignTaskMapper, Aut
             return Result.error("最多只能添加5个签到任务");
         }
 
-        if (query().eq("course_id", addSignTaskDTO.getCourseId()).exists()) {
+        if (query().eq("student_id", studentId).eq("course_id", addSignTaskDTO.getCourseId()).exists()) {
             return Result.error("该课程已存在签到任务");
         }
 

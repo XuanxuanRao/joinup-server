@@ -15,11 +15,15 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/user/**, /verify, /test/**
+            - Path=/user/**, /admin/user/**, /verify, /test/**
         - id: course-service
           uri: lb://course-service
           predicates:
-              - Path=/course/**
+            - Path=/course/**, /admin/course/**
+        - id: team-service
+          uri: lb://team-service
+          predicates:
+            - Path=/team/**, /admin/team**, /theme/**, /admin/theme/**, /tag/**, /admin/tag/**
 
 
 joinup:
@@ -36,5 +40,7 @@ joinup:
       - /user/register
       - /verify/**
       - /test/hello
-    admin-paths:
+    admin-regex-paths:
       - ^/user/\d+$
+    admin-ant-paths:
+      - /admin/**
