@@ -37,11 +37,11 @@ public class AutoSignTaskServiceImpl extends ServiceImpl<AutoSignTaskMapper, Aut
             return Result.error("身份信息错误");
         }
 
-        if (query().eq("student_id", studentId).count() >= 5) {
+        if (lambdaQuery().eq(AutoSignTask::getStudentId, studentId).count() >= 5) {
             return Result.error("最多只能添加5个签到任务");
         }
 
-        if (query().eq("student_id", studentId).eq("course_id", addSignTaskDTO.getCourseId()).exists()) {
+        if (lambdaQuery().eq(AutoSignTask::getStudentId, studentId).eq(AutoSignTask::getCourseId, addSignTaskDTO.getCourseId()).exists()) {
             return Result.error("该课程已存在签到任务");
         }
 

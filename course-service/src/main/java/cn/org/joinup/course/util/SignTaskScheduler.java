@@ -2,6 +2,7 @@ package cn.org.joinup.course.util;
 
 import cn.org.joinup.course.constants.MQConstants;
 import cn.org.joinup.course.domain.Course;
+import cn.org.joinup.course.domain.dto.DelaySignDTO;
 import cn.org.joinup.course.domain.po.AutoSignTask;
 import cn.org.joinup.course.domain.vo.ScheduleVO;
 import cn.org.joinup.course.enums.SignStatus;
@@ -44,7 +45,7 @@ public class SignTaskScheduler {
 
             // 添加签到任务
             rabbitTemplate.convertAndSend(MQConstants.DELAY_EXCHANGE, MQConstants.DELAY_SIGN_KEY,
-                    autoSignTask.getId(),
+                    new DelaySignDTO(autoSignTask.getId(), course.getId()),
                     message -> {
                         message.getMessageProperties().setDelay(calcDelayTime(course));
                         return message;
