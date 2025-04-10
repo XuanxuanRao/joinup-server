@@ -8,6 +8,7 @@ import cn.org.joinup.course.domain.vo.ScheduleVO;
 import cn.org.joinup.course.enums.SignStatus;
 import cn.org.joinup.course.service.ICourseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -19,14 +20,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * 定时任务调度器，负责设置延时签到任务
  * @author chenxuanrao06@gmail.com
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SignTaskScheduler {
     private final ICourseService courseService;
     private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * 设置延迟签到任务，加入消息队列
+     * @param autoSignTask 自动签到任务配置
+     */
     public void setDelaySignTask(AutoSignTask autoSignTask) {
         Integer courseId = autoSignTask.getCourseId();
         String studentId = autoSignTask.getStudentId();
@@ -42,6 +49,8 @@ public class SignTaskScheduler {
             if (course.getSignStatus() == SignStatus.SIGNED) {
                 return;
             }
+
+            log.info("添加课程签到任务, 课程ID: {}, 学生ID: {}, 开始时间: {}", course.getId(), studentId, course.getClassBeginTime());
 
             // 添加签到任务
             rabbitTemplate.convertAndSend(MQConstants.DELAY_EXCHANGE, MQConstants.DELAY_SIGN_KEY,
