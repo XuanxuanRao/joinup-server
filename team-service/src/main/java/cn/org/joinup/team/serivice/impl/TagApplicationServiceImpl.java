@@ -12,8 +12,10 @@ import cn.org.joinup.team.serivice.ITagApplicationService;
 import cn.org.joinup.team.serivice.ITagService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**
@@ -23,7 +25,9 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TagApplicationServiceImpl extends ServiceImpl<TagApplicationMapper, TagApplication> implements ITagApplicationService {
 
-    private final ITagService tagService;
+    @Lazy
+    @Resource
+    private ITagService tagService;
 
     @Override
     public Result<Void> addTagApplication(AddTagDTO addTagDTO) {

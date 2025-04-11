@@ -25,5 +25,5 @@ public class TeamTagRelation implements Serializable {
     /**
      * 标签ID (复合主键的一部分)
      */
-    private Long tagId;
+    private Integer tagId;
 }

@@ -71,4 +71,11 @@ public class Team implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
+
+    /**
+     * 是否公开
+     */
+    private Boolean open;
+
+    private Integer maxMembers;
 }
