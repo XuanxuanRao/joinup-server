@@ -40,6 +40,7 @@ joinup:
       - /user/register
       - /verify/**
       - /test/hello
+      - /theme/list
     admin-regex-paths:
       - ^/user/\d+$
     admin-ant-paths:
