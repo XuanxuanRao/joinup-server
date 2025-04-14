@@ -13,9 +13,9 @@
         <module>joinup-common</module>
         <module>gateway</module>
         <module>joinup-api</module>
-        <module>email-service</module>
         <module>team-service</module>
         <module>course-service</module>
+        <module>message-center</module>
     </modules>
 
 

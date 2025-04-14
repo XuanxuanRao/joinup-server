@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搭伙儿 - 北航邮箱验证</title>
+    <style>
+        body {
+            font-family: Arial, 'Microsoft YaHei', sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .intro {
+            background-color: #e6f7ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1890ff;
+        }
+        .intro p {
+            margin: 0;
+            color: #333;
+        }
+        p {
+            color: #555;
+        }
+        .code-wrapper {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .code {
+            display: inline-block;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #1890ff;
+            color: #ffffff;
+            border-radius: 4px;
+            letter-spacing: 2px;
+        }
+        .validity {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #777;
+        }
+        /* 新增隐私声明样式 */
+        .privacy-notice {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fffbe6; /* 淡黄色背景 */
+            border: 1px solid #ffe58f; /* 黄色边框 */
+            border-radius: 4px;
+            font-size: 13px;
+            color: #8a6d3b; /* 深黄色文字 */
+        }
+        .ignore-notice {
+            margin-top: 20px;
+            color: #777;
+            font-size: 13px;
+        }
+        footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #aaaaaa;
+            text-align: center;
+            border-top: 1px solid #eeeeee;
+            padding-top: 20px;
+        }
+        footer a {
+            color: #1890ff;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        /* 新增 GitHub 链接样式 */
+        .github-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .github-link a {
+            text-decoration: none;
+            display: inline-block; /* 让链接区域更易点击 */
+        }
+        .github-icon {
+            width: 25px;  /* 调整图标大小 */
+            height: 25px;
+            vertical-align: middle;
+            border: 0; /* 移除图片可能的边框 */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>搭伙儿 - 邮箱验证码</h1>
+    <h2>你好, [[${username}]]!</h2>
+    <div class="intro">
+        <p>感谢您使用搭伙儿小程序！您正在通过北航邮箱进行身份验证。</p>
+    </div>
+    <p>您的验证码是：</p>
+    <div class="code-wrapper">
+        <div class="code">[[${verification_code}]]</div>
+    </div>
+    <p class="validity">请在 <strong>3分钟</strong> 内输入此验证码以完成验证。验证码将于3分钟后失效！</p>
+
+    <p class="privacy-notice">
+        <strong>重要提示：</strong>身份验证后，系统将记录您的学号信息，用于为您提供相关服务。我们承诺将严格遵守相关法律法规，保护您的个人隐私信息安全。
+    </p>
+
+    <p class="ignore-notice">为了您的账号安全，请勿将验证码泄露给他人。如果您并未请求此验证码进行身份验证，请忽略本邮件。</p>
+
+    <footer>
+        感谢您的使用！<br>
+        搭伙儿 (Joinup) 开发团队<br>
+        官网: <a href="https://joinup.org.cn" target="_blank">joinup.org.cn</a>
+
+        <div class="github-link">
+            <a href="https://github.com/XuanxuanRao/joinup-server" target="_blank" title="查看项目源码">
+                <img src="https://survey-planet-test.oss-cn-beijing.aliyuncs.com/github-logo.png" alt="GitHub" class="github-icon">
+            </a>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

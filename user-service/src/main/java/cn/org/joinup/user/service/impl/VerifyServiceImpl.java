@@ -1,14 +1,14 @@
 package cn.org.joinup.user.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.org.joinup.api.client.MessageClient;
+import cn.org.joinup.api.dto.SendEmailMessageDTO;
+import cn.org.joinup.api.enums.MessageType;
+import cn.org.joinup.api.enums.PushChannel;
 import cn.org.joinup.common.util.UserContext;
-import com.alibaba.nacos.api.naming.pojo.healthcheck.impl.Http;
 import lombok.extern.slf4j.Slf4j;
-import cn.org.joinup.api.client.EmailClient;
-import cn.org.joinup.api.dto.SendEmailDTO;
 import cn.org.joinup.common.constant.RedisConstant;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.common.util.RegexUtil;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.service.IUserService;
 import cn.org.joinup.user.service.IVerifyService;
@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -38,59 +39,63 @@ public class VerifyServiceImpl implements IVerifyService {
     private IUserService userService;
 
     @Resource
-    private EmailClient emailClient;
+    private MessageClient messageClient;
 
     @Override
     public Result<Void> sendVerifyCodeForRegister(final String email) {
-        // 正则
-        if (!RegexUtil.isEmailValid(email)) {
-            return Result.error("非法的邮箱地址");
-        }
-
-        User user = userService.lambdaQuery().eq(User::getEmail, email).one();
-        if (user != null) {
-            return Result.error("该邮箱已被注册");
-        }
-
-        // 生成验证码
-        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
-
-        // 生成邮件内容
-        final String body = loadTemplate("templates/email_register.html")
-                .replace("{{verification_code}}", code);
-
-        // 发送邮件
-        emailClient.sendEmail(SendEmailDTO.builder()
-                    .to(email)
-                    .subject("注册验证码")
-                    .body(body)
-                    .build());
-
-        return Result.success();
+        return Result.error("该功能已下线");
+//        // 正则
+//        if (!RegexUtil.isEmailValid(email)) {
+//            return Result.error("非法的邮箱地址");
+//        }
+//
+//        User user = userService.lambdaQuery().eq(User::getEmail, email).one();
+//        if (user != null) {
+//            return Result.error("该邮箱已被注册");
+//        }
+//
+//        // 生成验证码
+//        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
+//
+//        // 生成邮件内容
+//        final String body = loadTemplate("templates/email_register.html")
+//                .replace("{{verification_code}}", code);
+//
+//        // 发送邮件
+//        emailClient.sendEmail(SendEmailDTO.builder()
+//                    .to(email)
+//                    .subject("注册验证码")
+//                    .body(body)
+//                    .build());
+//
+//        return Result.success();
     }
 
     @Override
     public Result<Void> sendVerifyCodeForReset(final String email) {
-        User user = userService.lambdaQuery().eq(User::getEmail, email).one();
-        if (user == null) {
-            return Result.error("该邮箱未注册");
-        }
 
-        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
+        return Result.error("该功能已下线");
 
-        // 生成邮件内容
-        final String body = loadTemplate("templates/email_reset.html")
-                .replace("{{verification_code}}", code)
-                .replace("{{username}}", user.getUsername());
+//        User user = userService.lambdaQuery().eq(User::getEmail, email).one();
+//        if (user == null) {
+//            return Result.error("该邮箱未注册");
+//        }
+//
+//        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
+//
+//        // 生成邮件内容
+//        final String body = loadTemplate("templates/email_reset.html")
+//                .replace("{{verification_code}}", code)
+//                .replace("{{username}}", user.getUsername());
 
         // 发送邮件
-        emailClient.sendEmail(SendEmailDTO.builder()
-                .to(email)
-                .subject("重置密码验证码")
-                .body(body)
-                .build());
+//        emailClient.sendEmail(SendEmailDTO.builder()
+//                .to(email)
+//                .subject("重置密码验证码")
+//                .body(body)
+//                .build());
 
-        return Result.success();
+        // return Result.success();
     }
 
     @Override
@@ -103,17 +108,16 @@ public class VerifyServiceImpl implements IVerifyService {
         // 生成验证码
         String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
 
-        // 生成邮件内容
-        final String body = loadTemplate("templates/email_identity.html")
-                .replace("{{verification_code}}", code)
-                .replace("{{username}}", user.getUsername());
-
-
-        // 发送邮件
-        emailClient.sendEmail(SendEmailDTO.builder()
-                .to(email)
+        messageClient.sendEmail(SendEmailMessageDTO.builder()
+                .channel(PushChannel.EMAIL)
+                .messageType(MessageType.VERIFY)
+                .templateCode("email-buaa")
+                .params(new HashMap<>() {{
+                    put("verification_code", code);
+                    put("username", user.getUsername());
+                }})
+                .email(email)
                 .subject("北航身份验证")
-                .body(body)
                 .build());
 
         return Result.success();

@@ -14,6 +14,7 @@ import cn.org.joinup.team.serivice.ITagApplicationService;
 import cn.org.joinup.team.serivice.ITagService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/admin/tag")
 @RequiredArgsConstructor
+@Api(tags = "管理员标签接口")
 public class AdminTagController {
     private final ITagService tagService;
     private final ITagApplicationService tagApplicationService;

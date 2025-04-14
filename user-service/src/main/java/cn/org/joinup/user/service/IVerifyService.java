@@ -4,7 +4,6 @@ import cn.org.joinup.common.result.Result;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 public interface IVerifyService {
 

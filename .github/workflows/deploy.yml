@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [gateway, user-service, email-service, team-service, course-service]
+        service: [gateway, user-service, message-center, team-service, course-service]
 
     steps:
       - name: 拉取代码
