@@ -118,6 +118,38 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         return Result.success(team);
     }
 
+    /**
+     * 添加队伍成员
+     * @param teamId 队伍id
+     * @param userId 用户id
+     * @return 是否添加成功
+     */
+    public boolean addMember(Long teamId, Long userId) {
+        Team team = getById(teamId);
+        if (team == null || team.getStatus() != TeamStatus.NORMAL) {
+            return false;
+        } else if (team.getCurrentMembersCount() >= team.getMaxMembers()) {
+            return false;
+        }
+
+        if (teamMemberService.isTeamMember(teamId, userId)) {
+            return false;
+        }
+
+        TeamMember teamMember = new TeamMember();
+        teamMember.setTeamId(teamId);
+        teamMember.setUserId(userId);
+        teamMember.setCreateTime(LocalDateTime.now());
+        teamMember.setRole(TeamMemberRole.MEMBER);
+        if (!teamMemberService.save(teamMember)) {
+            return false;
+        }
+        return update()
+                .setSql("current_members_count = current_members_count + 1")
+                .eq("id", teamId)
+                .update();
+    }
+
     private TeamVO convertToTeamVO(Team team) {
         TeamVO teamVO = new TeamVO();
         BeanUtil.copyProperties(team, teamVO);

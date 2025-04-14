@@ -13,4 +13,6 @@ public interface ITeamService extends IService<Team> {
     Result<Void> updateTeamInfo(Long teamId, UpdateTeamInfoDTO updateTeamInfoDTO);
 
     Result<Team> createTeam(CreateTeamDTO createTeamDTO);
+
+    boolean addMember(Long teamId, Long userId);
 }

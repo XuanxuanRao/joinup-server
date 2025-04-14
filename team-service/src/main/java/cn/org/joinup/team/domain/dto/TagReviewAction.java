@@ -6,7 +6,7 @@ import lombok.Data;
  * @author chenxuanrao06@gmail.com
  */
 @Data
-public class ReviewAction {
+public class TagReviewAction {
     // 0: 通过，1: 拒绝
 
     private Integer action;

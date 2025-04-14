@@ -6,7 +6,7 @@ import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.team.domain.dto.ReviewAction;
+import cn.org.joinup.team.domain.dto.TagReviewAction;
 import cn.org.joinup.team.domain.po.TagApplication;
 import cn.org.joinup.team.domain.vo.TagApplicationVO;
 import cn.org.joinup.team.enums.TagApplicationStatus;
@@ -54,11 +54,11 @@ public class AdminTagController {
     }
 
     @PostMapping("/applications/{id}/review")
-    public Result<Void> reviewTagApplication(@PathVariable Long id, @RequestBody ReviewAction reviewAction) {
-        if(reviewAction.getAction() == 0) {
-            return tagService.approveTagApplication(id, reviewAction.getComment());
+    public Result<Void> reviewTagApplication(@PathVariable Long id, @RequestBody TagReviewAction tagReviewAction) {
+        if(tagReviewAction.getAction() == 0) {
+            return tagService.approveTagApplication(id, tagReviewAction.getComment());
         } else {
-            return tagService.rejectTagApplication(id, reviewAction.getComment());
+            return tagService.rejectTagApplication(id, tagReviewAction.getComment());
         }
     }
 
