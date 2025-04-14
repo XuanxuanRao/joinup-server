@@ -49,7 +49,7 @@ jobs:
           script: |
             cd /home/project
             docker compose down
-            for service in gateway user-service email-service team-service course-service; do
+            for service in gateway user-service team-service course-service message-center; do
               docker pull ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/$service:latest
             done
             docker compose --project-name joinup up -d
