@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class TeamController {
     private final ITeamService teamService;
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     @ApiOperation("根据主题获取队伍列表")
     public Result<PageResult<Team>> pageQuery(@RequestParam Integer themeId, @RequestBody PageQuery pageQuery) {
         Page<Team> page = teamService.page(
