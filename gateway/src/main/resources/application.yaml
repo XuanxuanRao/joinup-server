@@ -41,8 +41,6 @@ joinup:
       - /verify/**
       - /test/hello
       - /theme/list
-      - /team/**
-      - /tags/**
     admin-regex-paths:
       - ^/user/\d+$
     admin-ant-paths:
