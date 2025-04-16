@@ -24,6 +24,10 @@ spring:
           uri: lb://team-service
           predicates:
             - Path=/team/**, /admin/team/**, /theme/**, /admin/theme/**, /tag/**, /admin/tag/**
+        - id: boya-service
+          uri: lb://boya-service
+          predicates:
+            - Path=/boya/**
 
 
 joinup:
