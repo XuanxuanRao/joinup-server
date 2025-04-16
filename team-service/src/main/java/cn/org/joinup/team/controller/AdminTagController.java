@@ -33,7 +33,7 @@ public class AdminTagController {
     private final ITagApplicationService tagApplicationService;
     private final UserClient userClient;
 
-    @GetMapping("/applications/list")
+    @PostMapping("/applications/list")
     public Result<PageResult<TagApplicationVO>> getTagApplications(
             @RequestParam(required = false) TagApplicationStatus status,
             @RequestBody PageQuery pageQuery) {

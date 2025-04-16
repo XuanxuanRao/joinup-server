@@ -16,5 +16,5 @@ public interface ICourseService extends IService<SignLog> {
 
     Result<Void> sign(Integer courseScheduleId);
 
-    Result<PageResult<SignLog>> query(PageQuery query, String studentId);
+    Result<PageResult<SignLog>> query(PageQuery query);
 }

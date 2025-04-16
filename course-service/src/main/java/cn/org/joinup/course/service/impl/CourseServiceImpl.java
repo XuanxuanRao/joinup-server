@@ -63,7 +63,8 @@ public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> imple
     }
 
     @Override
-    public Result<PageResult<SignLog>> query(PageQuery query, String studentId) {
+    public Result<PageResult<SignLog>> query(PageQuery query) {
+        String studentId = userClient.getUserInfo().getData().getStudentId();
         Page<SignLog> page = page(query.toMpPage("create_time", false), new QueryWrapper<SignLog>().eq("student_id", studentId));
         return Result.success(PageResult.of(page, SignLog.class));
     }

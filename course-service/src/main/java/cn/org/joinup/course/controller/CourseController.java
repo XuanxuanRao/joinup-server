@@ -38,10 +38,10 @@ public class CourseController {
         return courseService.list(date);
     }
 
-    @GetMapping("/log/{studentId}")
+    @PostMapping("/log")
     @ApiOperation("获得学生的签到记录")
-    public Result<PageResult<SignLog>> getSignLog(@PathVariable String studentId, @Validated @RequestBody PageQuery query){
-        return courseService.query(query, studentId);
+    public Result<PageResult<SignLog>> getSignLog(@Validated @RequestBody PageQuery query){
+        return courseService.query(query);
     }
 
 }
