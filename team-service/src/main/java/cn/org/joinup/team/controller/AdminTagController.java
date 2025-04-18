@@ -7,6 +7,7 @@ import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.team.domain.dto.TagReviewAction;
+import cn.org.joinup.team.domain.po.Tag;
 import cn.org.joinup.team.domain.po.TagApplication;
 import cn.org.joinup.team.domain.vo.TagApplicationVO;
 import cn.org.joinup.team.enums.TagApplicationStatus;
@@ -60,6 +61,28 @@ public class AdminTagController {
         } else {
             return tagService.rejectTagApplication(id, tagReviewAction.getComment());
         }
+    }
+
+    @PostMapping("/listAllTag")
+    public Result<List<String>> listAllTag() {
+        return Result.success(tagService.list().stream().map(Tag::getName).collect(Collectors.toList()));
+    }
+
+    @PostMapping("/querySearchTag")
+    public Result<List<Tag>> querySearchTag(@RequestBody Tag tag) {
+        return Result.success(tagService.list(new QueryWrapper<Tag>().like("name", tag.getName())));
+    }
+
+    @PostMapping("/edit")
+    public Result<Void> editTag(@RequestBody Tag tag) {
+        Tag tag1 = tagService.getById(tag.getId());
+        if (tag1 == null) {
+            return Result.error("标签不存在");
+        }
+        tag1.setName(tag.getName());
+        tag1.setDescription(tag.getDescription());
+        tagService.updateById(tag1);
+        return Result.success();
     }
 
 }
