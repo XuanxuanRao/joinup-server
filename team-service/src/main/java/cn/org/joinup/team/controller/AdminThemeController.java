@@ -39,14 +39,14 @@ public class AdminThemeController {
         return iAdminThemeService.getPageThemes(pageable);
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     public Result<Void> delete(@RequestBody Map<String, Long> body) {
         Long id = body.get("id");
         iAdminThemeService.removeById(id);
         return Result.success();
     }
 
-    @PostMapping("/delete/batch")
+    @DeleteMapping("/delete/batch")
     public Result<Void> deleteBatch(@RequestBody Map<String, List<Long>> body) {
         List<Long> ids = body.get("ids");
         iAdminThemeService.removeByIds(ids);
