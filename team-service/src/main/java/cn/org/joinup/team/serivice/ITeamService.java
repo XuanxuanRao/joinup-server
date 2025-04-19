@@ -5,7 +5,10 @@ import cn.org.joinup.team.domain.dto.CreateTeamDTO;
 import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
 import cn.org.joinup.team.domain.po.Team;
 import cn.org.joinup.team.domain.vo.TeamVO;
+import cn.org.joinup.team.enums.TeamMemberRole;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 public interface ITeamService extends IService<Team> {
     Result<TeamVO> userGetTeam(Long teamId);
@@ -15,4 +18,6 @@ public interface ITeamService extends IService<Team> {
     Result<Team> createTeam(CreateTeamDTO createTeamDTO);
 
     boolean addMember(Long teamId, Long userId);
+
+    Result<List<Team>> getParticipatedTeam(TeamMemberRole role);
 }

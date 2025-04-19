@@ -16,12 +16,14 @@ import cn.org.joinup.team.serivice.ITeamMemberService;
 import cn.org.joinup.team.serivice.ITeamService;
 import cn.org.joinup.team.serivice.ITeamTagRelationService;
 import cn.org.joinup.team.serivice.IThemeService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -148,6 +150,23 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .setSql("current_members_count = current_members_count + 1")
                 .eq("id", teamId)
                 .update();
+    }
+
+    @Override
+    public Result<List<Team>> getParticipatedTeam(TeamMemberRole role) {
+        Long userId = UserContext.getUser();
+        List<Long> teamIds = teamMemberService.list(new LambdaQueryWrapper<TeamMember>()
+                        .eq(TeamMember::getUserId, userId)
+                        .eq(role!=null, TeamMember::getRole, role))
+                .stream()
+                .map(TeamMember::getTeamId)
+                .collect(Collectors.toList());
+
+        if (teamIds.isEmpty()) {
+            return Result.success(List.of());
+        }
+        List<Team> teams = listByIds(teamIds);
+        return Result.success(teams);
     }
 
     private TeamVO convertToTeamVO(Team team) {

@@ -28,6 +28,10 @@ spring:
           uri: lb://boya-service
           predicates:
             - Path=/boya/**
+        - id: message-center
+          uri: lb://message-center
+          predicates:
+            - Path=/message/**, /admin/message/**
 
 
 joinup:

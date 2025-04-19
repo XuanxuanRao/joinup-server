@@ -7,6 +7,7 @@ import cn.org.joinup.team.domain.dto.CreateTeamDTO;
 import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
 import cn.org.joinup.team.domain.po.Team;
 import cn.org.joinup.team.domain.vo.TeamVO;
+import cn.org.joinup.team.enums.TeamMemberRole;
 import cn.org.joinup.team.serivice.ITeamService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,6 +16,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -52,6 +55,12 @@ public class TeamController {
     @PostMapping("/add")
     public Result<Team> createTeam(@RequestBody @Validated CreateTeamDTO createTeamDTO) {
         return teamService.createTeam(createTeamDTO);
+    }
+
+    @GetMapping("/my")
+    @ApiOperation("获取我的队伍")
+    public Result<List<Team>> getMyTeam(@RequestParam(required = false) TeamMemberRole role) {
+        return teamService.getParticipatedTeam(role);
     }
 
 }
