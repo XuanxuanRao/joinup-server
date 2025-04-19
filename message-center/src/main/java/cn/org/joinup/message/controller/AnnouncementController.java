@@ -49,8 +49,8 @@ public class AnnouncementController {
 
         UserDTO info = userClient.queryUser(announcement.getPosterUserId()).getData();
         AnnouncementVO announcementVO = BeanUtil.copyProperties(announcement, AnnouncementVO.class);
-        announcementVO.setUsername(info.getUsername());
-        announcementVO.setAvatar(info.getAvatar());
+        announcementVO.setPosterUsername(info.getUsername());
+        announcementVO.setPosterAvatar(info.getAvatar());
         return Result.success(announcementVO);
     }
 
