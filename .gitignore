@@ -37,3 +37,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/gateway/src/main/java/cn/org/joinup/gateway/GlobalCorsConfig.java
+/email-service/src/main/resources/.env
