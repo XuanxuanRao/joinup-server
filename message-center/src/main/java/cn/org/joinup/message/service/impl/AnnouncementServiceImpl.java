@@ -12,12 +12,12 @@ import java.util.List;
  * @author chenxuanrao06@gmail.com
  */
 @Service
-public class IAnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Announcement> implements IAnnouncementService {
+public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Announcement> implements IAnnouncementService {
     @Override
     public List<Announcement> getBriefList() {
         return this.lambdaQuery()
                 .eq(Announcement::getDeleted, false)
-                .select(Announcement::getId, Announcement::getTitle, Announcement::getCreateTime)
+                .select(Announcement::getId, Announcement::getTitle, Announcement::getCover, Announcement::getCreateTime)
                 .orderByDesc(false, Announcement::getCreateTime)
                 .list();
     }

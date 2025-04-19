@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AnnouncementVO extends Announcement {
-    private String username;
-    private String avatar;
+    private String posterUsername;
+    private String posterAvatar;
 }
