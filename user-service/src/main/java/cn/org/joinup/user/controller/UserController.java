@@ -3,11 +3,13 @@ package cn.org.joinup.user.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.user.domain.dto.*;
+import cn.org.joinup.user.domain.po.Interest;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.vo.UserLoginVO;
+import cn.org.joinup.user.service.IUserInterestService;
 import cn.org.joinup.user.service.IUserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -25,6 +28,9 @@ public class UserController {
 
     @Resource
     private IUserService userService;
+
+    @Resource
+    private IUserInterestService userInterestService;
 
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
@@ -88,6 +94,19 @@ public class UserController {
         if (!userService.updateById(user)) {
             return Result.error("更新用户信息失败，请稍后再试");
         }
+        return Result.success();
+    }
+
+    @ApiOperation("获取用户的兴趣")
+    @GetMapping("/interest/list")
+    public Result<List<Interest>> getUserInterests() {
+        return Result.success(userInterestService.getUserInterests(null));
+    }
+
+    @ApiOperation("添加用户兴趣")
+    @PostMapping("/interest")
+    public Result<Void> addUserInterest(@RequestParam Long interestId) {
+        userInterestService.addUserInterest(interestId);
         return Result.success();
     }
 

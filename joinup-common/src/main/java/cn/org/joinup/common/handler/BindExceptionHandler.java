@@ -1,5 +1,6 @@
 package cn.org.joinup.common.handler;
 
+import cn.org.joinup.common.exception.BadRequestException;
 import cn.org.joinup.common.result.Result;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -24,6 +25,11 @@ public class BindExceptionHandler {
         Map<String, String> errorMap = new LinkedHashMap<>(fieldErrors.size());
         fieldErrors.forEach(fieldError -> errorMap.put(fieldError.getField(), fieldError.getDefaultMessage()));
         return ResponseEntity.badRequest().body(Result.error("参数错误", errorMap));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Result<String>> handle(BadRequestException e) {
+        return ResponseEntity.badRequest().body(Result.error(e.getMessage()));
     }
 
 }
