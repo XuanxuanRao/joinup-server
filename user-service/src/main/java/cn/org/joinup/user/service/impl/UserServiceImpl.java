@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 
 /**
@@ -167,6 +168,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public Result<Void> verifyIdentity(VerifyIdentityDTO verifyIdentityDTO) {
         Long userId = UserContext.getUser();
         User user = getById(userId);
+
+        if (!Objects.equals(user.getRole(), "ADMIN")) {
+            return Result.error("该接口暂时下线");
+        }
 
         String correctCode = stringRedisTemplate.opsForValue().get(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
         if (!verifyIdentityDTO.getVerifyCode().equals(correctCode)) {

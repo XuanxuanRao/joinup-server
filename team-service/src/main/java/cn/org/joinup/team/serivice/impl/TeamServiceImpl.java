@@ -220,6 +220,21 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         return Result.success();
     }
 
+    @Override
+    public List<Team> searchTeam(String keyword) {
+        // 首先根据 队伍名称模糊查询
+        List<Team> teams = lambdaQuery()
+                .like(Team::getName, keyword)
+                .eq(Team::getStatus, TeamStatus.NORMAL)
+                .eq(Team::getOpen, true)
+                .last("LIMIT 10")
+                .list();
+        System.out.println(teams);
+        // 如果没有结果，则根据队伍标签模糊查询
+
+        return teams;
+    }
+
     private TeamVO convertToTeamVO(Team team) {
         TeamVO teamVO = new TeamVO();
         BeanUtil.copyProperties(team, teamVO);

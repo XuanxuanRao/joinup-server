@@ -11,5 +11,6 @@ public interface RedisConstant {
     /**
      * 缓存过期时间：12h
      */
-    Long CACHE_TTL = 12 * 60 * 60L;
+    Long CREATE_TEAM_CACHE_TTL = 12 * 60 * 60L;
+    Long JOIN_TEAM_CACHE_TTL = 12 * 60 * 60L;
 }

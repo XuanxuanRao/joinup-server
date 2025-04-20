@@ -50,6 +50,7 @@ joinup:
       - /test/hello
       - /theme/list
       - /interest/all
+      - /team/search
     admin-regex-paths:
       - ^/user/\d+$
     admin-ant-paths:

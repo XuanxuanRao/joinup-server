@@ -77,5 +77,11 @@ public class TeamController {
         return teamService.leaveTeam(teamId);
     }
 
+    @GetMapping("/search")
+    @ApiOperation("搜索队伍")
+    public Result<List<Team>> searchTeam(@RequestParam String keyword) {
+        return Result.success(teamService.searchTeam(keyword));
+    }
+
 
 }

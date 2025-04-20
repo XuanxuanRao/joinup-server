@@ -26,4 +26,6 @@ public interface ITeamService extends IService<Team> {
 
     Result<Void> leaveTeam(Long teamId);
 
+    List<Team> searchTeam(String keyword);
+
 }

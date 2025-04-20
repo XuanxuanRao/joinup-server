@@ -7,6 +7,7 @@ import cn.org.joinup.user.domain.po.UserInterest;
 import cn.org.joinup.user.mapper.UserInterestMapper;
 import cn.org.joinup.user.service.IInterestService;
 import cn.org.joinup.user.service.IUserInterestService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,9 +58,9 @@ public class UserInterestServiceImpl extends ServiceImpl<UserInterestMapper, Use
             throw new BadRequestException("Illegal Operation: Try to delete a non-leaf interest node!");
         }
 
-        remove(lambdaQuery()
+        remove(new LambdaQueryWrapper<UserInterest>()
                 .eq(UserInterest::getUserId, UserContext.getUser())
                 .eq(UserInterest::getInterestId, interestId)
-                .last("LIMIT 1"));
+        );
     }
 }

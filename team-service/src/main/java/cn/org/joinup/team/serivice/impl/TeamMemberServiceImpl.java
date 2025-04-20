@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -64,7 +63,7 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
                     .collect(Collectors.toSet());
         }
 
-        // 3. 缓存未命中，查询数据库
+        // 2. 缓存未命中，查询数据库
         Set<Long> teamIds = lambdaQuery()
                 .eq(TeamMember::getUserId, userId)
                 .eq(TeamMember::getRole, TeamMemberRole.MEMBER)
@@ -74,15 +73,14 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
                 .map(TeamMember::getTeamId)
                 .collect(Collectors.toSet());
 
-        // 4. 将查询结果存入缓存
+        // 3. 将查询结果存入缓存
         String[] redisValue = teamIds.stream().map(String::valueOf).distinct().toArray(String[]::new);
         if (redisValue.length > 0) {
-            System.out.println("redisValue = " + Arrays.toString(redisValue));
             stringRedisTemplate.opsForSet().add(key, redisValue);
-            stringRedisTemplate.expire(key, RedisConstant.CACHE_TTL, TimeUnit.SECONDS);
+            stringRedisTemplate.expire(key, RedisConstant.JOIN_TEAM_CACHE_TTL, TimeUnit.SECONDS);
         }
 
-        // 5. 返回结果
+        // 4. 返回结果
         return teamIds;
     }
 
@@ -97,7 +95,7 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
                     .collect(Collectors.toSet());
         }
 
-        // 3. 缓存未命中，查询数据库
+        // 2. 缓存未命中，查询数据库
         Set<Long> teamIds = lambdaQuery()
                 .eq(TeamMember::getUserId, userId)
                 .eq(TeamMember::getRole, TeamMemberRole.CREATOR)
@@ -107,13 +105,14 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
                 .map(TeamMember::getTeamId)
                 .collect(Collectors.toSet());
 
-        // 4. 将查询结果存入缓存
+        // 3. 将查询结果存入缓存
         String[] redisValue = teamIds.stream().map(String::valueOf).distinct().toArray(String[]::new);
-        System.out.println("redisValue = " + Arrays.toString(redisValue));
-        stringRedisTemplate.opsForSet().add(key, redisValue);
-        stringRedisTemplate.expire(key, RedisConstant.CACHE_TTL, TimeUnit.SECONDS);
+        if (redisValue.length > 0) {
+            stringRedisTemplate.opsForSet().add(key, redisValue);
+            stringRedisTemplate.expire(key, RedisConstant.CREATE_TEAM_CACHE_TTL, TimeUnit.SECONDS);
+        }
 
-        // 5. 返回结果
+        // 4. 返回结果
         return teamIds;
     }
 }
