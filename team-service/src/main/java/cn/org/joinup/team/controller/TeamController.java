@@ -1,5 +1,6 @@
 package cn.org.joinup.team.controller;
 
+import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
@@ -53,14 +54,28 @@ public class TeamController {
     }
 
     @PostMapping("/add")
+    @ApiOperation("创建队伍")
     public Result<Team> createTeam(@RequestBody @Validated CreateTeamDTO createTeamDTO) {
         return teamService.createTeam(createTeamDTO);
     }
 
-    @GetMapping("/my")
+    @GetMapping("/my/list")
     @ApiOperation("获取我的队伍")
     public Result<List<Team>> getMyTeam(@RequestParam(required = false) TeamMemberRole role) {
         return teamService.getParticipatedTeam(role);
     }
+
+    @GetMapping("/my/count")
+    @ApiOperation("获取我的队伍数量信息")
+    public Result<UserTeamStatisticDTO> getMyTeamCount() {
+        return teamService.getMyTeamCount();
+    }
+
+    @PostMapping("/{teamId}/leave")
+    @ApiOperation("退出队伍")
+    public Result<Void> leaveTeam(@PathVariable Long teamId) {
+        return teamService.leaveTeam(teamId);
+    }
+
 
 }

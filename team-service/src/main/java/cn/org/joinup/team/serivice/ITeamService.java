@@ -1,5 +1,6 @@
 package cn.org.joinup.team.serivice;
 
+import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.team.domain.dto.CreateTeamDTO;
 import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
@@ -20,4 +21,9 @@ public interface ITeamService extends IService<Team> {
     boolean addMember(Long teamId, Long userId);
 
     Result<List<Team>> getParticipatedTeam(TeamMemberRole role);
+
+    Result<UserTeamStatisticDTO> getMyTeamCount();
+
+    Result<Void> leaveTeam(Long teamId);
+
 }

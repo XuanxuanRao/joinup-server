@@ -1,6 +1,8 @@
 package cn.org.joinup.user.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.api.client.TeamClient;
+import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.user.domain.dto.*;
 import cn.org.joinup.user.domain.po.User;
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 public class UserController {
 
     private final IUserService userService;
+    private final TeamClient teamClient;
 
 
     @ApiOperation("获取当前用户信息")
@@ -34,7 +37,10 @@ public class UserController {
         if (user == null) {
             return Result.error("System error");
         }
-        return Result.success(BeanUtil.copyProperties(user, UserDTO.class));
+        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        Result<UserTeamStatisticDTO> userTeamStatistic = teamClient.getMyTeamCount();
+        BeanUtil.copyProperties(userTeamStatistic.getData(), userDTO);
+        return Result.success(userDTO);
     }
 
     @PostMapping("/register")

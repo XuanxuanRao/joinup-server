@@ -18,4 +18,12 @@ public interface ITeamJoinApplicationService extends IService<TeamJoinApplicatio
      * @throws RuntimeException if adding the member fails, triggering rollback.
      */
     Result<Void> approveJoinApplication(Long teamId, Long applicationId);
+
+    /**
+     * Rejects a join application.
+     * @param teamId id of the team
+     * @param applicationId id of the application
+     * @return Result indicating success or failure.
+     */
+    Result<Void> rejectJoinApplication(Long teamId, Long applicationId);
 }

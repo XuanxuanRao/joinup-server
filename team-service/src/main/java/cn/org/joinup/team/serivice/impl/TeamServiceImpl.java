@@ -1,8 +1,10 @@
 package cn.org.joinup.team.serivice.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.team.constants.RedisConstant;
 import cn.org.joinup.team.domain.dto.CreateTeamDTO;
 import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
 import cn.org.joinup.team.domain.po.Team;
@@ -19,6 +21,7 @@ import cn.org.joinup.team.serivice.IThemeService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     private final ITeamMemberService teamMemberService;
     private final ITeamTagRelationService teamTagRelationService;
     private final IThemeService themeService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public Result<TeamVO> userGetTeam(Long teamId) {
@@ -117,6 +121,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .collect(Collectors.toList())
         );
 
+        // 缓存
+        String key = RedisConstant.CREATE_TEAM_KEY_PREFIX + UserContext.getUser();
+        stringRedisTemplate.opsForSet().add(key, String.valueOf(team.getId()));
+
         return Result.success(team);
     }
 
@@ -167,6 +175,49 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         }
         List<Team> teams = listByIds(teamIds);
         return Result.success(teams);
+    }
+
+    @Override
+    public Result<UserTeamStatisticDTO> getMyTeamCount() {
+        return Result.success(
+                UserTeamStatisticDTO.builder()
+                        .joinedTeamCount(teamMemberService.getJoinedTeamIds(UserContext.getUser()).size())
+                        .createdTeamCount(teamMemberService.getCreatedTeamIds(UserContext.getUser()).size())
+                        .build()
+        );
+    }
+
+    @Override
+    @Transactional
+    public Result<Void> leaveTeam(Long teamId) {
+        Team team = getById(teamId);
+        if (team == null || team.getStatus() != TeamStatus.NORMAL) {
+            return Result.error("队伍不存在");
+        } else if (team.getCreatorUserId().equals(UserContext.getUser())) {
+            return Result.error("队伍创建者不能退出队伍");
+        }
+
+        if (!teamMemberService.isTeamMember(teamId, UserContext.getUser())) {
+            return Result.error("你不在该队伍中");
+        }
+
+        if (!teamMemberService.remove(new LambdaQueryWrapper<TeamMember>()
+                .eq(TeamMember::getTeamId, teamId)
+                .eq(TeamMember::getUserId, UserContext.getUser()))) {
+            return Result.error("退出队伍失败，请稍后重试");
+        }
+
+        // 更新队伍成员数
+        update()
+                .setSql("current_members_count = current_members_count - 1")
+                .eq("id", teamId)
+                .update();
+
+        // 删除缓存
+        String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + UserContext.getUser();
+        stringRedisTemplate.opsForSet().remove(key, String.valueOf(teamId));
+
+        return Result.success();
     }
 
     private TeamVO convertToTeamVO(Team team) {

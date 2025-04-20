@@ -24,7 +24,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/team")
 @RequiredArgsConstructor
-@Api(tags = "申请加入队伍接口")
+@Api(tags = "队伍成员管理接口")
 public class JoinTeamController {
     private final ITeamJoinApplicationService teamJoinApplicationService;
     private final ITeamService teamService;
@@ -39,15 +39,21 @@ public class JoinTeamController {
     @PostMapping("/{teamId}/join/review/{applicationId}")
     @ApiOperation("审批加入队伍申请")
     public Result<Void> reviewJoinApplication(@PathVariable Long teamId, @PathVariable Long applicationId, @RequestBody JoinReviewAction joinReviewAction) {
-        if (joinReviewAction.getAction() == 0) {
-            try {
-                teamJoinApplicationService.approveJoinApplication(teamId, applicationId);
-            } catch (RuntimeException e) {
-                return Result.error("添加成员失败，请稍后重试");
-            }
+        switch (joinReviewAction.getAction()) {
+            case 0:
+                try {
+                    return teamJoinApplicationService.approveJoinApplication(teamId, applicationId);
+                } catch (RuntimeException e) {
+                    return Result.error("添加成员失败，请稍后重试");
+                }
+            case 1:
+                try {
+                    return teamJoinApplicationService.rejectJoinApplication(teamId, applicationId);
+                } catch (RuntimeException e) {
+                    return Result.error("拒绝申请失败，请稍后重试");
+                }
         }
-
-        return Result.error("todo: 拒绝申请");
+        return Result.error("Invalid Parameter: joinReviewAction.action");
     }
 
     @GetMapping("/{teamId}/join/list")

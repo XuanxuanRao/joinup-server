@@ -4,6 +4,7 @@ import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.domain.po.Interest;
 import cn.org.joinup.user.service.IInterestService;
 import cn.org.joinup.user.service.IUserInterestService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/interest")
 @RequiredArgsConstructor
+@Api(tags = "用户兴趣/技术标签接口")
 public class InterestController {
     private final IInterestService interestService;
     private final IUserInterestService userInterestService;

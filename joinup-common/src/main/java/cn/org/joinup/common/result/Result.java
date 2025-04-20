@@ -24,8 +24,8 @@ public class Result<T> {
      */
     private T data;
 
-    private static final Integer SUCCESS = 1;
-    private static final Integer ERROR = 0;
+    public static final Integer SUCCESS = 1;
+    public static final Integer ERROR = 0;
 
     /**
      * 增删改类请求成功响应

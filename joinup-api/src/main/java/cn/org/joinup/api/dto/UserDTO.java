@@ -23,4 +23,8 @@ public class UserDTO {
     private String studentId;
     @ApiModelProperty("是否完成了身份认证")
     private Boolean verified;
+    @ApiModelProperty("加入队伍的数量")
+    private Integer joinedTeamCount;
+    @ApiModelProperty("创建队伍的数量")
+    private Integer createdTeamCount;
 }
