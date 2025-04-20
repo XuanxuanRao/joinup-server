@@ -50,4 +50,16 @@ public class UserInterestServiceImpl extends ServiceImpl<UserInterestMapper, Use
                 .map(userInterest -> interestService.getById(userInterest.getInterestId()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteUserInterest(Long interestId) {
+        if (!interestService.isLeaf(interestId)) {
+            throw new BadRequestException("Illegal Operation: Try to delete a non-leaf interest node!");
+        }
+
+        remove(lambdaQuery()
+                .eq(UserInterest::getUserId, UserContext.getUser())
+                .eq(UserInterest::getInterestId, interestId)
+                .last("LIMIT 1"));
+    }
 }

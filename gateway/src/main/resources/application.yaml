@@ -15,7 +15,7 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/user/**, /admin/user/**, /verify, /test/**
+            - Path=/user/**, /admin/user/**, /verify, /test/**, /interest/**
         - id: course-service
           uri: lb://course-service
           predicates:
@@ -49,6 +49,7 @@ joinup:
       - /verify/**
       - /test/hello
       - /theme/list
+      - /interest/all
     admin-regex-paths:
       - ^/user/\d+$
     admin-ant-paths:

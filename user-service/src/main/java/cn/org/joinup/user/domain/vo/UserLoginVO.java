@@ -16,4 +16,6 @@ public class UserLoginVO {
     private String avatar;
     @ApiModelProperty(value = "用户性别")
     private Gender gender;
+    @ApiModelProperty(value = "是否完成了身份认证")
+    private Boolean verified;
 }

@@ -10,4 +10,6 @@ public interface IUserInterestService extends IService<UserInterest> {
     UserInterest addUserInterest(Long interestId);
 
     List<Interest> getUserInterests(Long parentInterestId);
+
+    void deleteUserInterest(Long interestId);
 }
