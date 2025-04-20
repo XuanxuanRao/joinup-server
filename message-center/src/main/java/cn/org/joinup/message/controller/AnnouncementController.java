@@ -31,8 +31,8 @@ public class AnnouncementController {
 
     @ApiOperation("获取公告列表")
     @GetMapping("/list")
-    public List<Announcement> list() {
-        return announcementService.getBriefList();
+    public Result<List<Announcement>> list() {
+        return Result.success(announcementService.getBriefList());
     }
 
     @ApiOperation("根据id获取公告详情")
