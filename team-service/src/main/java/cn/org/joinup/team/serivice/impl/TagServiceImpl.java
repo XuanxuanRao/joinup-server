@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -59,5 +61,35 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
         tagApplicationService.updateById(tagApplication);
 
         return Result.success();
+    }
+
+    @Override
+    public List<Tag> getTagByName(String name) {
+        Tag one = lambdaQuery().eq(Tag::getName, name).one();
+        if (one != null) {
+            return List.of(one);
+        }
+
+        List<Tag> allTags = list();
+        List<Tag> similarTags = new ArrayList<>();
+
+        int threshold;
+        if (name.length() <= 3) {
+            threshold = 1;
+        } else {
+            threshold = Math.max(1, name.length() / 3);
+        }
+
+        for (Tag tag : allTags) {
+            String tagName = tag.getName();
+            int distance = cn.org.joinup.common.util.StrUtil.getLevenshteinDistance(name, tagName);
+            if (distance <= threshold) {
+                similarTags.add(tag);
+            } else if (name.contains(tagName) || tagName.contains(name)) {
+                similarTags.add(tag);
+            }
+        }
+
+        return similarTags;
     }
 }

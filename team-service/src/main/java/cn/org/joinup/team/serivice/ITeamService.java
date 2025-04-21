@@ -28,4 +28,6 @@ public interface ITeamService extends IService<Team> {
 
     List<Team> searchTeam(String keyword);
 
+    Result<Void> disbandTeam(Long teamId);
+
 }

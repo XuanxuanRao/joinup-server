@@ -14,10 +14,7 @@ import cn.org.joinup.team.domain.vo.TeamVO;
 import cn.org.joinup.team.enums.TeamMemberRole;
 import cn.org.joinup.team.enums.TeamStatus;
 import cn.org.joinup.team.mapper.TeamMapper;
-import cn.org.joinup.team.serivice.ITeamMemberService;
-import cn.org.joinup.team.serivice.ITeamService;
-import cn.org.joinup.team.serivice.ITeamTagRelationService;
-import cn.org.joinup.team.serivice.IThemeService;
+import cn.org.joinup.team.serivice.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +39,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     private final ITeamMemberService teamMemberService;
     private final ITeamTagRelationService teamTagRelationService;
     private final IThemeService themeService;
+    private final ITagService tagService;
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
@@ -227,12 +227,43 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .like(Team::getName, keyword)
                 .eq(Team::getStatus, TeamStatus.NORMAL)
                 .eq(Team::getOpen, true)
-                .last("LIMIT 10")
                 .list();
         System.out.println(teams);
         // 如果没有结果，则根据队伍标签模糊查询
-
+        Set<Long> ids = new HashSet<>();
+        tagService.getTagByName(keyword).forEach(tag -> ids.addAll(teamTagRelationService.getTeamIdsByTagId(tag.getId())));
+        if (ids.isEmpty()) {
+            return teams;
+        }
+        teams.addAll(lambdaQuery()
+                .in(Team::getId, ids)
+                .eq(Team::getStatus, TeamStatus.NORMAL)
+                .eq(Team::getOpen, true)
+                .list());
         return teams;
+    }
+
+    @Override
+    public Result<Void> disbandTeam(Long teamId) {
+        Team team = getById(teamId);
+        if (team == null) {
+            return Result.error("队伍不存在");
+        } else if (team.getStatus() == TeamStatus.BANNED) {
+            return Result.error("队伍状态异常，请联系管理员");
+        } else if (team.getStatus() == TeamStatus.DISBANDED) {
+            return Result.error("队伍已解散");
+        }
+
+        if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
+            return Result.error("只有队伍创建者才能解散队伍");
+        }
+
+        team.setStatus(TeamStatus.DISBANDED);
+        team.setUpdateTime(LocalDateTime.now());
+        if (!updateById(team)) {
+            return Result.error("解散队伍失败，请稍后重试");
+        }
+        return Result.success();
     }
 
     private TeamVO convertToTeamVO(Team team) {

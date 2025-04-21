@@ -11,4 +11,7 @@ import java.util.List;
  */
 public interface ITeamTagRelationService extends IService<TeamTagRelation> {
     List<Tag> getTagsByTeamId(Long teamId);
+
+    List<Long> getTeamIdsByTagId(Integer tagId);
+
 }

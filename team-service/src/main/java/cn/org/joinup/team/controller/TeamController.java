@@ -53,6 +53,12 @@ public class TeamController {
         return teamService.updateTeamInfo(teamId, updateTeamInfoDTO);
     }
 
+    @DeleteMapping("/{teamId}")
+    @ApiOperation("解散队伍")
+    public Result<Void> disbandTeam(@PathVariable Long teamId) {
+        return teamService.disbandTeam(teamId);
+    }
+
     @PostMapping("/add")
     @ApiOperation("创建队伍")
     public Result<Team> createTeam(@RequestBody @Validated CreateTeamDTO createTeamDTO) {

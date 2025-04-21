@@ -31,4 +31,14 @@ public class TeamTagRelationServiceImpl extends ServiceImpl<TeamTagRelationMappe
                 .map(tagService::getById)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Long> getTeamIdsByTagId(Integer tagId) {
+        return lambdaQuery()
+                .eq(TeamTagRelation::getTagId, tagId)
+                .list()
+                .stream()
+                .map(TeamTagRelation::getTeamId)
+                .collect(Collectors.toList());
+    }
 }
