@@ -94,5 +94,10 @@ public class TeamController {
         return Result.success(teamMemberService.getUserRole(teamId, UserContext.getUser()));
     }
 
+    @PostMapping("/{teamId}/kick/{userId}")
+    @ApiOperation("踢出队伍")
+    public Result<Void> kickOutTeam(@PathVariable Long teamId, @PathVariable Long userId) {
+        return teamService.kickOutTeam(teamId, userId);
+    }
 
 }

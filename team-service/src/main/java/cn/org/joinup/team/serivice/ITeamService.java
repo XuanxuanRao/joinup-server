@@ -34,4 +34,7 @@ public interface ITeamService extends IService<Team> {
     Result<Void> disbandTeam(Long teamId);
 
     Page<BriefTeamVO> pageQuery(PageQuery pageQuery, Long themeId);
+
+    Result<Void> kickOutTeam(Long teamId, Long userId);
+
 }

@@ -77,17 +77,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
 
     @Override
     public Result<Void> updateTeamInfo(Long teamId, UpdateTeamInfoDTO updateTeamInfoDTO) {
-        Team team = getById(teamId);
-        if (team == null) {
-            return Result.error("队伍不存在");
-        } else if (team.getStatus() == TeamStatus.BANNED) {
-            return Result.error("队伍状态异常，请联系管理员");
-        } else if (team.getStatus() == TeamStatus.DISBANDED) {
-            return Result.error("队伍已解散");
-        }
-
-        if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
-            return Result.error("只有队伍创建者才能修改队伍信息");
+        Result<Team> validateResult = validateCreatorOperation(teamId);
+        if (Objects.equals(validateResult.getCode(), Result.ERROR)) {
+            return Result.error(validateResult.getMsg());
         }
 
         Team updatTeam = BeanUtil.copyProperties(updateTeamInfoDTO, Team.class);
@@ -252,19 +244,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
 
     @Override
     public Result<Void> disbandTeam(Long teamId) {
-        Team team = getById(teamId);
-        if (team == null) {
-            return Result.error("队伍不存在");
-        } else if (team.getStatus() == TeamStatus.BANNED) {
-            return Result.error("队伍状态异常，请联系管理员");
-        } else if (team.getStatus() == TeamStatus.DISBANDED) {
-            return Result.error("队伍已解散");
+        Result<Team> validateResult = validateCreatorOperation(teamId);
+        if (Objects.equals(validateResult.getCode(), Result.ERROR)) {
+            return Result.error(validateResult.getMsg());
         }
 
-        if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
-            return Result.error("只有队伍创建者才能解散队伍");
-        }
-
+        Team team = validateResult.getData();
         team.setStatus(TeamStatus.DISBANDED);
         team.setUpdateTime(LocalDateTime.now());
         if (!updateById(team)) {
@@ -286,6 +271,55 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .setTotal(page.getTotal())
                 .setSize(page.getSize())
                 .setCurrent(page.getCurrent());
+    }
+
+    @Override
+    public Result<Void> kickOutTeam(Long teamId, Long userId) {
+        Result<Team> validateResult = validateCreatorOperation(teamId);
+        if (Objects.equals(validateResult.getCode(), Result.ERROR)) {
+            return Result.error(validateResult.getMsg());
+        }
+
+        if (teamMemberService.isTeamMember(teamId, userId)) {
+            return Result.error("该用户不在队伍中");
+        } else if (userId.equals(UserContext.getUser())) {
+            return Result.error("队伍创建者不能踢出自己");
+        }
+
+        if (!teamMemberService.remove(new LambdaQueryWrapper<TeamMember>()
+                .eq(TeamMember::getTeamId, teamId)
+                .eq(TeamMember::getUserId, userId))) {
+            return Result.error("踢出队伍失败，请稍后重试");
+        }
+
+        // 更新队伍成员数
+        update()
+                .setSql("current_members_count = current_members_count - 1")
+                .eq("id", teamId)
+                .update();
+
+        // 删除缓存
+        String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + userId;
+        stringRedisTemplate.opsForSet().remove(key, String.valueOf(teamId));
+
+        return Result.success();
+    }
+
+    Result<Team> validateCreatorOperation(Long teamId) {
+        Team team = getById(teamId);
+        if (team == null) {
+            return Result.error("队伍不存在");
+        } else if (team.getStatus() == TeamStatus.BANNED) {
+            return Result.error("队伍状态异常，请联系管理员");
+        } else if (team.getStatus() == TeamStatus.DISBANDED) {
+            return Result.error("队伍已解散");
+        }
+
+        if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
+            return Result.error("非法操作");
+        }
+
+        return Result.success(team);
     }
 
     private BriefTeamVO convertToBriefTeamVO(Team team) {
