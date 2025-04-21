@@ -1,7 +1,10 @@
 package cn.org.joinup.team.serivice.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.api.client.UserClient;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.api.dto.UserTeamStatisticDTO;
+import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.team.constants.RedisConstant;
@@ -10,12 +13,15 @@ import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
 import cn.org.joinup.team.domain.po.Team;
 import cn.org.joinup.team.domain.po.TeamMember;
 import cn.org.joinup.team.domain.po.TeamTagRelation;
+import cn.org.joinup.team.domain.vo.BriefTeamVO;
 import cn.org.joinup.team.domain.vo.TeamVO;
 import cn.org.joinup.team.enums.TeamMemberRole;
 import cn.org.joinup.team.enums.TeamStatus;
 import cn.org.joinup.team.mapper.TeamMapper;
 import cn.org.joinup.team.serivice.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,6 +46,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     private final ITeamTagRelationService teamTagRelationService;
     private final IThemeService themeService;
     private final ITagService tagService;
+    private final UserClient userClient;
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
@@ -221,7 +228,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     }
 
     @Override
-    public List<Team> searchTeam(String keyword) {
+    public List<BriefTeamVO> searchTeam(String keyword) {
         // 首先根据 队伍名称模糊查询
         List<Team> teams = lambdaQuery()
                 .like(Team::getName, keyword)
@@ -233,14 +240,14 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         Set<Long> ids = new HashSet<>();
         tagService.getTagByName(keyword).forEach(tag -> ids.addAll(teamTagRelationService.getTeamIdsByTagId(tag.getId())));
         if (ids.isEmpty()) {
-            return teams;
+            return teams.stream().map(this::convertToBriefTeamVO).collect(Collectors.toList());
         }
         teams.addAll(lambdaQuery()
                 .in(Team::getId, ids)
                 .eq(Team::getStatus, TeamStatus.NORMAL)
                 .eq(Team::getOpen, true)
                 .list());
-        return teams;
+        return teams.stream().map(this::convertToBriefTeamVO).collect(Collectors.toList());
     }
 
     @Override
@@ -264,6 +271,30 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
             return Result.error("解散队伍失败，请稍后重试");
         }
         return Result.success();
+    }
+
+    @Override
+    public Page<BriefTeamVO> pageQuery(PageQuery pageQuery, Long themeId) {
+        Page<Team> page = page(
+                pageQuery.toMpPage("create_time", true),
+                new QueryWrapper<Team>().eq("theme_id", themeId)
+        );
+
+        List<BriefTeamVO> collect = page.getRecords().stream().map(this::convertToBriefTeamVO).collect(Collectors.toList());
+        return new Page<BriefTeamVO>()
+                .setRecords(collect)
+                .setTotal(page.getTotal())
+                .setSize(page.getSize())
+                .setCurrent(page.getCurrent());
+    }
+
+    private BriefTeamVO convertToBriefTeamVO(Team team) {
+        BriefTeamVO briefTeamVO = new BriefTeamVO();
+        BeanUtil.copyProperties(team, briefTeamVO);
+        UserDTO userInfo = userClient.queryUser(team.getCreatorUserId()).getData();
+        briefTeamVO.setCreatorUserName(userInfo.getUsername());
+        briefTeamVO.setCreatorAvatar(userInfo.getAvatar());
+        return briefTeamVO;
     }
 
     private TeamVO convertToTeamVO(Team team) {

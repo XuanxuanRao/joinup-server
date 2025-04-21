@@ -115,5 +115,16 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
         // 4. 返回结果
         return teamIds;
     }
+
+    @Override
+    public TeamMemberRole getUserRole(Long teamId, Long userId) {
+        if (getCreatedTeamIds(userId).contains(teamId)) {
+            return TeamMemberRole.CREATOR;
+        } else if (getCreatedTeamIds(userId).contains(teamId)) {
+            return TeamMemberRole.MEMBER;
+        } else {
+            return null;
+        }
+    }
 }
 

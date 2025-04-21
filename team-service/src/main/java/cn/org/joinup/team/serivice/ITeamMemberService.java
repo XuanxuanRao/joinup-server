@@ -2,6 +2,7 @@ package cn.org.joinup.team.serivice;
 
 import cn.org.joinup.team.domain.po.TeamMember;
 import cn.org.joinup.team.domain.vo.TeamMemberVO;
+import cn.org.joinup.team.enums.TeamMemberRole;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface ITeamMemberService extends IService<TeamMember> {
     Set<Long> getJoinedTeamIds(Long userId);
 
     Set<Long> getCreatedTeamIds(Long userId);
+
+    TeamMemberRole getUserRole(Long teamId, Long userId);
 }

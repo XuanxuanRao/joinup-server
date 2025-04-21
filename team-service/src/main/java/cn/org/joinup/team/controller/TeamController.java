@@ -4,13 +4,15 @@ import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.team.domain.dto.CreateTeamDTO;
 import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
 import cn.org.joinup.team.domain.po.Team;
+import cn.org.joinup.team.domain.vo.BriefTeamVO;
 import cn.org.joinup.team.domain.vo.TeamVO;
 import cn.org.joinup.team.enums.TeamMemberRole;
+import cn.org.joinup.team.serivice.ITeamMemberService;
 import cn.org.joinup.team.serivice.ITeamService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,16 +31,13 @@ import java.util.List;
 @Api(tags = "队伍接口")
 public class TeamController {
     private final ITeamService teamService;
+    private final ITeamMemberService teamMemberService;
 
     @PostMapping("/list")
     @ApiOperation("根据主题获取队伍列表")
-    public Result<PageResult<Team>> pageQuery(@RequestParam Integer themeId, @RequestBody PageQuery pageQuery) {
-        Page<Team> page = teamService.page(
-                pageQuery.toMpPage("create_time", true),
-                new QueryWrapper<Team>().eq("theme_id", themeId)
-        );
-
-        return Result.success(PageResult.of(page, Team.class));
+    public Result<PageResult<BriefTeamVO>> pageQuery(@RequestParam Long themeId, @RequestBody PageQuery pageQuery) {
+        Page<BriefTeamVO> page = teamService.pageQuery(pageQuery, themeId);
+        return Result.success(PageResult.of(page, BriefTeamVO.class));
     }
 
     @GetMapping("/{teamId}")
@@ -85,8 +84,14 @@ public class TeamController {
 
     @GetMapping("/search")
     @ApiOperation("搜索队伍")
-    public Result<List<Team>> searchTeam(@RequestParam String keyword) {
+    public Result<List<BriefTeamVO>> searchTeam(@RequestParam String keyword) {
         return Result.success(teamService.searchTeam(keyword));
+    }
+
+    @GetMapping("/{teamId}/role")
+    @ApiOperation("获取用户在队伍中的角色")
+    public Result<TeamMemberRole> getUserRole(@PathVariable Long teamId) {
+        return Result.success(teamMemberService.getUserRole(teamId, UserContext.getUser()));
     }
 
 
