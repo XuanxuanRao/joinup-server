@@ -1,6 +1,5 @@
 package cn.org.joinup.message.sender;
 
-import cn.org.joinup.message.domain.po.MessageRecord;
 import cn.org.joinup.message.enums.PushChannel;
 
 
@@ -13,7 +12,7 @@ public interface MessageChannelSender<T extends MessageContext> {
 
     /**
      * 完成消息发送给用户的过程
-     * @param messageRecord 消息记录
+     * @param messageContext 消息上下文，包含了消息的内容和接收者的信息
      */
     void send(T messageContext);
 }

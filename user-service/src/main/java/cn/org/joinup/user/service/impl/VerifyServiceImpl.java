@@ -4,7 +4,6 @@ import cn.hutool.core.util.RandomUtil;
 import cn.org.joinup.api.client.MessageClient;
 import cn.org.joinup.api.dto.SendEmailMessageDTO;
 import cn.org.joinup.api.enums.MessageType;
-import cn.org.joinup.api.enums.PushChannel;
 import cn.org.joinup.common.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import cn.org.joinup.common.constant.RedisConstant;
@@ -109,7 +108,6 @@ public class VerifyServiceImpl implements IVerifyService {
         String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
 
         messageClient.sendEmail(SendEmailMessageDTO.builder()
-                .channel(PushChannel.EMAIL)
                 .messageType(MessageType.VERIFY)
                 .templateCode("email-buaa")
                 .params(new HashMap<>() {{
@@ -117,7 +115,6 @@ public class VerifyServiceImpl implements IVerifyService {
                     put("username", user.getUsername());
                 }})
                 .email(email)
-                .subject("北航身份验证")
                 .build());
 
         return Result.success();

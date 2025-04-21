@@ -1,6 +1,11 @@
 package cn.org.joinup.team.serivice.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.api.client.MessageClient;
+import cn.org.joinup.api.client.UserClient;
+import cn.org.joinup.api.dto.SendSiteMessageDTO;
+import cn.org.joinup.api.enums.MessageType;
+import cn.org.joinup.api.enums.NotifyType;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.team.constants.RedisConstant;
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,6 +40,8 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
     private final ITeamService teamService;
     private final ITeamMemberService teamMemberService;
     private final StringRedisTemplate stringRedisTemplate;
+    private final MessageClient messageClient;
+    private final UserClient userClient;
 
     @Override
     public Result<Void> addJoinApplication(Long teamId, JoinTeamDTO joinTeamDTO) {
@@ -54,13 +62,23 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
             return Result.error("发送申请失败，请稍后重试");
         }
 
+        messageClient.sendSite(SendSiteMessageDTO.builder()
+                    .templateCode("team-join")
+                    .receiverUserId(team.getCreatorUserId())
+                    .messageType(MessageType.NOTICE)
+                    .notifyType(NotifyType.TEAM)
+                    .params(Map.of(
+                            "username", userClient.getUserInfo().getData().getUsername(),
+                            "teamName", team.getName()
+                    ))
+                    .build());
+
         return Result.success();
     }
 
     @Override
     @Transactional
     public Result<Void> approveJoinApplication(Long teamId, Long applicationId) {
-        System.out.println("approveJoinApplication");
         Result<TeamJoinApplication> validateResult = validateJoinApplication(teamId, applicationId);
         if (Objects.equals(validateResult.getCode(), Result.ERROR)) {
             return Result.error(validateResult.getMsg());

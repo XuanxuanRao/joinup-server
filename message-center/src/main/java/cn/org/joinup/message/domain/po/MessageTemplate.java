@@ -27,6 +27,7 @@ public class MessageTemplate implements Serializable {
      * 编码格式：TEXT, HTML, MARKDOWN
      */
     private String encoding;
+    private String title;
     /**
      * 模板路径
      */

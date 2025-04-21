@@ -3,6 +3,8 @@ package cn.org.joinup.message.controller;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.message.domain.EmailSendModel;
 import cn.org.joinup.message.domain.SendMessageModel;
+import cn.org.joinup.message.domain.SiteSendModel;
+import cn.org.joinup.message.enums.PushChannel;
 import cn.org.joinup.message.service.IMessageRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,14 +24,22 @@ public class MessageController {
 
     @PostMapping("/email/send")
     public Result<Void> sendEmail(@RequestBody EmailSendModel sendMessageModel) {
+        sendMessageModel.setChannel(PushChannel.EMAIL);
         messageRecordService.sendMessage(sendMessageModel);
         return Result.success();
     }
 
     @PostMapping("/wechat/send")
     public Result<Void> sendWechat(@RequestBody SendMessageModel sendMessageModel) {
+        sendMessageModel.setChannel(PushChannel.WECHAT);
         messageRecordService.sendMessage(sendMessageModel);
         return Result.success();
     }
 
+    @PostMapping("/site/send")
+    public Result<Void> sendSite(@RequestBody SiteSendModel sendMessageModel) {
+        sendMessageModel.setChannel(PushChannel.SITE);
+        messageRecordService.sendMessage(sendMessageModel);
+        return Result.success();
+    }
 }

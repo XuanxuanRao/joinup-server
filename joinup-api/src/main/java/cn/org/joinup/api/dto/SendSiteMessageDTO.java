@@ -1,6 +1,7 @@
 package cn.org.joinup.api.dto;
 
 import cn.org.joinup.api.enums.MessageType;
+import cn.org.joinup.api.enums.NotifyType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,12 +13,13 @@ import java.util.Map;
  * @author chenxuanrao06@gmail.com
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class SendEmailMessageDTO {
+public class SendSiteMessageDTO {
     private MessageType messageType;
     private String templateCode;
     private Map<String, Object> params;
-    private String email;
+    private Long receiverUserId;
+    private NotifyType notifyType;
 }

@@ -13,3 +13,5 @@ joinup:
     port: 5672
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
+  nacos:
+    namespace: ""

@@ -1,0 +1,3 @@
+joinup:
+  nacos:
+    namespace: ""

@@ -20,6 +20,4 @@ public class MessageRecord {
     private Map<String, Object> params;
 
     private String content;
-
-    private Long receiverId;
 }

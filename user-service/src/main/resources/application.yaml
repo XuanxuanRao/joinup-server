@@ -14,7 +14,7 @@ spring:
     name: user-service
 
   profiles:
-    active: dev
+    active: local
 
   datasource:
     url: jdbc:mysql://${joinup.db.host}:${joinup.db.port}/user-service?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
@@ -26,6 +26,7 @@ spring:
     nacos:
       discovery:
         server-addr: ${NACOS_ADDR}
+        namespace: ${joinup.nacos.namespace}
     sentinel:
       transport:
         dashboard: localhost:8090

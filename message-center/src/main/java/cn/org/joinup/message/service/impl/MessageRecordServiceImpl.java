@@ -2,12 +2,14 @@ package cn.org.joinup.message.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.message.domain.EmailSendModel;
+import cn.org.joinup.message.domain.SiteSendModel;
 import cn.org.joinup.message.domain.po.MessageRecord;
 import cn.org.joinup.message.domain.SendMessageModel;
 import cn.org.joinup.message.domain.po.MessageTemplate;
 import cn.org.joinup.message.events.MessageRecordEvents;
 import cn.org.joinup.message.sender.EmailMessageContext;
 import cn.org.joinup.message.sender.MessageContext;
+import cn.org.joinup.message.sender.SiteMessageContext;
 import cn.org.joinup.message.sender.WechatMessageContext;
 import cn.org.joinup.message.service.IMessageRecordService;
 import cn.org.joinup.message.service.IMessageTemplateService;
@@ -33,14 +35,11 @@ public class MessageRecordServiceImpl implements IMessageRecordService {
 
     @Override
     public void sendMessage(SendMessageModel sendMessageModel) {
-        String content = parseTemplate(
-                messageTemplateService.findByTemplateCode(sendMessageModel.getTemplateCode()),
-                sendMessageModel.getParams()
-        );
+        MessageTemplate template = messageTemplateService.findByTemplateCode(sendMessageModel.getTemplateCode());
+        String content = parseTemplate(template, sendMessageModel.getParams());
         MessageRecord messageRecord = BeanUtil.copyProperties(sendMessageModel, MessageRecord.class);
         messageRecord.setContent(content);
-        messageRecord.setReceiverId(1L);
-        applicationEventPublisher.publishEvent(new MessageRecordEvents.MessageRecordCreateEvent(messageRecord, buildContext(sendMessageModel, content)));
+        applicationEventPublisher.publishEvent(new MessageRecordEvents.MessageRecordCreateEvent(messageRecord, buildContext(sendMessageModel, content, template.getTitle())));
     }
 
     private String parseTemplate(MessageTemplate messageTemplate, Map<String, Object> params) {
@@ -58,18 +57,21 @@ public class MessageRecordServiceImpl implements IMessageRecordService {
         }
     }
 
-    private MessageContext buildContext(SendMessageModel model, String content) {
+    private MessageContext buildContext(SendMessageModel model, String content, String title) {
         switch (model.getChannel()) {
             case EMAIL:
                 EmailMessageContext emailContext = new EmailMessageContext();
                 EmailSendModel emailSendModel = (EmailSendModel) model;
-                emailContext.setTo(emailSendModel.getEmail()); // 独立字段
-                emailContext.setSubject(emailSendModel.getSubject());
+                emailContext.setTo(emailSendModel.getEmail());
+                emailContext.setSubject(title);
                 emailContext.setContent(content);
                 return emailContext;
             case SITE:
-                // 组装站内信上下文
-                return null;
+                SiteSendModel siteSendModel = (SiteSendModel) model;
+                SiteMessageContext siteMessageContext = BeanUtil.copyProperties(siteSendModel, SiteMessageContext.class);
+                siteMessageContext.setTitle(title);
+                siteMessageContext.setContent(content);
+                return siteMessageContext;
             case WECHAT:
                 // 组装微信上下文
                 return new WechatMessageContext();
