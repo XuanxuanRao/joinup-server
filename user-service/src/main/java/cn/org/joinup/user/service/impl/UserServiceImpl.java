@@ -7,19 +7,17 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
-import cn.org.joinup.user.domain.dto.ResetPasswordDTO;
-import cn.org.joinup.user.domain.dto.VerifyIdentityDTO;
+import cn.org.joinup.user.domain.dto.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.org.joinup.common.constant.RedisConstant;
 import cn.org.joinup.common.exception.BadRequestException;
 import cn.org.joinup.user.config.JwtProperties;
-import cn.org.joinup.user.domain.dto.RegisterFormDTO;
 import cn.org.joinup.user.util.JwtTool;
-import cn.org.joinup.user.domain.dto.LoginFormDTO;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.domain.vo.UserLoginVO;
 import cn.org.joinup.user.mapper.UserMapper;
 import cn.org.joinup.user.service.IUserService;
+import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -53,6 +51,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Resource
     private WxMaService wxMaService;
 
+    @Resource
+    private SensitiveWordBs sensitiveWordBs;
+
 
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
@@ -79,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     @Transactional
     public UserLoginVO wxLogin(String code) throws SystemException {
-        WxMaJscode2SessionResult sessionInfo = null;
+        WxMaJscode2SessionResult sessionInfo;
         try {
             sessionInfo = wxMaService.getUserService().getSessionInfo(code);
             log.info("openid: {}", sessionInfo.getOpenid());
@@ -186,6 +187,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> updateUserInfo(UpdateUserDTO updateUserDTO) {
+        if (sensitiveWordBs.contains(updateUserDTO.getUsername())) {
+            return Result.error("用户名包含敏感词");
+        }
+
+        User user = BeanUtil.copyProperties(updateUserDTO, User.class);
+        user.setId(UserContext.getUser());
+        user.setUpdateTime(LocalDateTime.now());
+        System.out.println(user);
+        if (!updateById(user)) {
+            return Result.error("更新用户信息失败，请稍后再试");
+        }
         return Result.success();
     }
 }

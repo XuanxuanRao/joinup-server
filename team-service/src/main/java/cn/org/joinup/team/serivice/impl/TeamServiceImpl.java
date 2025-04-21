@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     private final ITagService tagService;
     private final UserClient userClient;
     private final StringRedisTemplate stringRedisTemplate;
+    private final SensitiveWordBs sensitiveWordBs;
 
     @Override
     public Result<TeamVO> userGetTeam(Long teamId) {
@@ -77,6 +79,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
 
     @Override
     public Result<Void> updateTeamInfo(Long teamId, UpdateTeamInfoDTO updateTeamInfoDTO) {
+        if (sensitiveWordBs.contains(updateTeamInfoDTO.getName()) || sensitiveWordBs.contains(updateTeamInfoDTO.getDescription())) {
+            return Result.error("队伍名称或描述中包含敏感词，请遵守法律法规");
+        }
+
         Result<Team> validateResult = validateCreatorOperation(teamId);
         if (Objects.equals(validateResult.getCode(), Result.ERROR)) {
             return Result.error(validateResult.getMsg());
@@ -94,7 +100,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     @Override
     @Transactional
     public Result<Team> createTeam(CreateTeamDTO createTeamDTO) {
-        // todo: 敏感词检查
+        if (sensitiveWordBs.contains(createTeamDTO.getName()) || sensitiveWordBs.contains(createTeamDTO.getDescription())) {
+            return Result.error("队伍名称或描述中包含敏感词，请遵守法律法规");
+        }
 
         Team team = BeanUtil.copyProperties(createTeamDTO, Team.class);
         team.setCreatorUserId(UserContext.getUser());
