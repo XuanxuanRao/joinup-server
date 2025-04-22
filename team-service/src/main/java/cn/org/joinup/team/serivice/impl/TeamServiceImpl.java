@@ -288,7 +288,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
             return Result.error(validateResult.getMsg());
         }
 
-        if (teamMemberService.isTeamMember(teamId, userId)) {
+        if (!teamMemberService.isTeamMember(teamId, userId)) {
             return Result.error("该用户不在队伍中");
         } else if (userId.equals(UserContext.getUser())) {
             return Result.error("队伍创建者不能踢出自己");
