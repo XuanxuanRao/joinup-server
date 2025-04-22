@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -20,16 +21,19 @@ import java.util.List;
 @Component
 @Slf4j
 public class CustomWordDeny implements IWordDeny {
+
     @Override
     public List<String> deny() {
         List<String> list = new ArrayList<>();
         try {
             Resource mySensitiveWords = new ClassPathResource("sensitive-words.txt");
-            Path mySensitiveWordsPath = Paths.get(mySensitiveWords.getFile().getPath());
-            log.info("尝试读取敏感词文件路径: {}", mySensitiveWordsPath); // 打印文件路径
-            list =  Files.readAllLines(mySensitiveWordsPath, StandardCharsets.UTF_8);
-        } catch (IOException ioException) {
-            log.error("读取敏感词文件错误！", ioException); // 打印完整的异常堆栈
+            try (InputStream inputStream = mySensitiveWords.getInputStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                list = reader.lines().collect(Collectors.toList());
+                log.info("成功读取敏感词数量：{}", list.size());
+            }
+        } catch (IOException e) {
+            log.error("读取敏感词文件错误！", e);
         }
         return list;
     }
