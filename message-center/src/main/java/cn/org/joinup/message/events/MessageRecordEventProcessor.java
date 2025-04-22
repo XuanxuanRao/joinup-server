@@ -1,12 +1,23 @@
 package cn.org.joinup.message.events;
 
+import cn.org.joinup.message.config.VerifyProperties;
 import cn.org.joinup.message.domain.po.MessageRecord;
+import cn.org.joinup.message.domain.po.VerifyLog;
+import cn.org.joinup.message.enums.MessageType;
 import cn.org.joinup.message.enums.PushChannel;
+import cn.org.joinup.message.sender.EmailMessageContext;
 import cn.org.joinup.message.sender.MessageChannelSender;
 import cn.org.joinup.message.sender.MessageContext;
+import cn.org.joinup.message.service.IVerifyLogService;
+import cn.org.joinup.message.service.checker.CheckerContext;
+import cn.org.joinup.message.service.checker.SendIntervalChecker;
+import cn.org.joinup.message.service.checker.SendMaxTimesChecker;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,6 +29,11 @@ import java.util.stream.Collectors;
 @Component
 public class MessageRecordEventProcessor {
     private final Map<PushChannel, MessageChannelSender<? extends MessageContext>> senders;
+    @Resource
+    private VerifyProperties verifyProperties;
+
+    @Resource
+    private IVerifyLogService verifyLogService;
 
     public MessageRecordEventProcessor(List<MessageChannelSender<? extends MessageContext>> senderList) {
         this.senders = senderList.stream()
@@ -37,12 +53,27 @@ public class MessageRecordEventProcessor {
     @EventListener
     public void onMessageRecordCreateEvent(MessageRecordEvents.MessageRecordCreateEvent event) {
         MessageRecord messageRecord = event.getMessageRecord();
+
+        if (!preHandler(messageRecord.getMessageType(), event.getMessageContext())) {
+            return;
+        }
+
         MessageChannelSender<? extends MessageContext> sender = senders.get(messageRecord.getChannel());
 
         if (sender != null) {
             sendMessageInternal(sender, event.getMessageContext());
         } else {
             System.err.println("No sender found for channel: " + messageRecord.getChannel());
+            return;
+        }
+
+        // 发送完成后的处理
+        if (messageRecord.getMessageType() == MessageType.VERIFY) {
+            VerifyLog log = new VerifyLog();
+            log.setAccount(((EmailMessageContext) event.getMessageContext()).getTo());
+            log.setCreateTime(LocalDateTime.now());
+            log.setChannel(PushChannel.EMAIL);
+            verifyLogService.save(log);
         }
     }
 
@@ -59,5 +90,25 @@ public class MessageRecordEventProcessor {
         } catch (Exception e) {
             System.err.println("Error sending message via channel " + sender.getChannel() + ": " + e.getMessage());
         }
+    }
+
+    private <T extends MessageContext> boolean preHandler(MessageType type, MessageContext messageContext) {
+        if (type != MessageType.VERIFY) {
+            return true;
+        }
+
+        String account;
+
+        if (messageContext.getChannel() == PushChannel.EMAIL) {
+            EmailMessageContext emailSendModel = (EmailMessageContext) messageContext;
+            account = emailSendModel.getTo();
+        } else {
+            throw new IllegalArgumentException("Unsupported channel: " + messageContext.getChannel());
+        }
+
+        return ElementMatchers.any()
+                .and(new SendMaxTimesChecker())
+                .and(new SendIntervalChecker())
+                .matches(new CheckerContext(verifyProperties.getSendInterval(), verifyProperties.getSendMaxTimes(), account));
     }
 }

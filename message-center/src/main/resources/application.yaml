@@ -96,3 +96,8 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - cn.org.joinup.message.controller
+joinup:
+  message:
+    verify:
+      send-interval: 60
+      send-max-times: 10
