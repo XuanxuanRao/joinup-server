@@ -27,7 +27,7 @@ spring:
         - id: team-service
           uri: lb://team-service
           predicates:
-            - Path=/team/**, /admin/team/**, /theme/**, /admin/theme/**, /tag/**, /admin/tag/**
+            - Path=/team/**, /admin/team/**, /theme/**, /admin/theme/**, /tag/**, /admin/tag/**, /admin/team-member/**
         - id: boya-service
           uri: lb://boya-service
           predicates:
