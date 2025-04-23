@@ -14,6 +14,8 @@ public interface IUserService extends IService<User> {
 
     UserLoginVO register(RegisterFormDTO registerDTO);
 
+    Result<UserLoginVO> wxRegister(WxRegisterFormDTO wxRegisterFormDTO);
+
     Result<Void> resetPassword(ResetPasswordDTO resetPasswordDTO);
 
     Result<Void> verifyIdentity(VerifyIdentityDTO verifyIdentityDTO);

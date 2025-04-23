@@ -4,6 +4,7 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
@@ -89,6 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             User user = lambdaQuery()
                     .eq(User::getOpenid, sessionInfo.getOpenid())
                     .one();
+            boolean isNewUser = user == null;
             // 如果用户不存在则注册
             if (user == null) {
                 user = new User();
@@ -102,6 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
+            userLoginVO.setNewUser(isNewUser);
             return userLoginVO;
         } catch (WxErrorException e) {
             log.error("微信登录失败: {}", e.getLocalizedMessage());
@@ -138,6 +141,47 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;
+    }
+
+    @Override
+    public Result<UserLoginVO> wxRegister(WxRegisterFormDTO wxRegisterFormDTO) {
+        WxMaJscode2SessionResult sessionInfo;
+        try {
+            sessionInfo = wxMaService.getUserService().getSessionInfo(wxRegisterFormDTO.getCode());
+            log.info("openid: {}", sessionInfo.getOpenid());
+            log.info("session_key: {}", sessionInfo.getSessionKey());
+
+            User user = lambdaQuery()
+                    .eq(User::getOpenid, sessionInfo.getOpenid())
+                    .one();
+
+            if (user != null) {
+                return Result.error("用户已存在");
+            }
+
+            if (sensitiveWordBs.contains(wxRegisterFormDTO.getUsername())) {
+                return Result.error("用户名包含敏感词");
+            }
+
+            user = new User();
+            user.setUsername(StrUtil.isBlank(wxRegisterFormDTO.getUsername()) ? "wx_" + sessionInfo.getOpenid().substring(0, 8) : wxRegisterFormDTO.getUsername());
+            user.setGender(wxRegisterFormDTO.getGender());
+            user.setOpenid(sessionInfo.getOpenid());
+            user.setCreateTime(LocalDateTime.now());
+            user.setUpdateTime(LocalDateTime.now());
+            save(user);
+
+            String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+            // 返回登录结果
+            UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
+            userLoginVO.setToken(token);
+            userLoginVO.setNewUser(true);
+            return Result.success(userLoginVO);
+        } catch (WxErrorException e) {
+            return Result.error("微信登录失败");
+        } finally {
+            WxMaConfigHolder.remove();
+        }
     }
 
     @Override

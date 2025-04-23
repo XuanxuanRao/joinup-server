@@ -72,6 +72,12 @@ public class UserController {
         }
     }
 
+    @ApiOperation("微信注册")
+    @PostMapping("/wxRegister")
+    public Result<UserLoginVO> wxRegister(@Validated @RequestBody WxRegisterFormDTO wxRegisterFormDTO) {
+        return userService.wxRegister(wxRegisterFormDTO);
+    }
+
     @ApiOperation("账号密码登录")
     @PostMapping("/login")
     public Result<UserLoginVO> login(@Validated @RequestBody LoginFormDTO loginFormDTO) {
