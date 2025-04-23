@@ -17,13 +17,13 @@ public class VerifyLogServiceImpl extends ServiceImpl<VerifyLogMapper, VerifyLog
 
     @Override
     public LocalDateTime lastSendTime(String account) {
-    return lambdaQuery()
-            .eq(VerifyLog::getAccount, account)
-            .orderByDesc(VerifyLog::getCreateTime)
-            .last("limit 1")
-            .oneOpt()
-            .map(VerifyLog::getCreateTime)
-            .orElse(null); // 如果不存在，返回 null
+        return lambdaQuery()
+                .eq(VerifyLog::getAccount, account)
+                .orderByDesc(VerifyLog::getCreateTime)
+                .last("limit 1")
+                .oneOpt()
+                .map(VerifyLog::getCreateTime)
+                .orElse(null); // 如果不存在，返回 null
     }
 
     @Override

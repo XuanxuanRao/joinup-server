@@ -120,7 +120,7 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
     public TeamMemberRole getUserRole(Long teamId, Long userId) {
         if (getCreatedTeamIds(userId).contains(teamId)) {
             return TeamMemberRole.CREATOR;
-        } else if (getCreatedTeamIds(userId).contains(teamId)) {
+        } else if (getJoinedTeamIds(userId).contains(teamId)) {
             return TeamMemberRole.MEMBER;
         } else {
             return null;

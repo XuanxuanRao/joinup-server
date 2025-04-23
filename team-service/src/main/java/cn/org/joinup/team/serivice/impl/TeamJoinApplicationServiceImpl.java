@@ -102,6 +102,17 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
         String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + application.getUserId();
         stringRedisTemplate.opsForSet().add(key, String.valueOf(teamId));
 
+        // todo: 通过消息队列异步发送站内信
+        messageClient.sendSite(SendSiteMessageDTO.builder()
+                .templateCode("join-application-pass")
+                .receiverUserId(application.getUserId())
+                .messageType(MessageType.NOTICE)
+                .notifyType(NotifyType.TEAM)
+                .params(Map.of(
+                        "teamName", teamService.getById(teamId).getName()
+                ))
+                .build());
+
         return Result.success();
     }
 
@@ -120,6 +131,18 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
         if (!updateById(application)) {
             return Result.error("更新申请状态失败，请稍后重试");
         }
+
+        messageClient.sendSite(SendSiteMessageDTO.builder()
+                .templateCode("join-application-reject")
+                .receiverUserId(application.getUserId())
+                .messageType(MessageType.NOTICE)
+                .notifyType(NotifyType.TEAM)
+                .params(Map.of(
+                        "teamName", teamService.getById(teamId).getName(),
+                        "time", LocalDateTime.now().toString().replace("T", " "),
+                        "reason", application.getReviewerComment()
+                ))
+                .build());
 
         return Result.success();
     }
