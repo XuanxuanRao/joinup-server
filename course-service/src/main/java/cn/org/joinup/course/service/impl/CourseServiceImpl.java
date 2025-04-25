@@ -40,7 +40,7 @@ public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> imple
     @Override
     public Result<ScheduleVO> list(LocalDate date) {
         UserDTO userInfo = userClient.getUserInfo().getData();
-        if (userInfo == null || userInfo.getStudentId() == null) {
+        if (userInfo == null || userInfo.getStudentId() == null || !userInfo.getVerified()) {
             return Result.error("用户未认证");
         }
         return Result.success(getScheduleByDate(userInfo.getStudentId(), date));
@@ -55,7 +55,7 @@ public class CourseServiceImpl extends ServiceImpl<SignLogMapper, SignLog> imple
     @Override
     public Result<Void> sign(Integer courseScheduleId) {
         UserDTO userInfo = userClient.getUserInfo().getData();
-        if (userInfo == null || userInfo.getStudentId() == null) {
+        if (userInfo == null || userInfo.getStudentId() == null || !userInfo.getVerified()) {
             return Result.error("用户未认证");
         }
         rabbitTemplate.convertAndSend("course.direct", "course.sign", new SignDTO(userInfo.getStudentId(), courseScheduleId));
