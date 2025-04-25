@@ -13,6 +13,7 @@ import cn.org.joinup.user.domain.vo.UserLoginVO;
 import cn.org.joinup.user.service.IUserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final IUserService userService;
@@ -32,6 +34,7 @@ public class UserController {
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
     public Result<UserDTO> getUserInfo() {
+        log.info("==================\n获取用户信息: " + UserContext.getUser());
         User user = userService.getById(UserContext.getUser());
         if (user == null) {
             return Result.error("System error");
