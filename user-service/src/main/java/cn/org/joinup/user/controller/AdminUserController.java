@@ -5,6 +5,7 @@ import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.domain.dto.AdminUpdateUserDTO;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.service.IAdminUserService;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -53,12 +54,17 @@ public class AdminUserController {
         return Result.success();
     }
 
+    // TODO 取消认证需要通知课程服务
     // 更新用户
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @RequestBody AdminUpdateUserDTO adminUpdateUserDTO) {
-        User user = BeanUtil.copyProperties(adminUpdateUserDTO, User.class);
-        user.setId(id);
-        iAdminUserService.updateById(user);
+        UpdateWrapper<User> uw = new UpdateWrapper<>();
+        uw.eq("id", id)
+                .set("username", adminUpdateUserDTO.getUsername())
+                .set("verified", adminUpdateUserDTO.getVerified())
+                .set("update_time", LocalDateTime.now());  // 假设你也记录更新时间
+
+        iAdminUserService.update(null, uw);
         return Result.success();
     }
 
