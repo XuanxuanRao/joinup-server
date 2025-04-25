@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 
 /**
@@ -244,7 +245,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = BeanUtil.copyProperties(updateUserDTO, User.class);
         user.setId(UserContext.getUser());
         user.setUpdateTime(LocalDateTime.now());
-        user.setSsoPassword(PasswordUtil.encrypt(updateUserDTO.getSsoPassword()));
+        Optional.ofNullable(updateUserDTO.getSsoPassword())
+                .filter(StrUtil::isNotBlank)
+                .ifPresent(pwd -> user.setSsoPassword(PasswordUtil.encrypt(pwd)));
         System.out.println(user);
         if (!updateById(user)) {
             return Result.error("更新用户信息失败，请稍后再试");
