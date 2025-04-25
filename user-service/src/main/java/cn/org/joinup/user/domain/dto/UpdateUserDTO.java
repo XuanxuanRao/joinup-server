@@ -22,4 +22,6 @@ public class UpdateUserDTO {
     private String avatar;
     @ApiModelProperty("新的性别，可选值：男，女，未知")
     private Gender gender;
+    @ApiModelProperty("sso")
+    private String ssoPassword;
 }

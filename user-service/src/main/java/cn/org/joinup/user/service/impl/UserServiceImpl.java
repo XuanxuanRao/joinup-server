@@ -7,6 +7,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.common.util.PasswordUtil;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.dto.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -243,6 +244,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = BeanUtil.copyProperties(updateUserDTO, User.class);
         user.setId(UserContext.getUser());
         user.setUpdateTime(LocalDateTime.now());
+        user.setSsoPassword(PasswordUtil.encrypt(updateUserDTO.getSsoPassword()));
         System.out.println(user);
         if (!updateById(user)) {
             return Result.error("更新用户信息失败，请稍后再试");
