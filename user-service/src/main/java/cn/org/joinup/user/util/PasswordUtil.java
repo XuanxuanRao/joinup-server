@@ -1,5 +1,9 @@
-package cn.org.joinup.common.util;
+package cn.org.joinup.user.util;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -12,8 +16,17 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Utility class for encrypting and decrypting long integer IDs using AES encryption.
  */
+@Component
 public class PasswordUtil {
-    private static final String key = "sgw!sgr>?a[?i52_";
+    @Value("${joinup.aes.key}")
+    private String aesKeyFromConfig;
+
+    private static String key;
+
+    @PostConstruct
+    public void init() {
+        key = aesKeyFromConfig;
+    }
 
     /**
      * Encrypts a long integer ID using AES encryption.

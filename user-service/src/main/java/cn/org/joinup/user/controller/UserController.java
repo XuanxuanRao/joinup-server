@@ -101,4 +101,15 @@ public class UserController {
         return userService.updateUserInfo(updateUserDTO);
     }
 
+    @ApiOperation("获取新的token")
+    @GetMapping("/refreshToken")
+    public Result<UserLoginVO> refreshToken() {
+        return userService.refreshToken();
+    }
+
+    @ApiOperation("获取sso密码")
+    @GetMapping("/ssoPassword")
+    public Result<String> getSsoPassword() {
+        return Result.success(userService.getSsoPassword());
+    }
 }

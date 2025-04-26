@@ -27,6 +27,4 @@ public class UserDTO {
     private Integer joinedTeamCount;
     @ApiModelProperty("创建队伍的数量")
     private Integer createdTeamCount;
-    @ApiModelProperty("sso")
-    private String ssoPassword;
 }

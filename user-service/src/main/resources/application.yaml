@@ -91,3 +91,5 @@ joinup:
     alias: joinup
     password: ${JWT_PASSWORD}
     tokenTTL: 30m
+  aes:
+    key: ${AES_KEY}

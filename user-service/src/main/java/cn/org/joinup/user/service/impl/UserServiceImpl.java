@@ -7,7 +7,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.common.util.PasswordUtil;
+import cn.org.joinup.user.util.PasswordUtil;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.dto.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -253,5 +253,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Result.error("更新用户信息失败，请稍后再试");
         }
         return Result.success();
+    }
+
+    @Override
+    public Result<UserLoginVO> refreshToken() {
+        Long userId = UserContext.getUser();
+        User user = getById(userId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
+        userLoginVO.setToken(token);
+        return Result.success(userLoginVO);
+    }
+
+    @Override
+    public String getSsoPassword() {
+        Long userId = UserContext.getUser();
+        User user = getById(userId);
+        if (user == null) {
+            return null;
+        }
+        String ssoPassword = user.getSsoPassword();
+        if (StrUtil.isBlank(ssoPassword)) {
+            return null;
+        }
+        return ssoPassword;
     }
 }

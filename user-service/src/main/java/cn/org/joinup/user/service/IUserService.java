@@ -22,4 +22,7 @@ public interface IUserService extends IService<User> {
 
     Result<Void> updateUserInfo(UpdateUserDTO updateUserDTO);
 
+    Result<UserLoginVO> refreshToken();
+
+    String getSsoPassword();
 }
