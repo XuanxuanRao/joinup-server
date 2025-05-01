@@ -31,15 +31,14 @@ public class PasswordUtil {
     /**
      * Encrypts a long integer ID using AES encryption.
      * @param raw  the content to encrypt
-     * @return The encrypted ID as a hexadecimal string
-     * @throws Exception If an error occurs during encryption
+     * @return The encrypted content as a hexadecimal string
      */
     public static String encrypt(String raw) {
         // 创建 AES 密钥
         SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
 
         // 创建 Cipher 对象
-        Cipher cipher = null;
+        Cipher cipher;
         try {
             cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -74,11 +73,11 @@ public class PasswordUtil {
 
     /**
      * Decrypts a hexadecimal string using AES encryption.
-     * @param hexInput The hexadecimal string to decrypt as a long integer ID
-     * @return The decrypted long integer ID
+     * @param hexInput The hexadecimal string to decrypt
+     * @return The decrypted content as a string
      * @throws Exception If an error occurs during decryption
      */
-    public static Long decrypt(String hexInput) throws Exception {
+    public static String decrypt(String hexInput) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
@@ -91,7 +90,6 @@ public class PasswordUtil {
         }
 
         // 解密输入字节
-        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-        return Long.parseLong(new String(decryptedBytes, StandardCharsets.UTF_8).trim()); // 去除空格
+        return new String(cipher.doFinal(encryptedBytes), StandardCharsets.UTF_8);
     }
 }
