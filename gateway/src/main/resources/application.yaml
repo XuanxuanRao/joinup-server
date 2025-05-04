@@ -9,6 +9,13 @@ spring:
   profiles:
     active: local
 
+  rabbitmq:
+    host: ${joinup.rabbitmq.host}
+    port: ${joinup.rabbitmq.port}
+    virtual-host: joinup
+    username: ${joinup.rabbitmq.username}
+    password: ${joinup.rabbitmq.password}
+
   cloud:
     nacos:
       discovery:
@@ -35,7 +42,7 @@ spring:
         - id: message-center
           uri: lb://message-center
           predicates:
-            - Path=/message/**, /admin/message/**
+            - Path=/message/**, /admin/message/**, /admin/log/**
 
 
 joinup:

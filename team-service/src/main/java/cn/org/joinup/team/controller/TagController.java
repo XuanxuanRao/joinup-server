@@ -29,6 +29,7 @@ public class TagController {
     }
 
     @GetMapping("/list")
+    @ApiOperation("获取所有标签")
     public Result<List<Tag>> list() {
         return Result.success(tagService.list());
     }

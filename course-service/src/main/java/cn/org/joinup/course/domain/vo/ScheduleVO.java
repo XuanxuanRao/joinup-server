@@ -11,6 +11,6 @@ import java.util.List;
 @Data
 public class ScheduleVO {
     private String status;
-    private String total;
+    private Integer total;
     private List<Course> result;
 }

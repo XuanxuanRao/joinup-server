@@ -43,6 +43,13 @@ spring:
         min-idle: 5
         time-between-eviction-runs: 10s
 
+  rabbitmq:
+    host: ${joinup.rabbitmq.host}
+    port: ${joinup.rabbitmq.port}
+    virtual-host: joinup
+    username: ${joinup.rabbitmq.username}
+    password: ${joinup.rabbitmq.password}
+
   mail:
     host: smtp.163.com
     port: 465
