@@ -5,4 +5,4 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # 拷贝jar包
 COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]

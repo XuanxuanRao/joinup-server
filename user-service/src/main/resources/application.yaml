@@ -17,7 +17,7 @@ spring:
     active: local
 
   datasource:
-    url: jdbc:mysql://${joinup.db.host}:${joinup.db.port}/user-service?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${joinup.db.host}:${joinup.db.port}/${joinup.db.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${joinup.db.username}
     password: ${joinup.db.password}

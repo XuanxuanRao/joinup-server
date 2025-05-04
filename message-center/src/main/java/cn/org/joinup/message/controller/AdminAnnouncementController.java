@@ -6,8 +6,6 @@ import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.domain.dto.AddAnnouncementDTO;
 import cn.org.joinup.message.domain.po.Announcement;
 import cn.org.joinup.message.service.IAdminAnnouncementService;
-import cn.org.joinup.message.service.IAnnouncementService;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,6 +36,7 @@ public class AdminAnnouncementController {
     public Result<Long> addAnnouncement(@RequestBody @Validated AddAnnouncementDTO addAnnouncementDTO) {
         Announcement announcement = BeanUtil.copyProperties(addAnnouncementDTO, Announcement.class);
         announcement.setPosterUserId(UserContext.getUser());
+        announcement.setUpdateTime(LocalDateTime.now());
         if (!iAdminAnnouncementService.save(announcement)) {
             return Result.error("公告发布失败，请稍后再试");
         }
