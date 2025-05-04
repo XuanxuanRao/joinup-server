@@ -1,0 +1,13 @@
+joinup:
+  db:
+    host: ${DB_HOST}
+    port: 3306
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    database: team-service-prod
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+    password: ${REDIS_PASSWORD}
+  nacos:
+    namespace: ""

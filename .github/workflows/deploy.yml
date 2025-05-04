@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [gateway, user-service, email-service, team-service]
+        service: [gateway, user-service, message-center, team-service, course-service]
 
     steps:
       - name: 拉取代码
@@ -27,7 +27,7 @@ jobs:
 
       - name: 登录 Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username=${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ vars.DOCKER_HUB_ADDR }}
-        
+
       - name: 构建 Docker 镜像
         run: |
           cd ${{ matrix.service }}
@@ -47,9 +47,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            cd /home/project
+            cd /data/joinup-server/project
             docker compose down
-            for service in gateway user-service email-service team-service; do
+            for service in gateway user-service team-service course-service message-center; do
               docker pull ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/$service:latest
             done
             docker compose --project-name joinup up -d

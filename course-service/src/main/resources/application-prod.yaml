@@ -1,0 +1,18 @@
+joinup:
+  db:
+    host: ${DB_HOST}
+    port: 3306
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    database: course-service-prod
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+    password: ${REDIS_PASSWORD}
+  rabbitmq:
+    host: ${MQ_HOST}
+    port: 5672
+    username: ${MQ_USERNAME}
+    password: ${MQ_PASSWORD}
+  nacos:
+    namespace: ""
