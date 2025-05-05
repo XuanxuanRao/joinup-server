@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.MessageClient;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.SendSiteMessageDTO;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.api.enums.MessageType;
 import cn.org.joinup.api.enums.NotifyType;
 import cn.org.joinup.common.result.Result;
@@ -12,6 +13,7 @@ import cn.org.joinup.team.constants.RedisConstant;
 import cn.org.joinup.team.domain.dto.JoinTeamDTO;
 import cn.org.joinup.team.domain.po.Team;
 import cn.org.joinup.team.domain.po.TeamJoinApplication;
+import cn.org.joinup.team.domain.vo.TeamJoinApplicationVO;
 import cn.org.joinup.team.enums.TeamJoinApplicationStatus;
 import cn.org.joinup.team.enums.TeamStatus;
 import cn.org.joinup.team.mapper.TeamJoinApplicationMapper;
@@ -26,8 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -147,6 +151,31 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
         return Result.success();
     }
 
+    @Override
+    public Result<List<TeamJoinApplicationVO>> getJoinApplications(Long teamId, TeamJoinApplicationStatus status) {
+        Team team = teamService.getById(teamId);
+        if (team == null || team.getStatus() != TeamStatus.NORMAL) {
+            return Result.error("队伍不存在");
+        } else if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
+            return Result.error("非法操作");
+        }
+
+        // 联合索引(teamId, status)，必须先查teamId再查status，否组索引失效
+        return Result.success(lambdaQuery()
+                .eq(TeamJoinApplication::getTeamId, teamId)
+                .eq(status != null, TeamJoinApplication::getStatus, status)
+                .list()
+                .stream()
+                .map(application -> {
+                    UserDTO userInfo = userClient.queryUser(application.getUserId()).getData();
+                    TeamJoinApplicationVO applicationVO = BeanUtil.copyProperties(application, TeamJoinApplicationVO.class);
+                    applicationVO.setUsername(userInfo.getUsername());
+                    applicationVO.setAvatar(userInfo.getAvatar());
+                    return applicationVO;
+                })
+                .collect(Collectors.toList())
+        );
+    }
 
 
     private Result<TeamJoinApplication> validateJoinApplication(Long teamId, Long applicationId) {
