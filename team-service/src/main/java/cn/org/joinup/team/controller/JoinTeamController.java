@@ -9,6 +9,7 @@ import cn.org.joinup.team.serivice.ITeamJoinApplicationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/team")
 @RequiredArgsConstructor
+@Slf4j
 @Api(tags = "队伍成员管理接口")
 public class JoinTeamController {
     private final ITeamJoinApplicationService teamJoinApplicationService;
@@ -38,12 +40,14 @@ public class JoinTeamController {
                 try {
                     return teamJoinApplicationService.approveJoinApplication(teamId, applicationId);
                 } catch (RuntimeException e) {
+                    log.error("添加成员失败", e);
                     return Result.error("添加成员失败，请稍后重试");
                 }
             case 1:
                 try {
                     return teamJoinApplicationService.rejectJoinApplication(teamId, applicationId);
                 } catch (RuntimeException e) {
+                    log.error("拒绝申请失败", e);
                     return Result.error("拒绝申请失败，请稍后重试");
                 }
         }
