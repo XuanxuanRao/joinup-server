@@ -15,4 +15,4 @@ joinup:
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
   nacos:
-    namespace: ""
+    namespace: bcc1206a-17c8-401d-85a8-c7225a1a72b4
