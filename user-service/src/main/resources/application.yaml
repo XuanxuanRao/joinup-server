@@ -61,23 +61,6 @@ logging:
   file:
     path: "logs/${spring.application.name}"
 
-
-knife4j:
-  enable: true
-  openapi:
-    title: 搭伙儿用户信息接口文档
-    description: "搭伙儿用户信息接口文档"
-    email: chenxuanrao06@gmail.com
-    concat: rcx
-    version: v1.0.0
-    group:
-      default:
-        group-name: default
-        api-rule: package
-        api-rule-resources:
-          - cn.org.joinup.user.controller
-
-
 wx:
   miniapp:
     app-id: ${APP_ID}
