@@ -4,7 +4,7 @@ package cn.org.joinup.common.constant;
  * @author chenxuanrao06@gmail.com
  */
 public interface RedisConstant {
-    String VERIFY_CODE_PREFIX = "verify_code:";
+    String VERIFY_CODE_PREFIX = "verify:code:";
 
     /**
      * 验证码过期时间 5min
@@ -19,4 +19,5 @@ public interface RedisConstant {
     String INTEREST_ID_PREFIX = "interest:id:";
     String INTEREST_LIST_PREFIX = "interest:list";
     String INTEREST_LIST_ALL = "interest:list:all";
+    String VERIFY_LOCK_PREFIX = "verify:email:lock:";
 }

@@ -1,22 +1,17 @@
 package cn.org.joinup.team.controller;
 
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.team.domain.dto.JoinReviewAction;
 import cn.org.joinup.team.domain.dto.JoinTeamDTO;
-import cn.org.joinup.team.domain.po.Team;
-import cn.org.joinup.team.domain.po.TeamJoinApplication;
+import cn.org.joinup.team.domain.vo.TeamJoinApplicationVO;
 import cn.org.joinup.team.enums.TeamJoinApplicationStatus;
-import cn.org.joinup.team.enums.TeamStatus;
 import cn.org.joinup.team.serivice.ITeamJoinApplicationService;
-import cn.org.joinup.team.serivice.ITeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -27,7 +22,6 @@ import java.util.Objects;
 @Api(tags = "队伍成员管理接口")
 public class JoinTeamController {
     private final ITeamJoinApplicationService teamJoinApplicationService;
-    private final ITeamService teamService;
 
 
     @PostMapping("/{teamId}/join/apply")
@@ -58,19 +52,8 @@ public class JoinTeamController {
 
     @GetMapping("/{teamId}/join/list")
     @ApiOperation("获取加入队伍申请列表")
-    public Result<List<TeamJoinApplication>> getJoinApplicationList(@PathVariable Long teamId, @RequestParam(required = false)TeamJoinApplicationStatus status) {
-        Team team = teamService.getById(teamId);
-        if (team == null || team.getStatus() != TeamStatus.NORMAL) {
-            return Result.error("队伍不存在");
-        } else if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
-            return Result.error("非法操作");
-        }
-
-        // 联合索引(teamId, status)，必须先查teamId再查status，否组索引失效
-        return Result.success(teamJoinApplicationService.lambdaQuery()
-                .eq(TeamJoinApplication::getTeamId, teamId)
-                .eq(status != null, TeamJoinApplication::getStatus, status)
-                .list());
+    public Result<List<TeamJoinApplicationVO>> getJoinApplicationList(@PathVariable Long teamId, @RequestParam(required = false)TeamJoinApplicationStatus status) {
+        return teamJoinApplicationService.getJoinApplications(teamId, status);
     }
 
 }

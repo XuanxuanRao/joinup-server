@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -216,9 +215,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         Long userId = UserContext.getUser();
         User user = getById(userId);
 
-        if (!Objects.equals(user.getRole(), "ADMIN")) {
-            return Result.error("该接口暂时下线");
-        }
+//        if (!Objects.equals(user.getRole(), "ADMIN")) {
+//            return Result.error("该接口暂时下线");
+//        }
 
         String correctCode = stringRedisTemplate.opsForValue().get(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
         if (!verifyIdentityDTO.getVerifyCode().equals(correctCode)) {
@@ -245,10 +244,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = BeanUtil.copyProperties(updateUserDTO, User.class);
         user.setId(UserContext.getUser());
         user.setUpdateTime(LocalDateTime.now());
+        user.setSsoPassword(null);
         Optional.ofNullable(updateUserDTO.getSsoPassword())
                 .filter(StrUtil::isNotBlank)
                 .ifPresent(pwd -> user.setSsoPassword(PasswordUtil.encrypt(pwd)));
-        System.out.println(user);
         if (!updateById(user)) {
             return Result.error("更新用户信息失败，请稍后再试");
         }

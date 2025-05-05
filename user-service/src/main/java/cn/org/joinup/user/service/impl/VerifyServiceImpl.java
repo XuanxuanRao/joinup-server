@@ -5,6 +5,7 @@ import cn.org.joinup.api.client.MessageClient;
 import cn.org.joinup.api.dto.SendEmailMessageDTO;
 import cn.org.joinup.api.enums.MessageType;
 import cn.org.joinup.common.util.UserContext;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import cn.org.joinup.common.constant.RedisConstant;
 import cn.org.joinup.common.result.Result;
@@ -12,10 +13,11 @@ import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.service.IUserService;
 import cn.org.joinup.user.service.IVerifyService;
 import org.jetbrains.annotations.NotNull;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,16 +31,16 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class VerifyServiceImpl implements IVerifyService {
 
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
-    @Resource
-    private IUserService userService;
+    private final RedissonClient redissonClient;
 
-    @Resource
-    private MessageClient messageClient;
+    private final IUserService userService;
+
+    private final MessageClient messageClient;
 
     @Override
     public Result<Void> sendVerifyCodeForRegister(final String email) {
@@ -104,20 +106,40 @@ public class VerifyServiceImpl implements IVerifyService {
             return Result.error("用户不存在");
         }
 
-        // 生成验证码
-        String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
+        RLock lock = redissonClient.getLock(RedisConstant.VERIFY_LOCK_PREFIX + email);
 
-        messageClient.sendEmail(SendEmailMessageDTO.builder()
-                .messageType(MessageType.VERIFY)
-                .templateCode("email-buaa")
-                .params(new HashMap<>() {{
-                    put("verification_code", code);
-                    put("username", user.getUsername());
-                }})
-                .email(email)
-                .build());
+        boolean locked = false;
 
-        return Result.success();
+        try {
+            locked = lock.tryLock(5, TimeUnit.SECONDS);
+            if (!locked) {
+                return Result.error("请求过于频繁，请稍后重试");
+            }
+
+            // 生成验证码并缓存到 Redis
+            String code = generateCode(RedisConstant.VERIFY_CODE_PREFIX + email);
+
+            // 发送验证码
+            messageClient.sendEmail(SendEmailMessageDTO.builder()
+                    .messageType(MessageType.VERIFY)
+                    .templateCode("email-buaa")
+                    .params(new HashMap<>() {{
+                        put("verification_code", code);
+                        put("username", user.getUsername());
+                    }})
+                    .email(email)
+                    .build());
+
+            return Result.success();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Result.error("验证码发送失败，请稍后重试");
+        } finally {
+            if (locked) {
+                lock.unlock();
+            }
+        }
     }
 
     private String loadTemplate(final String fileName) {
