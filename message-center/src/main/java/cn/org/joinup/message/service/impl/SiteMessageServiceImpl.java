@@ -28,6 +28,7 @@ public class SiteMessageServiceImpl extends ServiceImpl<SiteMessageMapper, SiteM
         if (type != null) {
             queryWrapper.eq(SiteMessage::getNotifyType, type);
         }
+        queryWrapper.eq(SiteMessage::getDeleted, false);
         queryWrapper.eq(SiteMessage::getReceiverUserId, UserContext.getUser());
         queryWrapper.orderByDesc(SiteMessage::getCreateTime);
         return page(new Page<>(pageNumber, pageSize), queryWrapper);
