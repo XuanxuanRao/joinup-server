@@ -4,5 +4,6 @@ joinup:
   rabbitmq:
     host: ${MQ_HOST}
     port: 5672
+    virtual-host: /joinup-prod
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
