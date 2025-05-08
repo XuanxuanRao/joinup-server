@@ -1,9 +1,9 @@
-name: Build backend and deploy to server
+name: Build backend and deploy to server in production environment
 
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   build:
@@ -31,10 +31,14 @@ jobs:
       - name: 构建 Docker 镜像
         run: |
           cd ${{ matrix.service }}
-          docker build -t ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest .
+          docker build --build-arg PROFILE=${{ env.ENV }} -t ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:${{ env.ENV }} .
+        env:
+          ENV: prod
 
       - name: 推送 Docker 镜像
-        run: docker push ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest
+        run: docker push ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:${{ env.ENV }}
+        env:
+          ENV: prod
 
   deploy:
     needs: build
@@ -47,7 +51,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            cd /data/joinup-server/project
+            cd /data/joinup-server/prod
             docker compose down
             for service in gateway user-service team-service course-service message-center; do
               docker pull ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/$service:latest

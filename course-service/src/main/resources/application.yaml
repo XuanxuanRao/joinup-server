@@ -46,7 +46,7 @@ spring:
   rabbitmq:
     host: ${joinup.rabbitmq.host}
     port: ${joinup.rabbitmq.port}
-    virtual-host: joinup
+    virtual-host: ${joinup.rabbitmq.virtual-host}
     username: ${joinup.rabbitmq.username}
     password: ${joinup.rabbitmq.password}
 

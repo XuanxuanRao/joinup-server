@@ -12,6 +12,7 @@ joinup:
   rabbitmq:
     host: ${MQ_HOST}
     port: 5672
+    virtual-host: /joinup-dev
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
   nacos:

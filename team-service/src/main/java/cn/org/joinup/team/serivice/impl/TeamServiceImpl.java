@@ -270,7 +270,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     public Page<BriefTeamVO> pageQuery(PageQuery pageQuery, Long themeId) {
         Page<Team> page = page(
                 pageQuery.toMpPage("create_time", true),
-                new QueryWrapper<Team>().eq("theme_id", themeId)
+                new QueryWrapper<Team>().eq("theme_id", themeId).eq("open", true)
         );
 
         List<BriefTeamVO> collect = page.getRecords().stream().map(this::convertToBriefTeamVO).collect(Collectors.toList());

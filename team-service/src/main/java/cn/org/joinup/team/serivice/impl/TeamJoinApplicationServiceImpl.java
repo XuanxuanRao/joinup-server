@@ -1,6 +1,7 @@
 package cn.org.joinup.team.serivice.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.api.client.MessageClient;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.SendSiteMessageDTO;
@@ -144,7 +145,7 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
                 .params(Map.of(
                         "teamName", teamService.getById(teamId).getName(),
                         "time", LocalDateTime.now().toString().replace("T", " "),
-                        "reason", application.getReviewerComment()
+                        "reason", StrUtil.isBlank(application.getReviewerComment()) ? "无" : application.getReviewerComment()
                 ))
                 .build());
 
