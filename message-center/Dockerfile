@@ -5,4 +5,9 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # 拷贝jar包
 COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
+
+# 设置配置文件
+ARG PROFILE=prod
+ENV SPRING_PROFILES_ACTIVE=${PROFILE}
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
