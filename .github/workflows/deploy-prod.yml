@@ -54,6 +54,6 @@ jobs:
             cd /data/joinup-server/prod
             docker compose down
             for service in gateway user-service team-service course-service message-center; do
-              docker pull ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/$service:latest
+              docker pull ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/$service:prod
             done
             docker compose --project-name joinup up -d
