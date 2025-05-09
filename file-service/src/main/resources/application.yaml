@@ -29,7 +29,7 @@ spring:
         namespace: ${joinup.nacos.namespace}
     sentinel:
       transport:
-        dashboard: localhost:8090
+        dashboard: 81.70.182.217:8090
       http-method-specify: true
 
   redis:
