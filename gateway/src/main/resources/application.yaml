@@ -43,6 +43,10 @@ spring:
           uri: lb://message-center
           predicates:
             - Path=/message/**, /admin/message/**, /admin/log/**
+        - id: file-service
+          uri: lb://file-service
+          predicates:
+            - Path=/oss/file/**
 
 
 joinup:

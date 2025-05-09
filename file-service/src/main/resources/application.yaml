@@ -1,5 +1,5 @@
 server:
-  port: 8020
+  port: 8085
 
 
 feign:
@@ -11,7 +11,7 @@ feign:
 
 spring:
   application:
-    name: course-service
+    name: file-service
 
   profiles:
     active: local
@@ -43,13 +43,6 @@ spring:
         min-idle: 5
         time-between-eviction-runs: 10s
 
-  rabbitmq:
-    host: ${joinup.rabbitmq.host}
-    port: ${joinup.rabbitmq.port}
-    virtual-host: ${joinup.rabbitmq.virtual-host}
-    username: ${joinup.rabbitmq.username}
-    password: ${joinup.rabbitmq.password}
-
 
 mybatis-plus:
   configuration:
@@ -62,24 +55,17 @@ mybatis-plus:
 
 logging:
   level:
-    com.hmall: debug
+    cn.org.joinup: debug
   pattern:
     dateformat: HH:mm:ss:SSS
   file:
     path: "logs/${spring.application.name}"
 
 
-knife4j:
-  enable: true
-  openapi:
-    title: 搭伙儿课程服务接口文档
-    description: "搭伙儿课程服务接口文档"
-    email: chenxuanrao06@gmail.com
-    concat: rcx
-    version: v1.0.0
-    group:
-      default:
-        group-name: default
-        api-rule: package
-        api-rule-resources:
-          - cn.org.joinup.course.controller
+joinup:
+  oss:
+    endpoint: ${joinup.aliyun.oss.endpoint}
+    accessKeyId: ${joinup.aliyun.oss.accessKeyId}
+    accessKeySecret: ${joinup.aliyun.oss.accessKeySecret}
+    bucketName: ${joinup.aliyun.oss.bucketName}
+
