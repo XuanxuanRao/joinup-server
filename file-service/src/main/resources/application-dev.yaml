@@ -1,0 +1,19 @@
+joinup:
+  db:
+    host: ${DB_HOST}
+    port: 3306
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    database: file-service-dev
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+    password: ${REDIS_PASSWORD}
+  nacos:
+    namespace: ""
+  aliyun:
+    oss:
+      endpoint: oss-cn-beijing.aliyuncs.com
+      accessKeyId: ${OSS_ACCESS_KEY_ID}
+      accessKeySecret: ${OSS_ACCESS_KEY_SECRET}
+      bucketName: joinup

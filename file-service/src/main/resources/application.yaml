@@ -1,0 +1,71 @@
+server:
+  port: 8085
+
+
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true
+
+
+spring:
+  application:
+    name: file-service
+
+  profiles:
+    active: local
+
+  datasource:
+    url: jdbc:mysql://${joinup.db.host}:${joinup.db.port}/${joinup.db.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${joinup.db.username}
+    password: ${joinup.db.password}
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR}
+        namespace: ${joinup.nacos.namespace}
+    sentinel:
+      transport:
+        dashboard: localhost:8090
+      http-method-specify: true
+
+  redis:
+    host: ${joinup.redis.host}
+    port: ${joinup.redis.port}
+    password: ${joinup.redis.password}
+    lettuce:
+      pool:
+        max-active: 50
+        max-idle: 10
+        min-idle: 5
+        time-between-eviction-runs: 10s
+
+
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    db-config:
+      update-strategy: not_null
+      id-type: auto
+
+
+logging:
+  level:
+    cn.org.joinup: debug
+  pattern:
+    dateformat: HH:mm:ss:SSS
+  file:
+    path: "logs/${spring.application.name}"
+
+
+joinup:
+  oss:
+    endpoint: ${joinup.aliyun.oss.endpoint}
+    accessKeyId: ${joinup.aliyun.oss.accessKeyId}
+    accessKeySecret: ${joinup.aliyun.oss.accessKeySecret}
+    bucketName: ${joinup.aliyun.oss.bucketName}
+
