@@ -4,6 +4,7 @@ import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.common.domain.JwtPayload;
 import cn.org.joinup.common.exception.UnauthorizedException;
 import cn.org.joinup.gateway.util.JwtTool;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author chenxuanrao06@gmail.com
  */
 @Component
+@Slf4j
 public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> {
     private final JwtTool jwtTool;
 
@@ -28,6 +30,8 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
     public GatewayFilter apply(Object config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+
+            log.info("WebSocket: {}", request.getURI());
 
             String token;
             JwtPayload jwtPayload;

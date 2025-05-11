@@ -7,6 +7,7 @@ import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.common.exception.UnauthorizedException;
 import cn.org.joinup.gateway.config.AuthProperties;
 import cn.org.joinup.gateway.util.JwtTool;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private final AuthProperties authProperties;
@@ -36,6 +38,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+
+        log.info("Request: {}", request.getURI());
 
         String token = null;
         List<String> headers = request.getHeaders().get(SystemConstant.TOKEN_NAME);
