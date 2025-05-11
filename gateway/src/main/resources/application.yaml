@@ -47,7 +47,12 @@ spring:
           uri: lb://file-service
           predicates:
             - Path=/oss/file/**
-
+        - id: websocket-service
+          uri: lb://websocket-service
+          predicates:
+            - Path=/chat/**
+          filters:
+            - WebSocket
 
 joinup:
   jwt:
@@ -58,6 +63,7 @@ joinup:
 
   auth:
     exclude-paths:
+      - /chat/**
       - /user/wxLogin
       - /user/login
       - /user/register
