@@ -40,7 +40,7 @@ public class CorsConfig {
         // **关键：为你的 WebSocket 路径注册 CORS 配置**
         // 将上述 CORS 配置应用到所有以 /ws/ 开头的路径。
         // SockJS 会访问 /ws/info, /ws/<session>/websocket 等路径，所以使用 /ws/**
-        source.registerCorsConfiguration("/ws/**", corsConfig);
+        source.registerCorsConfiguration("/chat/**", corsConfig);
 
         return new CorsWebFilter(source);
     }
