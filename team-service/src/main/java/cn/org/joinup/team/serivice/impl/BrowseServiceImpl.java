@@ -1,11 +1,18 @@
 package cn.org.joinup.team.serivice.impl;
 
 import cn.hutool.core.date.DateTime;
+import cn.org.joinup.api.client.UserClient;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.common.util.BeanUtils;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.team.domain.po.BrowseHistory;
+import cn.org.joinup.team.domain.po.Team;
+import cn.org.joinup.team.domain.vo.TeamBrowseVO;
 import cn.org.joinup.team.mapper.BrowseHistoryMapper;
 import cn.org.joinup.team.serivice.IBrowseService;
+import cn.org.joinup.team.serivice.ITeamService;
+import cn.org.joinup.team.serivice.IThemeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service  // 标记为service的服务层
@@ -26,6 +34,10 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
     * BrowseHistory getById(Serializable id);      // 查询
     * List<BrowseHistory> list();                  // 查询所有
     * */
+    private final UserClient userClient;
+    private final ITeamService teamService;
+    private final IThemeService themeService;
+
     @Override
     public Result<BrowseHistory> addNewHistory(Long teamId) {
 
@@ -54,7 +66,18 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
                 finalHistories.add(history);
             }
         }
+        return Result.success(finalHistories.stream().map(this::convertToTeamBrowseVO).collect(Collectors.toList()));
+    }
 
-        return Result.success(finalHistories);
+    private TeamBrowseVO convertToTeamBrowseVO(BrowseHistory browseHistory){
+        TeamBrowseVO teamBrowseVO = new TeamBrowseVO();
+        BeanUtils.copyProperties(browseHistory,teamBrowseVO);
+        UserDTO userInfo = userClient.queryUser(teamBrowseVO.getId()).getData();
+        teamBrowseVO.setCreatorUserName(userInfo.getUsername());
+        teamBrowseVO.setCreatorAvatar(userInfo.getAvatar());
+        Team team = teamService.getById(browseHistory.getTeamId());
+        teamBrowseVO.setTeamName(team.getName());
+        teamBrowseVO.setTeamTheme(themeService.getById(team.getThemeId()).getName());
+        return teamBrowseVO;
     }
 }
