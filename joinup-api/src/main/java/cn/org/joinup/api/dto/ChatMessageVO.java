@@ -23,7 +23,7 @@ public class ChatMessageVO {
     /**
      * 消息所属会话
      */
-    private ConversationVO conversation;
+    private ConversationDTO conversation;
     private Map<String, Object> content;
     /**
      * 消息类型：文本，图片，文件，队伍分享

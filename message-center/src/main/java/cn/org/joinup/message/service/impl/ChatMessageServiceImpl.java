@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
-import cn.org.joinup.api.dto.ConversationVO;
+import cn.org.joinup.api.dto.ConversationDTO;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.mapper.ChatMessageMapper;
 import cn.org.joinup.message.service.IChatMessageService;
@@ -43,6 +43,13 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                 });
     }
 
+    @Override
+    public ChatMessageVO toChatMessageVO(ChatMessage chatMessage) {
+        ChatMessageVO chatMessageVO = BeanUtil.copyProperties(chatMessage, ChatMessageVO.class);
+        chatMessageVO.setSender(userClient.getUserInfo().getData());
+        return chatMessageVO;
+    }
+
     private ChatMessage buildChatMessage(ChatMessageDTO chatMessageDTO) {
         ChatMessage chatMessage = BeanUtil.copyProperties(chatMessageDTO, ChatMessage.class);
         return chatMessage;
@@ -52,7 +59,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         ChatMessageVO chatMessageVO = BeanUtil.copyProperties(chatMessage, ChatMessageVO.class);
         chatMessageVO.setSender(userClient.queryUser(chatMessage.getSenderId()).getData());
         chatMessageVO.setReceiverId(receiverId);
-        chatMessageVO.setConversation(BeanUtil.copyProperties(conversationService.getConversationById(chatMessage.getConversationId()), ConversationVO.class));
+        chatMessageVO.setConversation(BeanUtil.copyProperties(conversationService.getConversationById(chatMessage.getConversationId()), ConversationDTO.class));
         return chatMessageVO;
     }
 
