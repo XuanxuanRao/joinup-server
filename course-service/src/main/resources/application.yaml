@@ -25,7 +25,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: ${NACOS_ADDR}
+        server-addr: ${joinup.nacos.addr}
         namespace: ${joinup.nacos.namespace}
     sentinel:
       transport:

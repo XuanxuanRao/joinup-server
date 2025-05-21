@@ -7,7 +7,7 @@ joinup:
     database: course-service-dev
   redis:
     host: ${REDIS_HOST}
-    port: 6379
+    port: ${REDIS_PORT}
     password: ${REDIS_PASSWORD}
   rabbitmq:
     host: ${MQ_HOST}
@@ -16,4 +16,5 @@ joinup:
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: ""

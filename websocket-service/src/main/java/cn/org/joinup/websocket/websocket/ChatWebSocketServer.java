@@ -1,12 +1,22 @@
 package cn.org.joinup.websocket.websocket;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
+import cn.org.joinup.api.dto.ChatMessageDTO;
+import cn.org.joinup.api.dto.ChatMessageVO;
 import cn.org.joinup.websocket.config.ChatEndpointConfigurator;
+import cn.org.joinup.websocket.config.ChatMessageDTOEncoder;
+import cn.org.joinup.websocket.config.ClientChatMessageDecoder;
+import cn.org.joinup.websocket.domain.ClientChatMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,11 +25,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-@ServerEndpoint(value = "/chat", configurator = ChatEndpointConfigurator.class)
+@ServerEndpoint(
+        value = "/chat",
+        configurator = ChatEndpointConfigurator.class,
+        encoders = ChatMessageDTOEncoder.class,
+        decoders = ClientChatMessageDecoder.class
+)
 public class ChatWebSocketServer {
     // 维护用户ID与Session的映射，用于点对点发送和广播
     private static final Map<Long, Session> SESSION_MAP = new ConcurrentHashMap<>();
+    private static RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
+        ChatWebSocketServer.rabbitTemplate = rabbitTemplate;
+    }
 
     /**
      * 连接建立成功调用的方法
@@ -56,9 +76,6 @@ public class ChatWebSocketServer {
             session.getUserProperties().put("userId", userId);
 
             log.info("用户 {} 连接成功. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
-
-            sendTextMessage(session, "Welcome, " + userId);
-
         } catch (Exception e) {
             log.error("WebSocket @OnOpen 发生异常", e);
             try {
@@ -87,22 +104,16 @@ public class ChatWebSocketServer {
 
     /**
      * 收到客户端消息后调用的方法
-     * @param message 客户端发送过来的消息 (String 或 byte[])
+     * @param clientChatMessage 客户端发送过来的消息
      * @param session 发送消息的 Session 对象
      */
     @OnMessage
-    public void onMessage(String message, Session session) {
+    public void onMessage(ClientChatMessage clientChatMessage, Session session) {
         // 从 session 的用户属性中获取用户 ID 和角色
         Long userId = (Long) session.getUserProperties().get("userId");
-
-        if (userId != null) {
-            log.info("收到用户 {} 的消息：{}", userId, message);
-            // 示例：简单回显消息给发送者
-            // todo: 处理消息逻辑
-            sendTextMessage(session, "Echo from server: " + message);
-        } else {
+        if (userId == null) {
             // 理论上，如果 @OnOpen 中认证失败，连接应该已经被关闭。如果这里收到消息，说明有未认证的 session 仍在尝试通信。
-            log.warn("收到来自未认证 Session ({}) 的消息：{}", session.getId(), message);
+            log.warn("收到来自未认证 Session ({}) 的消息", session.getId());
             // 可以选择忽略或关闭连接
             try {
                 session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated session message"));
@@ -110,6 +121,13 @@ public class ChatWebSocketServer {
                 log.error("关闭未认证 Session 失败", e);
             }
         }
+
+        log.info("收到用户 {} 的消息：{}", userId, clientChatMessage);
+        ChatMessageDTO chatMessageDTO = BeanUtil.copyProperties(clientChatMessage, ChatMessageDTO.class);
+        chatMessageDTO.setSenderId(userId);
+        chatMessageDTO.setCreateTime(LocalDateTime.now());
+        // 通过消息队列发送消息
+        rabbitTemplate.convertAndSend("chat.message.direct", "onMessage", chatMessageDTO);
     }
 
     /**
@@ -128,21 +146,17 @@ public class ChatWebSocketServer {
         }
     }
 
-    /**
-     * 向单个 Session 发送文本消息 (私有方法，通常在当前 Endpoint 实例内部调用)
-     * @param session 要发送消息的 Session
-     * @param message 消息内容
-     */
-    private void sendTextMessage(Session session, String message) {
+    private void sendJsonMessage(Session session, ChatMessageVO chatMessageVO) {
         if (session != null && session.isOpen()) {
             try {
-                // BasicRemote 是同步发送
-                session.getBasicRemote().sendText(message);
-                // AsyncRemote 是异步发送
-                // session.getAsyncRemote().sendText(message);
+                session.getBasicRemote().sendText(JSONUtil.toJsonStr(chatMessageVO));
+                log.debug("发送 JSON 消息给 Session {}: {}", session.getId(), chatMessageVO);
             } catch (IOException e) {
-                log.error("发送消息给 Session {} 失败", session.getId(), e);
+                log.error("发送 JSON 消息给 Session {} 失败", session.getId(), e);
+                // 发送 IO 错误通常意味着连接问题，可能需要处理断开连接或重试
             }
+        } else {
+            log.warn("尝试发送 JSON 消息给一个无效或已关闭的 Session");
         }
     }
 
@@ -151,35 +165,17 @@ public class ChatWebSocketServer {
      * @param userId  用户ID
      * @param message 消息内容 (String)
      */
-    public static void sendMessageToUser(Long userId, String message) {
+    public static void sendMessageToUser(Long userId, ChatMessageVO message) {
         Session session = SESSION_MAP.get(userId);
         if (session != null && session.isOpen()) {
             try {
-                session.getBasicRemote().sendText(message);
+                session.getBasicRemote().sendObject(message);
                 log.debug("Sent message to user {}: {}", userId, message);
-            } catch (IOException e) {
+            } catch (IOException | EncodeException e) {
                 log.error("发送消息给用户 {} 失败", userId, e);
             }
         } else {
             log.warn("尝试发送消息给用户 {}，但 Session 不存在或已关闭", userId);
         }
-    }
-
-    /**
-     * 广播消息给所有在线用户 (静态方法供其他服务调用)
-     * @param message 消息内容 (String)
-     */
-    public static void broadcastMessage(String message) {
-        log.info("Broadcasting message: {}", message);
-        // 使用 stream 并行发送可以提高性能
-        SESSION_MAP.values().parallelStream().forEach(session -> {
-            if (session.isOpen()) {
-                try {
-                    session.getBasicRemote().sendText(message);
-                } catch (IOException e) {
-                    log.error("广播消息失败给 Session {}", session.getId(), e);
-                }
-            }
-        });
     }
 }

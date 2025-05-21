@@ -19,7 +19,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: ${NACOS_ADDR}
+        server-addr: ${joinup.nacos.addr}
         namespace: ${joinup.nacos.namespace}
     gateway:
       routes:
@@ -42,7 +42,7 @@ spring:
         - id: message-center
           uri: lb://message-center
           predicates:
-            - Path=/message/**, /admin/message/**, /admin/log/**
+            - Path=/message/**, /admin/message/**, /admin/log/**, /conversation/**
         - id: file-service
           uri: lb://file-service
           predicates:
@@ -58,7 +58,7 @@ joinup:
   jwt:
     location: classpath:joinup.jks
     alias: joinup
-    password: ${JWT_PASSWORD}
+    password: ${joinup.jwt.password}
     tokenTTL: 30m
 
   auth:
