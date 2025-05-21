@@ -25,7 +25,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: ${NACOS_ADDR}
+        server-addr: ${joinup.nacos.addr}
         namespace: ${joinup.nacos.namespace}
     sentinel:
       transport:
@@ -103,8 +103,3 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - cn.org.joinup.message.controller
-joinup:
-  message:
-    verify:
-      send-interval: 60
-      send-max-times: 10

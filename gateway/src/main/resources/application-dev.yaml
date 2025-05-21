@@ -1,5 +1,6 @@
 joinup:
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: ""
   rabbitmq:
     host: ${MQ_HOST}
@@ -7,3 +8,5 @@ joinup:
     virtual-host: /joinup-dev
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
+  jwt:
+    password: ${JWT_PASSWORD}

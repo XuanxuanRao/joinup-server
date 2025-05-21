@@ -21,4 +21,6 @@ public interface IConversationService extends IService<Conversation> {
     ConversationDTO getConversationDTO(String conversationId);
 
     ChatMessage getLastMessage(String conversationId);
+
+    Conversation tryCreateConversation(Long requesterId, Long inviteeId);
 }
