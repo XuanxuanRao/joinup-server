@@ -10,6 +10,7 @@ joinup:
     port: 6379
     password: ${REDIS_PASSWORD}
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: ""
   rabbitmq:
     host: ${MQ_HOST}
