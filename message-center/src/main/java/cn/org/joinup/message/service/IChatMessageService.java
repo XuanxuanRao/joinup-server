@@ -8,5 +8,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface IChatMessageService extends IService<ChatMessage> {
     void onMessage(ChatMessageDTO chatMessageDTO);
 
-    ChatMessageVO toChatMessageVO(ChatMessage chatMessage);
+    ChatMessageVO convertToVO(ChatMessage chatMessage, boolean needConversation);
+
+    ChatMessageVO convertToVO(ChatMessage chatMessage, Long receiverId, boolean needConversation);
+
+    ChatMessageVO getChatMessageVO(Long id, boolean needConversation);
+
+    ChatMessageVO getChatMessageVO(Long id);
 }

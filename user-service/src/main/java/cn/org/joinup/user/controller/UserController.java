@@ -34,7 +34,6 @@ public class UserController {
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
     public Result<UserDTO> getUserInfo() {
-        log.info("==================\n获取用户信息: " + UserContext.getUser());
         User user = userService.getById(UserContext.getUser());
         if (user == null) {
             log.info("用户不存在");
@@ -43,7 +42,6 @@ public class UserController {
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
         Result<UserTeamStatisticDTO> userTeamStatistic = teamClient.getMyTeamCount();
         BeanUtil.copyProperties(userTeamStatistic.getData(), userDTO);
-        log.info("==================\n获取用户信息: " + userDTO);
         return Result.success(userDTO);
     }
 

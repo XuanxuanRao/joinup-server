@@ -5,6 +5,7 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.util.PasswordUtil;
@@ -20,6 +21,7 @@ import cn.org.joinup.user.domain.vo.UserLoginVO;
 import cn.org.joinup.user.mapper.UserMapper;
 import cn.org.joinup.user.service.IUserService;
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,9 +29,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -37,25 +39,20 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
-    @Resource
-    private PasswordEncoder passwordEncoder;
 
-    @Resource
-    private JwtTool jwtTool;
+    private final PasswordEncoder passwordEncoder;
 
-    @Resource
-    private JwtProperties jwtProperties;
+    private final JwtTool jwtTool;
 
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private final JwtProperties jwtProperties;
 
-    @Resource
-    private WxMaService wxMaService;
+    private final StringRedisTemplate stringRedisTemplate;
 
-    @Resource
-    private SensitiveWordBs sensitiveWordBs;
+    private final WxMaService wxMaService;
 
+    private final SensitiveWordBs sensitiveWordBs;
 
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
@@ -207,6 +204,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + resetPasswordDTO.getEmail());
 
+        final String key = cn.org.joinup.user.constant.RedisConstant.USER_INFO_KEY_PREFIX + user.getId();
+        stringRedisTemplate.delete(key);
+
         return Result.success();
     }
 
@@ -214,10 +214,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public Result<Void> verifyIdentity(VerifyIdentityDTO verifyIdentityDTO) {
         Long userId = UserContext.getUser();
         User user = getById(userId);
-
-//        if (!Objects.equals(user.getRole(), "ADMIN")) {
-//            return Result.error("该接口暂时下线");
-//        }
 
         String correctCode = stringRedisTemplate.opsForValue().get(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
         if (!verifyIdentityDTO.getVerifyCode().equals(correctCode)) {
@@ -232,6 +228,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
+
+        final String key = cn.org.joinup.user.constant.RedisConstant.USER_INFO_KEY_PREFIX + user.getId();
+        stringRedisTemplate.delete(key);
+
         return Result.success();
     }
 
@@ -251,6 +251,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (!updateById(user)) {
             return Result.error("更新用户信息失败，请稍后再试");
         }
+
+        final String key = cn.org.joinup.user.constant.RedisConstant.USER_INFO_KEY_PREFIX + user.getId();
+        stringRedisTemplate.delete(key);
+
         return Result.success();
     }
 
@@ -270,7 +274,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public String getSsoPassword() {
         Long userId = UserContext.getUser();
-        User user = getById(userId);
+        User user = getUserById(userId);
         if (user == null) {
             return null;
         }
@@ -279,5 +283,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return null;
         }
         return ssoPassword;
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        final String key = cn.org.joinup.user.constant.RedisConstant.USER_INFO_KEY_PREFIX + id;
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+            String userJson = stringRedisTemplate.opsForValue().get(key);
+            if (StrUtil.isBlank(userJson)) {
+                return null;
+            } else {
+                return JSONUtil.toBean(userJson, User.class);
+            }
+        }
+        User user = getById(id);
+        if (user != null) {
+            stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(user), cn.org.joinup.user.constant.RedisConstant.USER_INFO_TTL, TimeUnit.SECONDS);
+        }
+        return user;
     }
 }
