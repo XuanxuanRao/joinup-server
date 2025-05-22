@@ -49,6 +49,14 @@ spring:
     virtual-host: ${joinup.rabbitmq.virtual-host}
     username: ${joinup.rabbitmq.username}
     password: ${joinup.rabbitmq.password}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          multiplier: 1
+          max-attempts: 3
+          stateless: true
 
   mail:
     host: smtp.163.com
