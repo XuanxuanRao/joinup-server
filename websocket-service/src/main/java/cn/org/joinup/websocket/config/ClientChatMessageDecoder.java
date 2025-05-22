@@ -14,7 +14,11 @@ public class ClientChatMessageDecoder implements Decoder.Text<ClientChatMessage>
     @Override
     public ClientChatMessage decode(String s) throws DecodeException {
         try {
-            return JSONUtil.toBean(s, ClientChatMessage.class);
+            ClientChatMessage message = JSONUtil.toBean(s, ClientChatMessage.class);
+            if (message.getType() == null || message.getConversationId() == null || message.getContent().isEmpty()) {
+                throw new DecodeException(s, "Failed to decode JSON to ClientChatMessage");
+            }
+            return message;
         } catch (Exception e) {
             throw new DecodeException(s, "Failed to decode JSON to ClientChatMessage", e);
         }
