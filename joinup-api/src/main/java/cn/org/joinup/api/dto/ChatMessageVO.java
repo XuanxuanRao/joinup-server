@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @Data
 public class ChatMessageVO {
-    private Long Id;
+    private Long id;
     /**
      * 发送用户
      */
@@ -23,7 +23,7 @@ public class ChatMessageVO {
     /**
      * 消息所属会话
      */
-    private ConversationDTO conversation;
+    private BriefConversationDTO conversation;
     private Map<String, Object> content;
     /**
      * 消息类型：文本，图片，文件，队伍分享

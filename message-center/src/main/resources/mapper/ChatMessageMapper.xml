@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.org.joinup.message.mapper.ChatMessageMapper">
+
+    <select id="findConversationLastMessage" resultType="cn.org.joinup.message.domain.po.ChatMessage">
+        SELECT conversation_id, id
+        FROM (
+                 SELECT
+                     id,
+                     conversation_id,
+                     create_time,
+                     ROW_NUMBER() OVER (PARTITION BY conversation_id ORDER BY create_time DESC, id DESC) as rn
+                 FROM chat_messages
+             ) AS ranked_messages
+        WHERE rn = 1;
+    </select>
+
+</mapper>

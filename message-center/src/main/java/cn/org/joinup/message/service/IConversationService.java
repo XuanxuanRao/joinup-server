@@ -1,5 +1,7 @@
 package cn.org.joinup.message.service;
 
+import cn.org.joinup.api.dto.BriefConversationDTO;
+import cn.org.joinup.api.dto.ChatMessageVO;
 import cn.org.joinup.api.dto.ConversationDTO;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.message.domain.po.ChatMessage;
@@ -16,11 +18,17 @@ public interface IConversationService extends IService<Conversation> {
 
     boolean in(String conversationId, Long userId);
 
-    PageResult<Conversation> queryConversations(Long userId, Integer pageNumber, Integer pageSize, String type);
+    PageResult<ConversationDTO> queryConversations(Long userId, Integer pageNumber, Integer pageSize, String type);
 
     ConversationDTO getConversationDTO(String conversationId);
 
-    ChatMessage getLastMessage(String conversationId);
+    ChatMessageVO getLastMessage(String conversationId);
 
     Conversation tryCreateConversation(Long requesterId, Long inviteeId);
+
+    BriefConversationDTO getBriefConversation(String conversationId);
+
+    BriefConversationDTO getBriefConversation(String conversationId, Long receiverId);
+
+    void updateConversationOnMessage(String conversationId, ChatMessage chatMessage);
 }

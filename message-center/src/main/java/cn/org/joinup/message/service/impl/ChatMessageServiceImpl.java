@@ -4,13 +4,13 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
-import cn.org.joinup.api.dto.ConversationDTO;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.mapper.ChatMessageMapper;
 import cn.org.joinup.message.service.IChatMessageService;
 import cn.org.joinup.message.service.IConversationService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,7 @@ import java.util.Objects;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage> implements IChatMessageService {
 
     private final RabbitTemplate rabbitTemplate;
@@ -38,16 +39,21 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                     if (Objects.equals(receiverId, chatMessage.getSenderId())) {
                         return;
                     }
-                    ChatMessageVO chatMessageVO = buildChatMessageVO(chatMessage, receiverId);
+                    ChatMessageVO chatMessageVO = buildChatMessageVO(chatMessage, receiverId, true);
                     rabbitTemplate.convertAndSend("chat.send.exchange", "message.send", chatMessageVO);
                 });
+        // 3. 维护缓存
+        conversationService.updateConversationOnMessage(chatMessageDTO.getConversationId(), chatMessage);
     }
 
     @Override
-    public ChatMessageVO toChatMessageVO(ChatMessage chatMessage) {
-        ChatMessageVO chatMessageVO = BeanUtil.copyProperties(chatMessage, ChatMessageVO.class);
-        chatMessageVO.setSender(userClient.getUserInfo().getData());
-        return chatMessageVO;
+    public ChatMessageVO convertToVO(ChatMessage chatMessage, boolean needConversation) {
+        return buildChatMessageVO(chatMessage, null, needConversation);
+    }
+
+    @Override
+    public ChatMessageVO convertToVO(ChatMessage chatMessage, Long receiverId, boolean needConversation) {
+        return buildChatMessageVO(chatMessage, receiverId, needConversation);
     }
 
     private ChatMessage buildChatMessage(ChatMessageDTO chatMessageDTO) {
@@ -55,12 +61,28 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         return chatMessage;
     }
 
-    private ChatMessageVO buildChatMessageVO(ChatMessage chatMessage, Long receiverId) {
+    private ChatMessageVO buildChatMessageVO(ChatMessage chatMessage, Long receiverId, boolean needConversation) {
         ChatMessageVO chatMessageVO = BeanUtil.copyProperties(chatMessage, ChatMessageVO.class);
         chatMessageVO.setSender(userClient.queryUser(chatMessage.getSenderId()).getData());
         chatMessageVO.setReceiverId(receiverId);
-        chatMessageVO.setConversation(BeanUtil.copyProperties(conversationService.getConversationById(chatMessage.getConversationId()), ConversationDTO.class));
+        if (needConversation) {
+            chatMessageVO.setConversation(conversationService.getBriefConversation(chatMessage.getConversationId(), receiverId));
+        }
         return chatMessageVO;
+    }
+
+    @Override
+    public ChatMessageVO getChatMessageVO(Long id) {
+        return getChatMessageVO(id, true);
+    }
+
+    @Override
+    public ChatMessageVO getChatMessageVO(Long id, boolean needConversation) {
+        ChatMessage chatMessage = getById(id);
+        if (chatMessage == null) {
+            return null;
+        }
+        return convertToVO(chatMessage, needConversation);
     }
 
 

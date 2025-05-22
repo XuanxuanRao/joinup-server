@@ -25,4 +25,6 @@ public interface IUserService extends IService<User> {
     Result<UserLoginVO> refreshToken();
 
     String getSsoPassword();
+
+    User getUserById(Long id);
 }

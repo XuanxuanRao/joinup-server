@@ -5,10 +5,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.client.UserClient;
-import cn.org.joinup.api.dto.ConversationDTO;
-import cn.org.joinup.api.dto.TeamDTO;
-import cn.org.joinup.api.dto.UserDTO;
+import cn.org.joinup.api.dto.*;
 import cn.org.joinup.common.result.PageResult;
+import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.constant.RedisConstant;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.domain.po.Conversation;
@@ -19,6 +18,7 @@ import cn.org.joinup.message.service.IConversationParticipantService;
 import cn.org.joinup.message.service.IConversationService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  * @author chenxuanrao06@gmail.com
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Conversation> implements IConversationService {
 
@@ -78,7 +79,8 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         }
 
         Set<Long> participants = conversationParticipantService.getParticipantsByConversationId(conversationId);
-        stringRedisTemplate.opsForValue().set(key, String.valueOf(participants), RedisConstant.CONVERSATION_PARTICIPANTS_TTL, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForSet().add(key, participants.stream().map(String::valueOf).toArray(String[]::new));
+        stringRedisTemplate.expire(key, RedisConstant.CONVERSATION_PARTICIPANTS_TTL, TimeUnit.SECONDS);
         return participants;
     }
 
@@ -88,7 +90,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
     }
 
     @Override
-    public PageResult<Conversation> queryConversations(Long userId, Integer pageNumber, Integer pageSize, String type) {
+    public PageResult<ConversationDTO> queryConversations(Long userId, Integer pageNumber, Integer pageSize, String type) {
         Set<String> conversationsIds = findUserConversations(userId);
         if (conversationsIds == null || conversationsIds.isEmpty()) {
             return PageResult.empty(0L, 0L);
@@ -107,7 +109,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         for (Conversation conversation : conversations) {
             lastMessageTimes.put(conversation.getId(),
                     Optional.ofNullable(getLastMessage(conversation.getId()))
-                            .map(ChatMessage::getCreateTime)
+                            .map(ChatMessageVO::getCreateTime)
                             .orElse(conversation.getCreateTime()));
         }
 
@@ -116,8 +118,10 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         int start = (pageNumber - 1) * pageSize;
         int end = Math.min(start + pageSize, conversations.size());
 
-        List<Conversation> paginatedConversations = conversations.subList(start, end);
-        PageResult<Conversation> pageResult = new PageResult<>();
+        List<ConversationDTO> paginatedConversations = conversations.subList(start, end).stream()
+                .map(conversation -> convertToDTO(conversation, userId))
+                .collect(Collectors.toList());
+        PageResult<ConversationDTO> pageResult = new PageResult<>();
         pageResult.setTotal((long) conversations.size());
         pageResult.setPages((long) Math.ceil((double) conversations.size() / pageSize));
         pageResult.setList(paginatedConversations);
@@ -127,27 +131,20 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
     @Override
     public ConversationDTO getConversationDTO(String conversationId) {
         Conversation conversation = getConversationById(conversationId);
-        ConversationDTO conversationDTO = BeanUtil.copyProperties(conversation, ConversationDTO.class);
-        if ("private".equals(conversation.getType())) {
-            UserDTO userInfo = userClient.getUserInfo().getData();
-            conversationDTO.setName(userInfo.getUsername());
-            conversationDTO.setCover(userInfo.getAvatar());
-        } else if ("group".equals(conversation.getType())) {
-            TeamDTO teamInfo = teamClient.queryTeam(conversation.getTeamId()).getData();
-            conversationDTO.setName(teamInfo.getName());
-            conversationDTO.setCover(null);
-        }
-        conversationDTO.setLastMessage(chatMessageService.toChatMessageVO(getLastMessage(conversationId)));
-        return conversationDTO;
+        return convertToDTO(conversation, UserContext.getUser());
     }
 
     @Override
-    public ChatMessage getLastMessage(String conversationId) {
+    public ChatMessageVO getLastMessage(String conversationId) {
         final String key = RedisConstant.CONVERSATION_LAST_MESSAGE_KEY_PREFIX + conversationId;
-        if (Boolean.FALSE.equals(stringRedisTemplate.hasKey(key))) {
+        if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
             return null;
         }
-        return JSONUtil.toBean(stringRedisTemplate.opsForValue().get(key), ChatMessage.class);
+        String messageId = stringRedisTemplate.opsForValue().get(key);
+        if (messageId == null) {
+            return null;
+        }
+        return chatMessageService.getChatMessageVO(Long.valueOf(messageId), false);
     }
 
     private Set<String> findUserConversations(Long userId) {
@@ -188,6 +185,44 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         return conversation;
     }
 
+    @Override
+    public BriefConversationDTO getBriefConversation(String conversationId) {
+        return getBriefConversation(conversationId, UserContext.getUser());
+    }
+
+    @Override
+    public BriefConversationDTO getBriefConversation(String conversationId, Long receiverId) {
+        Conversation conversation = getConversationById(conversationId);
+        if (conversation == null) {
+            return null;
+        }
+        BriefConversationDTO briefConversationDTO = BeanUtil.copyProperties(conversation, BriefConversationDTO.class);
+        switch (conversation.getType()) {
+            case "private":
+                UserDTO userInfo = userClient.queryUser(findAnotherUser(conversationId, receiverId)).getData();
+                briefConversationDTO.setName(userInfo.getUsername());
+                briefConversationDTO.setCover(userInfo.getAvatar());
+                break;
+            case "group":
+                TeamDTO teamInfo = teamClient.queryTeam(conversation.getTeamId()).getData();
+                briefConversationDTO.setName(teamInfo.getName());
+                briefConversationDTO.setCover(null);
+                break;
+        }
+        return briefConversationDTO;
+    }
+
+    @Override
+    public void updateConversationOnMessage(String conversationId, ChatMessage chatMessage) {
+        String lastMessageKey = RedisConstant.CONVERSATION_LAST_MESSAGE_KEY_PREFIX + conversationId;
+        stringRedisTemplate.opsForValue().set(lastMessageKey, String.valueOf(chatMessage.getId()));
+
+        getParticipants(conversationId).forEach(userId -> {
+            String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
+            stringRedisTemplate.opsForValue().increment(userUnreadMessageKey, 1);
+        });
+    }
+
     private Conversation findPrivateConversation(Long userId1, Long userId2) {
         Set<String> ids = stringRedisTemplate.opsForSet().intersect(
                 RedisConstant.USER_CONVERSATIONS_KEY_PREFIX + userId1,
@@ -204,5 +239,53 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
                 .last("LIMIT 1")
                 .one();
     }
+
+    /**
+     * 找到私聊会话中的另一个人
+     */
+    private Long findAnotherUser(String conversationId, Long userId) {
+        Set<Long> participants = getParticipants(conversationId);
+        participants.remove(userId);
+        if (participants.size() != 1) {
+            log.info("Strange Behaviour: {}", userId);
+        }
+        return participants.isEmpty() ? null : participants.iterator().next();
+    }
+
+    private int getUnreadMessageOfUserInConversation(String conversationId, Long userId) {
+        String key = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
+        if (Boolean.FALSE.equals(stringRedisTemplate.hasKey(key))) {
+            return 0;
+        }
+        String num = stringRedisTemplate.opsForValue().get(key);
+        if (StrUtil.isBlank(num)) {
+            return 0;
+        } else {
+            return Integer.parseInt(num);
+        }
+    }
+
+    /**
+     * Convert conversation entity to VO
+     */
+    private ConversationDTO convertToDTO(Conversation conversation, Long receiverId) {
+        ConversationDTO conversationDTO = BeanUtil.copyProperties(conversation, ConversationDTO.class);
+        switch (conversationDTO.getType()) {
+            case "private":
+                UserDTO userInfo = userClient.queryUser(findAnotherUser(conversation.getId(), receiverId)).getData();
+                conversationDTO.setName(userInfo.getUsername());
+                conversationDTO.setCover(userInfo.getAvatar());
+                break;
+            case "group":
+                TeamDTO teamInfo = teamClient.queryTeam(conversation.getTeamId()).getData();
+                conversationDTO.setName(teamInfo.getName());
+                conversationDTO.setCover(null);
+                break;
+        }
+        conversationDTO.setUnreadMessageCount(getUnreadMessageOfUserInConversation(conversation.getId(), UserContext.getUser()));
+        conversationDTO.setLastMessage(getLastMessage(conversation.getId()));
+        return conversationDTO;
+    }
+
 
 }
