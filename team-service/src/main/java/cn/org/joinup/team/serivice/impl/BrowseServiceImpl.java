@@ -55,7 +55,7 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
     @Override
     public Result<List<BrowseHistory>> getUserBrowseHistory() {
         List<BrowseHistory> histories = lambdaQuery()
-                .eq(BrowseHistory::getUserId,UserContext.getUser())
+                .eq(BrowseHistory::getUserId, UserContext.getUser())
                 .orderByDesc(BrowseHistory::getCreateTime).list();
 
         HashSet<Long> teamIds = new HashSet<>();
@@ -72,9 +72,11 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
     private TeamBrowseVO convertToTeamBrowseVO(BrowseHistory browseHistory){
         TeamBrowseVO teamBrowseVO = new TeamBrowseVO();
         BeanUtils.copyProperties(browseHistory,teamBrowseVO);
-        UserDTO userInfo = userClient.queryUser(teamBrowseVO.getId()).getData();
-        teamBrowseVO.setCreatorUserName(userInfo.getUsername());
-        teamBrowseVO.setCreatorAvatar(userInfo.getAvatar());
+        UserDTO userInfo = userClient.queryUser(teamBrowseVO.getUserId()).getData();
+        if (userInfo != null) {
+            teamBrowseVO.setCreatorUserName(userInfo.getUsername());
+            teamBrowseVO.setCreatorAvatar(userInfo.getAvatar());
+        }
         Team team = teamService.getById(browseHistory.getTeamId());
         teamBrowseVO.setTeamName(team.getName());
         teamBrowseVO.setTeamTheme(themeService.getById(team.getThemeId()).getName());
