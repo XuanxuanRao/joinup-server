@@ -38,6 +38,7 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
             try {
                 token = request.getURI().toString().split("token=")[1];
                 jwtPayload = jwtTool.parseToken(token);
+                log.info("Parsed token: {}", jwtPayload);
             } catch (UnauthorizedException e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
