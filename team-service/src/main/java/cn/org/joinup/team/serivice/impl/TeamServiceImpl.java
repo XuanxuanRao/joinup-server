@@ -330,7 +330,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         return Result.success(team);
     }
 
-    private BriefTeamVO convertToBriefTeamVO(Team team) {
+    @Override
+    public BriefTeamVO convertToBriefTeamVO(Team team) {
         BriefTeamVO briefTeamVO = new BriefTeamVO();
         BeanUtil.copyProperties(team, briefTeamVO);
         UserDTO userInfo = userClient.queryUser(team.getCreatorUserId()).getData();
@@ -339,7 +340,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         return briefTeamVO;
     }
 
-    private TeamVO convertToTeamVO(Team team) {
+    @Override
+    public TeamVO convertToTeamVO(Team team) {
         TeamVO teamVO = new TeamVO();
         BeanUtil.copyProperties(team, teamVO);
         teamVO.setTags(teamTagRelationService.getTagsByTeamId(team.getId()));

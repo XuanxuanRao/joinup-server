@@ -1,19 +1,18 @@
 package cn.org.joinup.team.domain.vo;
 
-import cn.org.joinup.team.domain.po.BrowseHistory;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
+import java.time.LocalDateTime;
+
 @Data
-public class TeamBrowseVO extends BrowseHistory {
-
-    private String creatorUserName;
-
-    private String creatorAvatar;
-
-    private String teamName;
-
-    private String teamTheme;
-
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TeamBrowseVO {
+    private Long id;
+    private BriefTeamVO team;
+    private LocalDateTime createTime;
 }

@@ -22,17 +22,17 @@ public class BrowseHistory implements Serializable {
     * 主键id
     * */
     @TableId(value = "id", type = IdType.AUTO)
-    private long id;
+    private Long id;
 
     /*
     * 用户id
     * */
-    private long userId;
+    private Long userId;
 
     /*
     * 队伍id
     * */
-    private long teamId;
+    private Long teamId;
 
     /*
     * 浏览时间

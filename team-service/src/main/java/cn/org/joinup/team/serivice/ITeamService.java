@@ -37,4 +37,7 @@ public interface ITeamService extends IService<Team> {
 
     Result<Void> kickOutTeam(Long teamId, Long userId);
 
+    BriefTeamVO convertToBriefTeamVO(Team team);
+
+    TeamVO convertToTeamVO(Team team);
 }

@@ -2,6 +2,7 @@ package cn.org.joinup.team.controller;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.team.domain.po.BrowseHistory;
+import cn.org.joinup.team.domain.vo.TeamBrowseVO;
 import cn.org.joinup.team.serivice.IBrowseService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class BrowseHistoryController {
     }
 
     @GetMapping("/browse")
-    public Result<List<BrowseHistory>> getBrowseHistory(){
+    public Result<List<TeamBrowseVO>> getBrowseHistory(){
         return browseHistoryService.getUserBrowseHistory();
     }
 }
