@@ -77,3 +77,4 @@ joinup:
       - ^/user/\d+$
     admin-ant-paths:
       - /admin/**
+      - /conversation/updateRedis

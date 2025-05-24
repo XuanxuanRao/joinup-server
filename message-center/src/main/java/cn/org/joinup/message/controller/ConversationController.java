@@ -8,7 +8,6 @@ import cn.org.joinup.message.constant.RedisConstant;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.domain.po.Conversation;
 import cn.org.joinup.message.mapper.ChatMessageMapper;
-import cn.org.joinup.message.service.IChatMessageService;
 import cn.org.joinup.message.service.IConversationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,11 +28,11 @@ import java.util.Objects;
 public class ConversationController {
 
     private final IConversationService conversationService;
-    private final IChatMessageService chatMessageService;
     private final ChatMessageMapper chatMessageMapper;
     private final StringRedisTemplate stringRedisTemplate;
 
     @GetMapping("/list")
+    @ApiOperation("分页获取会话列表")
     public Result<PageResult<ConversationDTO>> list(
             @RequestParam(required = false) String type,
             @RequestParam Integer pageNumber,

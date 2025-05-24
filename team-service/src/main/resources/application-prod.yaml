@@ -9,6 +9,13 @@ joinup:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
     password: ${REDIS_PASSWORD}
+    database: 1
   nacos:
     addr: ${NACOS_ADDR}
     namespace: bcc1206a-17c8-401d-85a8-c7225a1a72b4
+  rabbitmq:
+    host: ${MQ_HOST}
+    port: 5672
+    virtual-host: /joinup-prod
+    username: ${MQ_USERNAME}
+    password: ${MQ_PASSWORD}

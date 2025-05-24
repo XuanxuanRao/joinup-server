@@ -6,10 +6,12 @@ import cn.org.joinup.api.client.MessageClient;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.SendSiteMessageDTO;
 import cn.org.joinup.api.dto.UserDTO;
+import cn.org.joinup.api.dto.UserJoinTeamDTO;
 import cn.org.joinup.api.enums.MessageType;
 import cn.org.joinup.api.enums.NotifyType;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.team.constants.MQConstant;
 import cn.org.joinup.team.constants.RedisConstant;
 import cn.org.joinup.team.domain.dto.JoinTeamDTO;
 import cn.org.joinup.team.domain.po.Team;
@@ -24,6 +26,7 @@ import cn.org.joinup.team.serivice.ITeamService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +50,7 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
     private final StringRedisTemplate stringRedisTemplate;
     private final MessageClient messageClient;
     private final UserClient userClient;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     public Result<Void> addJoinApplication(Long teamId, JoinTeamDTO joinTeamDTO) {
@@ -117,6 +121,12 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
                         "teamName", teamService.getById(teamId).getName()
                 ))
                 .build());
+
+        rabbitTemplate.convertAndSend(MQConstant.TEAM_EXCHANGE, MQConstant.USER_JOIN_TEAM_KEY, UserJoinTeamDTO.builder()
+            .userId(application.getUserId())
+            .teamId(teamId)
+            .createTime(LocalDateTime.now())
+            .build());
 
         return Result.success();
     }

@@ -98,7 +98,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
         List<Conversation> conversations = lambdaQuery()
                 .in(Conversation::getId, conversationsIds)
-                .eq(type != null, Conversation::getType, type)
+                .eq(StrUtil.isNotBlank(type), Conversation::getType, type)
                 .list();
 
         if (conversations == null || conversations.isEmpty()) {

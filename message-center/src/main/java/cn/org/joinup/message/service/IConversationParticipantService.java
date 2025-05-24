@@ -9,4 +9,6 @@ public interface IConversationParticipantService extends IService<ConversationPa
     Set<Long> getParticipantsByConversationId(String conversationId);
 
     Set<String> getConversationsByUserId(Long userId);
+
+    void addParticipant(String conversationId, Long userId);
 }
