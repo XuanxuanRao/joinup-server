@@ -8,6 +8,8 @@ import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.service.IChatMessageService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +22,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/message/chat")
 @RequiredArgsConstructor
+@Api(tags = "聊天消息")
 public class ChatMessageController {
 
     private final IChatMessageService chatMessageService;
 
+    @ApiOperation("获取会话的聊天记录")
     @GetMapping("/{conversationId}")
     public Result<PageResult<ChatMessageVO>> list(@PathVariable String conversationId,
                                             @RequestParam Integer pageNumber,
