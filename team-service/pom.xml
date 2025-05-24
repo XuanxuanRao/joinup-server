@@ -81,12 +81,6 @@
             <version>6.1.6.RELEASE</version>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.commons</groupId>-->
-        <!--            <artifactId>commons-lang3</artifactId>-->
-        <!--            <version>3.12.0</version>-->
-        <!--        </dependency>-->
-
         <!--sentinel-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -99,11 +93,10 @@
             <artifactId>feign-okhttp</artifactId>
         </dependency>
 
-        <!-- 加载环境变量 -->
+        <!--mq-->
         <dependency>
-            <groupId>me.paulschwarz</groupId>
-            <artifactId>spring-dotenv</artifactId>
-            <version>4.0.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
     </dependencies>
 
