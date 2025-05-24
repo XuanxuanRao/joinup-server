@@ -18,7 +18,7 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        corsConfig.setAllowedOrigins(List.of("*")); // 允许所有来源的请求
+        corsConfig.setAllowedOriginPatterns(List.of("*")); // 允许所有来源的请求
 
         // **配置允许的 HTTP 方法**
         // WebSocket 握手是 GET。SockJS 会用到 GET, POST, OPTIONS 等方法。
