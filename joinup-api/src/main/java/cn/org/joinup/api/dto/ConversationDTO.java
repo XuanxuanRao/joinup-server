@@ -24,4 +24,6 @@ public class ConversationDTO {
     private String name;
     @ApiModelProperty(value = "聊天封面", required = true)
     private String cover;
+    @ApiModelProperty(value = "队伍ID", required = false)
+    private String teamId;
 }
