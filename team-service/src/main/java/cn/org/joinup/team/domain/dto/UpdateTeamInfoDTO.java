@@ -23,4 +23,6 @@ public class UpdateTeamInfoDTO {
     @ApiModelProperty("最大人数")
     @Max(value = 100, message = "最大人数不能超过100")
     private Integer maxMembers;
+    @ApiModelProperty("新的队伍封面")
+    private String cover;
 }
