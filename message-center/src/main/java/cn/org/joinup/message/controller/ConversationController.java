@@ -40,6 +40,11 @@ public class ConversationController {
         return Result.success(conversationService.queryConversations(UserContext.getUser(), pageNumber, pageSize, type));
     }
 
+    @GetMapping("/{conversationId}")
+    @ApiOperation("获取会话详情")
+    public Result<ConversationDTO> getConversation(@PathVariable String conversationId) {
+        return Result.success(conversationService.getConversationDTO(conversationId));
+    }
 
     @PostMapping("/create")
     @ApiOperation("发起会话")
