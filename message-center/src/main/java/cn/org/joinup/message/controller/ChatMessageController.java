@@ -26,13 +26,17 @@ public class ChatMessageController {
 
     @GetMapping("/{conversationId}")
     public Result<PageResult<ChatMessageVO>> list(@PathVariable String conversationId,
-                                            @RequestParam Integer pageNumber,
+                                            @RequestParam Integer lastSelectId,
                                             @RequestParam Integer pageSize) {
+        long size = Math.min(pageSize,10);
         LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatMessage::getConversationId, conversationId);
-        queryWrapper.orderByDesc(ChatMessage::getCreateTime);
+        queryWrapper.le(ChatMessage::getId,lastSelectId)
+                    .orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
 
-        Page<ChatMessage> page = chatMessageService.page(new Page<>(pageNumber, pageSize), queryWrapper);
+        //这里之后不会改变
+        System.out.println();
+        Page<ChatMessage> page = chatMessageService.page(new Page<>(1, size), queryWrapper);
         List<ChatMessageVO> collect = page.getRecords()
                 .stream()
                 .map(chat -> chatMessageService.convertToVO(chat, UserContext.getUser(), true)).collect(Collectors.toList());
