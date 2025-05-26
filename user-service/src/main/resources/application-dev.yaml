@@ -17,7 +17,7 @@ joinup:
     location: classpath:joinup.jks
     alias: joinup
     password: ${JWT_PASSWORD}
-    tokenTTL: 30m
+    tokenTTL: 180m
   aes:
     key: ${AES_KEY}
   wx:

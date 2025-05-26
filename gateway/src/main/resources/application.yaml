@@ -59,7 +59,7 @@ joinup:
     location: classpath:joinup.jks
     alias: joinup
     password: ${joinup.jwt.password}
-    tokenTTL: 30m
+    tokenTTL: 180m
 
   auth:
     exclude-paths:
@@ -78,3 +78,4 @@ joinup:
     admin-ant-paths:
       - /admin/**
       - /conversation/updateRedis
+      - /conversation/loadTeam

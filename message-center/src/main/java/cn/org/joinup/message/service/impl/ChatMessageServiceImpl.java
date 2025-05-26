@@ -30,10 +30,16 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
     @Override
     public void onMessage(ChatMessageDTO chatMessageDTO) {
-        // 1. 存储到数据库
+        // 1. 校验权限
+        if (!conversationService.in(chatMessageDTO.getConversationId(), chatMessageDTO.getSenderId())) {
+            log.warn("Detect invalid behaviour from user {}: " +
+                    "Try to send message in conversation {}", chatMessageDTO.getSenderId(), chatMessageDTO.getConversationId());
+            return;
+        }
+        // 2. 存储到数据库
         ChatMessage chatMessage = buildChatMessage(chatMessageDTO);
         save(chatMessage);
-        // 2. 发送给接收方
+        // 3. 发送给接收方
         conversationService.getParticipants(chatMessageDTO.getConversationId())
                 .forEach(receiverId -> {
                     if (Objects.equals(receiverId, chatMessage.getSenderId())) {
@@ -42,7 +48,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                     ChatMessageVO chatMessageVO = buildChatMessageVO(chatMessage, receiverId, true);
                     rabbitTemplate.convertAndSend("chat.send.exchange", "message.send", chatMessageVO);
                 });
-        // 3. 维护缓存
+        // 4. 维护缓存
         conversationService.updateConversationOnMessage(chatMessageDTO.getConversationId(), chatMessage);
     }
 

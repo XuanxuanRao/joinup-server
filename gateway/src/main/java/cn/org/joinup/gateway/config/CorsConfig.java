@@ -18,7 +18,7 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        corsConfig.setAllowedOrigins(List.of("http://localhost:63342", "http://localhost:80", "http://localhost:443"));
+        corsConfig.setAllowedOriginPatterns(List.of("*")); // 允许所有来源的请求
 
         // **配置允许的 HTTP 方法**
         // WebSocket 握手是 GET。SockJS 会用到 GET, POST, OPTIONS 等方法。
@@ -40,7 +40,7 @@ public class CorsConfig {
         // **关键：为你的 WebSocket 路径注册 CORS 配置**
         // 将上述 CORS 配置应用到所有以 /ws/ 开头的路径。
         // SockJS 会访问 /ws/info, /ws/<session>/websocket 等路径，所以使用 /ws/**
-        source.registerCorsConfiguration("/chat/**", corsConfig);
+        source.registerCorsConfiguration("/**", corsConfig);
 
         return new CorsWebFilter(source);
     }
