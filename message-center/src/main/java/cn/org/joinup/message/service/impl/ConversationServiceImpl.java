@@ -171,6 +171,10 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
             return conversation;
         }
 
+        if (userClient.queryUser(inviteeId).getData() == null) {
+            return null;
+        }
+
         conversation = new Conversation();
         conversation.setType("private");
         conversation.setCreateTime(LocalDateTime.now());
