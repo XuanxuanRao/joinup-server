@@ -79,8 +79,10 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         }
 
         Set<Long> participants = conversationParticipantService.getParticipantsByConversationId(conversationId);
-        stringRedisTemplate.opsForSet().add(key, participants.stream().map(String::valueOf).toArray(String[]::new));
-        stringRedisTemplate.expire(key, RedisConstant.CONVERSATION_PARTICIPANTS_TTL, TimeUnit.SECONDS);
+        if (!participants.isEmpty()) {
+            stringRedisTemplate.opsForSet().add(key, participants.stream().map(String::valueOf).toArray(String[]::new));
+            stringRedisTemplate.expire(key, RedisConstant.CONVERSATION_PARTICIPANTS_TTL, TimeUnit.SECONDS);
+        }
         return participants;
     }
 
@@ -163,7 +165,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
     @Override
     @Transactional
-    public Conversation tryCreateConversation(Long requesterId, Long inviteeId) {
+    public Conversation tryCreatePrivateConversation(Long requesterId, Long inviteeId) {
         Conversation conversation = findPrivateConversation(requesterId, inviteeId);
         if (conversation != null) {
             return conversation;
@@ -182,6 +184,33 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
         stringRedisTemplate.opsForSet().add(RedisConstant.CONVERSATION_PARTICIPANTS_KEY_PREFIX + conversation.getId(), requesterId.toString(), inviteeId.toString());
 
+        return conversation;
+    }
+
+    @Override
+    @Transactional
+    public Conversation tryCreateGroupConversation(Long requesterId, Long teamId) {
+        if (teamClient.getUserRole(teamId) == null) {
+            return null;
+        }
+
+        Conversation conversation = lambdaQuery()
+                .eq(Conversation::getType, "group")
+                .eq(Conversation::getTeamId, teamId)
+                .one();
+
+        if (conversation == null) {
+            conversation = new Conversation();
+            conversation.setType("group");
+            conversation.setCreateTime(LocalDateTime.now());
+            conversation.setTeamId(teamId);
+            save(conversation);
+        }
+
+        if (getParticipants(conversation.getId()).contains(requesterId)) {
+            return conversation;
+        }
+        conversationParticipantService.addParticipant(conversation.getId(), requesterId);
         return conversation;
     }
 
@@ -277,9 +306,11 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
                 conversationDTO.setCover(userInfo.getAvatar());
                 break;
             case "group":
-                TeamDTO teamInfo = teamClient.queryTeam(conversation.getTeamId()).getData();
-                conversationDTO.setName(teamInfo.getName());
-                conversationDTO.setCover(teamInfo.getCover());
+                Optional.ofNullable(teamClient.queryTeam(conversation.getTeamId()).getData())
+                        .ifPresent(teamInfo -> {
+                            conversationDTO.setName(teamInfo.getName());
+                            conversationDTO.setCover(teamInfo.getCover());
+                        });
                 break;
         }
         conversationDTO.setUnreadMessageCount(getUnreadMessageOfUserInConversation(conversation.getId(), UserContext.getUser()));
