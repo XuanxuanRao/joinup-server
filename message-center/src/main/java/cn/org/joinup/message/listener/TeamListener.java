@@ -34,7 +34,7 @@ public class TeamListener {
     ))
     public void handleUserJoinTeam(UserJoinTeamDTO userJoinTeamDTO) {
         Optional.ofNullable(conversationService.lambdaQuery()
-                .eq(Conversation::getTeamId, userJoinTeamDTO.getUserId())
+                .eq(Conversation::getTeamId, userJoinTeamDTO.getTeamId())
                 .eq(Conversation::getType, "group")
                 .one())
                 .map(Conversation::getId)

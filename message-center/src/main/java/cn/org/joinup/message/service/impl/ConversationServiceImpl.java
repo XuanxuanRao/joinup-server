@@ -235,7 +235,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
             case "group":
                 TeamDTO teamInfo = teamClient.queryTeam(conversation.getTeamId()).getData();
                 briefConversationDTO.setName(teamInfo.getName());
-                briefConversationDTO.setCover(null);
+                briefConversationDTO.setCover(teamInfo.getCover());
                 break;
         }
         return briefConversationDTO;
@@ -309,7 +309,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
                 Optional.ofNullable(teamClient.queryTeam(conversation.getTeamId()).getData())
                         .ifPresent(teamInfo -> {
                             conversationDTO.setName(teamInfo.getName());
-                            conversationDTO.setCover(null);
+                            conversationDTO.setCover(teamInfo.getCover());
                         });
                 break;
         }

@@ -59,4 +59,6 @@ public class TeamDTO {
     private Boolean open;
 
     private Integer maxMembers;
+
+    private String cover;
 }

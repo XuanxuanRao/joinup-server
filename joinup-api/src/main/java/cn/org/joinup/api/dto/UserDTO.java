@@ -11,6 +11,8 @@ import lombok.Data;
 @Data
 @ApiModel(description = "用户信息")
 public class UserDTO {
+    @ApiModelProperty("用户ID")
+    private Long id;
     @ApiModelProperty("用户名")
     private String username;
     @ApiModelProperty("用户头像")

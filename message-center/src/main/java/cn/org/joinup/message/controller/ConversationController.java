@@ -47,6 +47,11 @@ public class ConversationController {
         return Result.success(conversationService.queryConversations(UserContext.getUser(), pageNumber, pageSize, type));
     }
 
+    @GetMapping("/{conversationId}")
+    @ApiOperation("获取会话详情")
+    public Result<ConversationDTO> getConversation(@PathVariable String conversationId) {
+        return Result.success(conversationService.getConversationDTO(conversationId));
+    }
 
     @PostMapping("/create")
     @ApiOperation(value = "发起会话", notes = "通过userId或teamId发起会话，如果已经存在，直接返回该会话，否则会创建新的会话")

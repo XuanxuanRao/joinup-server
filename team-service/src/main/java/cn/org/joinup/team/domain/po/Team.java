@@ -77,5 +77,10 @@ public class Team implements Serializable {
      */
     private Boolean open;
 
+    /**
+     * 队伍封面
+     */
+    private String cover;
+
     private Integer maxMembers;
 }
