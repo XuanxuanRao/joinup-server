@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static cn.org.joinup.common.util.UserContext.getUser;
+
 /**
  * @author chenxuanrao06@gmail.com
  */
@@ -131,7 +133,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
     @Override
     public ConversationDTO getConversationDTO(String conversationId) {
         Conversation conversation = getConversationById(conversationId);
-        return convertToDTO(conversation, UserContext.getUser());
+        return convertToDTO(conversation, getUser());
     }
 
     @Override
@@ -187,7 +189,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
     @Override
     public BriefConversationDTO getBriefConversation(String conversationId) {
-        return getBriefConversation(conversationId, UserContext.getUser());
+        return getBriefConversation(conversationId, getUser());
     }
 
     @Override
@@ -221,6 +223,14 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
             String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
             stringRedisTemplate.opsForValue().increment(userUnreadMessageKey, 1);
         });
+    }
+
+    @Override
+    public void clearConversationUnreadMessage(String conversationId) {
+        Long userId = getUser();
+        String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
+        System.out.println(userUnreadMessageKey);
+        stringRedisTemplate.opsForValue().set(userUnreadMessageKey,String.valueOf(0));
     }
 
     private Conversation findPrivateConversation(Long userId1, Long userId2) {
@@ -282,7 +292,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
                 conversationDTO.setCover(null);
                 break;
         }
-        conversationDTO.setUnreadMessageCount(getUnreadMessageOfUserInConversation(conversation.getId(), UserContext.getUser()));
+        conversationDTO.setUnreadMessageCount(getUnreadMessageOfUserInConversation(conversation.getId(), getUser()));
         conversationDTO.setLastMessage(getLastMessage(conversation.getId()));
         return conversationDTO;
     }

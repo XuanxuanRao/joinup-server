@@ -61,4 +61,11 @@ public class ConversationController {
         return Result.success();
     }
 
+    @PostMapping("/clearUnread/{conversationId}")
+    @ApiOperation("清除未读消息记录")
+    public Result<Void> clearConversationUnreadMessage(@PathVariable String conversationId) {
+        conversationService.clearConversationUnreadMessage(conversationId);
+        return Result.success();
+    }
+
 }

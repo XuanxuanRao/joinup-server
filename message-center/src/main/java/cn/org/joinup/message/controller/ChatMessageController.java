@@ -35,7 +35,6 @@ public class ChatMessageController {
                     .orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
 
         //这里之后不会改变
-        System.out.println();
         Page<ChatMessage> page = chatMessageService.page(new Page<>(1, size), queryWrapper);
         List<ChatMessageVO> collect = page.getRecords()
                 .stream()
