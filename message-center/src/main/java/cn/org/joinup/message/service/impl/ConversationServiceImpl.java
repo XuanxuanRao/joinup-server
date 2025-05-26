@@ -7,7 +7,6 @@ import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.*;
 import cn.org.joinup.common.result.PageResult;
-import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.constant.RedisConstant;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.domain.po.Conversation;
@@ -253,6 +252,9 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
         stringRedisTemplate.opsForValue().set(lastMessageKey, String.valueOf(chatMessage.getId()));
 
         getParticipants(conversationId).forEach(userId -> {
+            if (Objects.equals(chatMessage.getSenderId(), userId)) {
+                return;
+            }
             String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
             stringRedisTemplate.opsForValue().increment(userUnreadMessageKey, 1);
         });
