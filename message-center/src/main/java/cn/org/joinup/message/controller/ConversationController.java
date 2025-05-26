@@ -84,6 +84,12 @@ public class ConversationController {
         return Result.success();
     }
 
+    @PostMapping("/{conversationId}/read")
+    @ApiOperation("清除会话的未读消息")
+    public Result<Void> clearConversationUnreadMessage(@PathVariable String conversationId) {
+        conversationService.clearConversationUnreadMessage(conversationId);
+    }
+
     @PostMapping("/loadTeam")
     @ApiOperation("加载队伍聊天会话")
     public Result<Void> loadGroupConversation(@RequestParam Long maxTeamId) {
@@ -112,7 +118,6 @@ public class ConversationController {
 
             log.info("load group conversation for team {}", teamId);
         }
-
         return Result.success();
     }
 

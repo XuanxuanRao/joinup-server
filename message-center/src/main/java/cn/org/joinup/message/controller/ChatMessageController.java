@@ -33,15 +33,18 @@ public class ChatMessageController {
     @ApiOperation("获取会话的聊天记录")
     @GetMapping("/{conversationId}")
     public Result<PageResult<ChatMessageVO>> list(@PathVariable String conversationId,
-                                            @RequestParam Integer pageNumber,
+                                            @RequestParam Long lastSelectId,
                                             @RequestParam Integer pageSize) {
+        long size = Math.min(pageSize,10);
         LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatMessage::getConversationId, conversationId);
-        queryWrapper.orderByDesc(ChatMessage::getCreateTime);
+        queryWrapper.le(ChatMessage::getId,lastSelectId)
+                    .orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
 
         BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
-
-        Page<ChatMessage> page = chatMessageService.page(new Page<>(pageNumber, pageSize), queryWrapper);
+      
+        Page<ChatMessage> page = chatMessageService.page(new Page<>(1, size), queryWrapper);
+      
         List<ChatMessageVO> collect = page.getRecords()
                 .stream()
                 .map(chat -> {

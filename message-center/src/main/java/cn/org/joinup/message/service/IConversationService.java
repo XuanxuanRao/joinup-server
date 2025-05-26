@@ -33,4 +33,6 @@ public interface IConversationService extends IService<Conversation> {
     BriefConversationDTO getBriefConversation(String conversationId, Long receiverId);
 
     void updateConversationOnMessage(String conversationId, ChatMessage chatMessage);
+
+    void clearConversationUnreadMessage(String conversationId);
 }
