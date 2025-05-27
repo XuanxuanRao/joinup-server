@@ -17,7 +17,9 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,6 +41,10 @@ public class ChatWebSocketServer {
     @Autowired
     public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
         ChatWebSocketServer.rabbitTemplate = rabbitTemplate;
+    }
+
+    public static Set<Long> getOnlineUsers() {
+        return SESSION_MAP.keySet();
     }
 
     /**
