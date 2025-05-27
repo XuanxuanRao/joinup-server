@@ -34,7 +34,7 @@ public class UserController {
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
     public Result<UserDTO> getUserInfo() {
-        User user = userService.getById(UserContext.getUser());
+        User user = userService.getUserById(UserContext.getUser());
         if (user == null) {
             log.info("用户不存在");
             return Result.error("System error");
@@ -52,7 +52,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public Result<UserDTO> queryUser(@PathVariable Long id) {
-        User user = userService.getById(id);
+        User user = userService.getUserById(id);
         if (user == null) {
             return Result.error("User not found");
         }
