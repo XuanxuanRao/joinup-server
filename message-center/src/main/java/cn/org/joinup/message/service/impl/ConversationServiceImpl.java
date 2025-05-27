@@ -262,7 +262,6 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
     public void clearConversationUnreadMessage(String conversationId) {
         Long userId = getUser();
         String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
-        System.out.println(userUnreadMessageKey);
         stringRedisTemplate.opsForValue().set(userUnreadMessageKey,String.valueOf(0));
     }
 
