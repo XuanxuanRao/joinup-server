@@ -19,3 +19,7 @@ joinup:
     virtual-host: /joinup-prod
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
+  message:
+    verify:
+      send-interval: 60
+      send-max-times: 10
