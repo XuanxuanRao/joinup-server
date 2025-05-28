@@ -12,9 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin/message/chat")
@@ -54,8 +52,12 @@ public class AdminChatLogController {
     public Result<List<ChatMessage>> querySearch(@RequestParam String name) {
         List<ChatMessage> messages = iAdminChatLogService.list();
         List<ChatMessage> result = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+
         for (ChatMessage message : messages) {
-            if (message.getConversationId().contains(name)) {
+            String cid = message.getConversationId();
+            // 包含搜索关键字 & 还没见过这个 ID
+            if (cid.contains(name) && seen.add(cid)) {
                 result.add(message);
             }
         }
