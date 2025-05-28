@@ -8,6 +8,7 @@ import cn.org.joinup.user.mapper.UserMapper;
 import cn.org.joinup.user.service.IAdminUserService;
 import cn.org.joinup.user.service.IUserService;
 import com.alibaba.nacos.common.utils.StringUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,5 +66,25 @@ public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implemen
                     return BeanUtil.copyProperties(user, UserDTO.class);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public IPage<User> onlineUsersList(Pageable pageable) {
+        Set<Long> onlineIds = webSocketClient.getOnlineUsers().getData();
+        if (onlineIds == null || onlineIds.isEmpty()) {
+            // MyBatis-Plus 的 Page 当前页从 1 开始，因此 +1
+            return new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize(), 0);
+        }
+
+        Page<User> page = new Page<>(
+                pageable.getPageNumber(),      // current
+                pageable.getPageSize()             // size
+        );
+
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(User::getId, onlineIds);
+
+        return page(page, wrapper);
+
     }
 }

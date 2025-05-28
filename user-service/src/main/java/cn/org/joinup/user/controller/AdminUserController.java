@@ -131,5 +131,16 @@ public class AdminUserController {
         return Result.success(iAdminUserService.onlineUsers());
     }
 
+    @GetMapping("/online/list")
+    public IPage<User> listOnlineUsers(Pageable pageable) {
+        return iAdminUserService.onlineUsersList(pageable);
+
+    }
+
+    @GetMapping("/online/count")
+    public Result<Long> countOnlineUsers() {
+        return Result.success((long) iAdminUserService.onlineUsers().size());
+    }
+
 
 }

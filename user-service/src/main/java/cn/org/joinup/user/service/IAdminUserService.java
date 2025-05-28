@@ -17,4 +17,6 @@ public interface IAdminUserService extends IService<User> {
     public IPage<User> getPageUsersSearchStudentId(String studentId, Pageable pageable);
 
     List<UserDTO> onlineUsers();
+
+    public IPage<User> onlineUsersList(Pageable pageable);
 }
