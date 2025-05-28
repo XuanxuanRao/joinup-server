@@ -19,6 +19,8 @@ public class WebSecurityConfig {
                 .authorizeRequests(authorize -> authorize
                         .antMatchers("/chat").permitAll()
                         .antMatchers("/chat/**").permitAll()
+                        .antMatchers("/ws").permitAll()
+                        .antMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

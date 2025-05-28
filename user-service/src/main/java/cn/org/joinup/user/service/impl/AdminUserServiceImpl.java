@@ -1,20 +1,32 @@
 package cn.org.joinup.user.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.api.client.WebSocketClient;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.mapper.UserMapper;
 import cn.org.joinup.user.service.IAdminUserService;
+import cn.org.joinup.user.service.IUserService;
 import com.alibaba.nacos.common.utils.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implements IAdminUserService {
+
+    private final WebSocketClient webSocketClient;
+
+    private final IUserService userService;
 
     // 分页获取用户
     @Override
@@ -41,5 +53,16 @@ public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implemen
         wrapper.like(StringUtils.isNotBlank(studentId), "student_id", studentId);
 
         return this.baseMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    public List<UserDTO> onlineUsers() {
+        return webSocketClient.getOnlineUsers().getData()
+                .stream()
+                .map(userId -> {
+                    User user = userService.getUserById(userId);
+                    return BeanUtil.copyProperties(user, UserDTO.class);
+                })
+                .collect(Collectors.toList());
     }
 }
