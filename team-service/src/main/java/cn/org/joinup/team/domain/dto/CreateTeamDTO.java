@@ -39,5 +39,7 @@ public class CreateTeamDTO {
     @ApiModelProperty("队伍标签")
     @Size(max = 10, message = "队伍标签数量不能超过10")
     private List<Integer> tagIds;
-
+    
+    @ApiModelProperty("封面")
+    private String cover;
 }
