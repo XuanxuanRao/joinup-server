@@ -195,7 +195,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
     @Override
     @Transactional
     public Conversation tryCreateGroupConversation(Long requesterId, Long teamId) {
-        if (teamClient.getUserRole(teamId) == null) {
+        if (teamClient.getUserRole(teamId).getData() == null) {
             return null;
         }
 
