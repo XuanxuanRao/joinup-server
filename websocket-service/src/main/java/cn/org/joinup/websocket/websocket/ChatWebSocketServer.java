@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
+import cn.org.joinup.common.constant.RedisConstant;
 import cn.org.joinup.websocket.config.ChatEndpointConfigurator;
 import cn.org.joinup.websocket.config.ChatMessageDTOEncoder;
 import cn.org.joinup.websocket.config.ClientChatMessageDecoder;
@@ -11,6 +12,7 @@ import cn.org.joinup.websocket.domain.ClientChatMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -96,6 +98,9 @@ public class ChatWebSocketServer {
         if (userId != null) {
             SESSION_MAP.remove(userId); // 从映射中移除 Session
             log.info("用户 {} 断开连接. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
+            String key = "user:at:conversation:" + userId;
+            StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
+            stringRedisTemplate.delete(key);
         } else {
             // 如果用户 ID 为 null，说明可能在 @OnOpen 认证前或认证失败时连接就关闭了
             log.info("未知用户断开连接. Session ID: {}", session.getId());

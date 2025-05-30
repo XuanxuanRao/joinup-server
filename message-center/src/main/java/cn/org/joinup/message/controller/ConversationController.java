@@ -3,6 +3,7 @@ package cn.org.joinup.message.controller;
 import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.dto.ConversationDTO;
 import cn.org.joinup.api.dto.TeamDTO;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.api.enums.TeamStatus;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static cn.org.joinup.common.util.UserContext.getUser;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -44,7 +47,7 @@ public class ConversationController {
             @RequestParam(required = false) String type,
             @RequestParam Integer pageNumber,
             @RequestParam Integer pageSize) {
-        return Result.success(conversationService.queryConversations(UserContext.getUser(), pageNumber, pageSize, type));
+        return Result.success(conversationService.queryConversations(getUser(), pageNumber, pageSize, type));
     }
 
     @GetMapping("/{conversationId}")
@@ -60,13 +63,13 @@ public class ConversationController {
             return Result.error("userId and teamId cannot be both set");
         }
         if (userId != null) {
-            if (Objects.equals(UserContext.getUser(), userId)) {
+            if (Objects.equals(getUser(), userId)) {
                 return Result.error("Cannot create conversation with yourself");
             } else {
-                return Result.success(conversationService.tryCreatePrivateConversation(UserContext.getUser(), userId));
+                return Result.success(conversationService.tryCreatePrivateConversation(getUser(), userId));
             }
         } else if (teamId != null) {
-            return Optional.ofNullable(conversationService.tryCreateGroupConversation(UserContext.getUser(), teamId))
+            return Optional.ofNullable(conversationService.tryCreateGroupConversation(getUser(), teamId))
                     .map(Result::success)
                     .orElseGet(() -> Result.error("未加入该队伍"));
         }
@@ -119,6 +122,20 @@ public class ConversationController {
 
             log.info("load group conversation for team {}", teamId);
         }
+        return Result.success();
+    }
+
+    @PostMapping("/{conversationId}/enter")
+    public Result<Void> enterConversation(@PathVariable String conversationId){
+        String key = RedisConstant.USER_AT_CONVERSATION + getUser();
+        stringRedisTemplate.opsForValue().set(key,conversationId);
+        return Result.success();
+    }
+
+    @DeleteMapping("/exit")
+    public Result<Void> exitConversation() {
+        String key = RedisConstant.USER_AT_CONVERSATION + getUser();
+        stringRedisTemplate.delete(key);
         return Result.success();
     }
 

@@ -254,7 +254,11 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
         getParticipants(conversationId).forEach(userId -> {
             String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
-            stringRedisTemplate.opsForValue().increment(userUnreadMessageKey, 1);
+            String userCurrentConversationKey = RedisConstant.USER_AT_CONVERSATION + userId;
+            String userCurrentConversationId = stringRedisTemplate.opsForValue().get(userCurrentConversationKey);
+            if(!conversationId.equals(userCurrentConversationId)) {
+                stringRedisTemplate.opsForValue().increment(userUnreadMessageKey, 1);
+            }
         });
     }
 
