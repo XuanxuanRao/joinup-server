@@ -50,7 +50,7 @@ spring:
         - id: websocket-service
           uri: lb://websocket-service
           predicates:
-            - Path=/chat/**
+            - Path=/chat/**, /ws/user/**
           filters:
             - WebSocket
 
@@ -75,6 +75,7 @@ joinup:
       - /message/announcement
     admin-regex-paths:
       - ^/user/\d+$
+      - ^/ws/user/\d+$
     admin-ant-paths:
       - /admin/**
       - /conversation/updateRedis
