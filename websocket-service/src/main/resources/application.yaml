@@ -1,0 +1,30 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: websocket-service
+
+  profiles:
+    active: local
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${joinup.nacos.addr}
+        namespace: ${joinup.nacos.namespace}
+
+  rabbitmq:
+    host: ${joinup.rabbitmq.host}
+    port: ${joinup.rabbitmq.port}
+    virtual-host: ${joinup.rabbitmq.virtual-host}
+    username: ${joinup.rabbitmq.username}
+    password: ${joinup.rabbitmq.password}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          multiplier: 1
+          max-attempts: 3
+          stateless: true

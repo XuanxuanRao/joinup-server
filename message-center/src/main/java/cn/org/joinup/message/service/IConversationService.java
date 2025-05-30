@@ -1,0 +1,38 @@
+package cn.org.joinup.message.service;
+
+import cn.org.joinup.api.dto.BriefConversationDTO;
+import cn.org.joinup.api.dto.ChatMessageVO;
+import cn.org.joinup.api.dto.ConversationDTO;
+import cn.org.joinup.common.result.PageResult;
+import cn.org.joinup.message.domain.po.ChatMessage;
+import cn.org.joinup.message.domain.po.Conversation;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.Set;
+
+public interface IConversationService extends IService<Conversation> {
+
+    Conversation getConversationById(String conversationId);
+
+    Set<Long> getParticipants(String conversationId);
+
+    boolean in(String conversationId, Long userId);
+
+    PageResult<ConversationDTO> queryConversations(Long userId, Integer pageNumber, Integer pageSize, String type);
+
+    ConversationDTO getConversationDTO(String conversationId);
+
+    ChatMessageVO getLastMessage(String conversationId);
+
+    Conversation tryCreatePrivateConversation(Long requesterId, Long inviteeId);
+
+    Conversation tryCreateGroupConversation(Long requesterId, Long teamId);
+
+    BriefConversationDTO getBriefConversation(String conversationId);
+
+    BriefConversationDTO getBriefConversation(String conversationId, Long receiverId);
+
+    void updateConversationOnMessage(String conversationId, ChatMessage chatMessage);
+
+    void clearConversationUnreadMessage(String conversationId);
+}

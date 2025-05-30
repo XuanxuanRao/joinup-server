@@ -1,6 +1,7 @@
 package cn.org.joinup.user.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.domain.dto.AdminUpdateUserDTO;
 import cn.org.joinup.user.domain.po.User;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class AdminUserController {
 
     private final IAdminUserService iAdminUserService;
+
 
     // 计算数据数量
     @GetMapping("/count")
@@ -124,6 +126,21 @@ public class AdminUserController {
         return iAdminUserService.getPageUsersSearchStudentId(studentId, pageable);
     }
 
+    @GetMapping("/online")
+    public Result<List<UserDTO>> getOnlineUsers() {
+        return Result.success(iAdminUserService.onlineUsers());
+    }
+
+    @GetMapping("/online/list")
+    public IPage<User> listOnlineUsers(Pageable pageable) {
+        return iAdminUserService.onlineUsersList(pageable);
+
+    }
+
+    @GetMapping("/online/count")
+    public Result<Long> countOnlineUsers() {
+        return Result.success((long) iAdminUserService.onlineUsers().size());
+    }
 
 
 }

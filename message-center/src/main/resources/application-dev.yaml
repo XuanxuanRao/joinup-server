@@ -9,7 +9,9 @@ joinup:
     host: ${REDIS_HOST}
     port: 6379
     password: ${REDIS_PASSWORD}
+    database: 0
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: ""
   rabbitmq:
     host: ${MQ_HOST}
@@ -17,3 +19,7 @@ joinup:
     virtual-host: /joinup-dev
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
+  message:
+    verify:
+      send-interval: 60
+      send-max-times: 10

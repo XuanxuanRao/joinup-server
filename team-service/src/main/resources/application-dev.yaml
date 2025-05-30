@@ -7,7 +7,15 @@ joinup:
     database: team-service-dev
   redis:
     host: ${REDIS_HOST}
-    port: 6379
+    port: ${REDIS_PORT}
     password: ${REDIS_PASSWORD}
+    database: 0
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: ""
+  rabbitmq:
+    host: ${MQ_HOST}
+    port: 5672
+    virtual-host: /joinup-dev
+    username: ${MQ_USERNAME}
+    password: ${MQ_PASSWORD}

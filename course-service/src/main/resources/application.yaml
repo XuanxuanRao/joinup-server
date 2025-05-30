@@ -25,7 +25,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: ${NACOS_ADDR}
+        server-addr: ${joinup.nacos.addr}
         namespace: ${joinup.nacos.namespace}
     sentinel:
       transport:
@@ -36,6 +36,7 @@ spring:
     host: ${joinup.redis.host}
     port: ${joinup.redis.port}
     password: ${joinup.redis.password}
+    database: ${joinup.redis.database}
     lettuce:
       pool:
         max-active: 50

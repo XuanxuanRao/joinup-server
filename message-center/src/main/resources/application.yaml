@@ -25,7 +25,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: ${NACOS_ADDR}
+        server-addr: ${joinup.nacos.addr}
         namespace: ${joinup.nacos.namespace}
     sentinel:
       transport:
@@ -36,6 +36,7 @@ spring:
     host: ${joinup.redis.host}
     port: ${joinup.redis.port}
     password: ${joinup.redis.password}
+    database: ${joinup.redis.database}
     lettuce:
       pool:
         max-active: 50
@@ -49,6 +50,14 @@ spring:
     virtual-host: ${joinup.rabbitmq.virtual-host}
     username: ${joinup.rabbitmq.username}
     password: ${joinup.rabbitmq.password}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          multiplier: 1
+          max-attempts: 3
+          stateless: true
 
   mail:
     host: smtp.163.com
@@ -103,8 +112,3 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - cn.org.joinup.message.controller
-joinup:
-  message:
-    verify:
-      send-interval: 60
-      send-max-times: 10

@@ -17,6 +17,7 @@
         <module>course-service</module>
         <module>message-center</module>
         <module>file-service</module>
+        <module>websocket-service</module>
     </modules>
 
 

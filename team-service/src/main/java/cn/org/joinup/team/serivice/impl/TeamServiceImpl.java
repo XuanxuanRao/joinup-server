@@ -2,11 +2,13 @@ package cn.org.joinup.team.serivice.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
+import cn.org.joinup.api.dto.TeamDTO;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.team.constants.MQConstant;
 import cn.org.joinup.team.constants.RedisConstant;
 import cn.org.joinup.team.domain.dto.CreateTeamDTO;
 import cn.org.joinup.team.domain.dto.UpdateTeamInfoDTO;
@@ -25,6 +27,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +53,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     private final UserClient userClient;
     private final StringRedisTemplate stringRedisTemplate;
     private final SensitiveWordBs sensitiveWordBs;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     public Result<TeamVO> userGetTeam(Long teamId) {
@@ -131,6 +135,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         // 缓存
         String key = RedisConstant.CREATE_TEAM_KEY_PREFIX + UserContext.getUser();
         stringRedisTemplate.opsForSet().add(key, String.valueOf(team.getId()));
+
+        // 发送消息
+        rabbitTemplate.convertAndSend(
+                MQConstant.TEAM_EXCHANGE,
+                MQConstant.TEAM_ESTABLISH_KEY,
+                BeanUtil.copyProperties(team, TeamDTO.class));
 
         return Result.success(team);
     }
@@ -270,7 +280,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     public Page<BriefTeamVO> pageQuery(PageQuery pageQuery, Long themeId) {
         Page<Team> page = page(
                 pageQuery.toMpPage("create_time", true),
-                new QueryWrapper<Team>().eq("theme_id", themeId).eq("open", true)
+                new LambdaQueryWrapper<Team>()
+                        .eq(Team::getThemeId, themeId)
+                        .eq(Team::getStatus, TeamStatus.NORMAL)
+                        .eq(Team::getOpen, true)
         );
 
         List<BriefTeamVO> collect = page.getRecords().stream().map(this::convertToBriefTeamVO).collect(Collectors.toList());
@@ -330,7 +343,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         return Result.success(team);
     }
 
-    private BriefTeamVO convertToBriefTeamVO(Team team) {
+    @Override
+    public BriefTeamVO convertToBriefTeamVO(Team team) {
         BriefTeamVO briefTeamVO = new BriefTeamVO();
         BeanUtil.copyProperties(team, briefTeamVO);
         UserDTO userInfo = userClient.queryUser(team.getCreatorUserId()).getData();
@@ -339,7 +353,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         return briefTeamVO;
     }
 
-    private TeamVO convertToTeamVO(Team team) {
+    @Override
+    public TeamVO convertToTeamVO(Team team) {
         TeamVO teamVO = new TeamVO();
         BeanUtil.copyProperties(team, teamVO);
         teamVO.setTags(teamTagRelationService.getTagsByTeamId(team.getId()));

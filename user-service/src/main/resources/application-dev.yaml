@@ -9,5 +9,18 @@ joinup:
     host: ${REDIS_HOST}
     port: 6379
     password: ${REDIS_PASSWORD}
+    database: 0
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: ""
+  jwt:
+    location: classpath:joinup.jks
+    alias: joinup
+    password: ${JWT_PASSWORD}
+    tokenTTL: 180m
+  aes:
+    key: ${AES_KEY}
+  wx:
+    miniapp:
+      app-id: ${APP_ID}
+      app-secret: ${APP_SECRET}

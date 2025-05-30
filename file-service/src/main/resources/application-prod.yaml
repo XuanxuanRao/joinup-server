@@ -7,9 +7,11 @@ joinup:
     database: file-service-prod
   redis:
     host: ${REDIS_HOST}
-    port: 6379
+    port: ${REDIS_PORT}
     password: ${REDIS_PASSWORD}
+    database: 1
   nacos:
+    addr: ${NACOS_ADDR}
     namespace: bcc1206a-17c8-401d-85a8-c7225a1a72b4
   aliyun:
     oss:
