@@ -17,7 +17,6 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +44,22 @@ public class ChatWebSocketServer {
 
     public static Set<Long> getOnlineUsers() {
         return SESSION_MAP.keySet();
+    }
+
+    public static boolean forceDisconnect(Long userId, String reason) {
+        Session session = SESSION_MAP.get(userId);
+        if (session != null && session.isOpen()) {
+            try {
+                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, reason));
+                log.info("主动断开用户 {} 的连接", userId);
+                return true;
+            } catch (IOException e) {
+                log.error("主动断开用户 {} 的连接失败", userId, e);
+            }
+        } else {
+            log.warn("尝试断开用户 {} 的连接，但 Session 不存在或已关闭", userId);
+        }
+        return false;
     }
 
     /**

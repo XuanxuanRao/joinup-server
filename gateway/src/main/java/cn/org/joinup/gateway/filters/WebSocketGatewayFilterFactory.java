@@ -31,6 +31,10 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
+            if (!request.getURI().getPath().startsWith("/chat")) {
+                return chain.filter(exchange);
+            }
+
             log.info("WebSocket: {}", request.getURI());
 
             String token;
@@ -39,7 +43,7 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
                 token = request.getURI().toString().split("token=")[1];
                 jwtPayload = jwtTool.parseToken(token);
                 log.info("Parsed token: {}", jwtPayload);
-            } catch (UnauthorizedException e) {
+            } catch (UnauthorizedException | IndexOutOfBoundsException e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
