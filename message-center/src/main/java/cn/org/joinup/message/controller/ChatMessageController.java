@@ -40,7 +40,7 @@ public class ChatMessageController {
         long size = Math.min(pageSize,10);
         LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatMessage::getConversationId, conversationId);
-        queryWrapper.le(ChatMessage::getId,lastSelectId)
+        queryWrapper.lt(ChatMessage::getId,lastSelectId)
                     .orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
 
         BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
