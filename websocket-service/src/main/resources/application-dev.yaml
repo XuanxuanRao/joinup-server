@@ -8,3 +8,8 @@ joinup:
     virtual-host: /joinup-dev
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+    password: ${REDIS_PASSWORD}
+    database: 0

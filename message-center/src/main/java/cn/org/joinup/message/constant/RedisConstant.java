@@ -8,6 +8,8 @@ public interface RedisConstant {
     String USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX = "user:conversation:message:unread:";
     String CONVERSATION_LAST_MESSAGE_KEY_PREFIX = "conversation:message:last:";
     String CONVERSATION_KEY_PREFIX = "conversation:";
+
+    String USER_AT_CONVERSATION = "user:at:conversation:";
     long CONVERSATION_TTL = 60 * 60;                // 1 hour
     long CACHE_NULL_TTL = 60; // 1 minute
 }
