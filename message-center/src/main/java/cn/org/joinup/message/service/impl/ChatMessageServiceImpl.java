@@ -1,6 +1,7 @@
 package cn.org.joinup.message.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.BriefConversationDTO;
 import cn.org.joinup.api.dto.ChatMessageDTO;
@@ -105,7 +106,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             LocalDateTime endOfTheDay = messageFilterDTO.getMessageDate().plusDays(1).atStartOfDay().minusSeconds(1);
             queryWrapper.between(ChatMessage::getCreateTime,startOfTheDay,endOfTheDay);
         }
-        if(messageFilterDTO.getMessageContent() != null){
+        if(StrUtil.isNotBlank(messageFilterDTO.getMessageContent())){
             queryWrapper.apply("JSON_UNQUOTE(JSON_EXTRACT(content, '$.text')) LIKE {0}", "%" +
                     messageFilterDTO.getMessageContent() + "%");
         }
