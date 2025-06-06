@@ -61,4 +61,21 @@ public class ConversationParticipantServiceImpl extends ServiceImpl<Conversation
             stringRedisTemplate.opsForSet().add(userConversationsKey, conversationId);
         }
     }
+
+    @Override
+    public void removeParticipant(String conversationId, Long userId) {
+        lambdaUpdate()
+                .eq(ConversationParticipant::getConversationId, conversationId)
+                .eq(ConversationParticipant::getUserId, userId)
+                .remove();
+
+        final String conversationParticipantsKey = RedisConstant.CONVERSATION_PARTICIPANTS_KEY_PREFIX + conversationId;
+        final String userConversationsKey = RedisConstant.USER_CONVERSATIONS_KEY_PREFIX + userId;
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(conversationParticipantsKey))) {
+            stringRedisTemplate.opsForSet().remove(conversationParticipantsKey, String.valueOf(userId));
+        }
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(userConversationsKey))) {
+            stringRedisTemplate.opsForSet().remove(userConversationsKey, conversationId);
+        }
+    }
 }

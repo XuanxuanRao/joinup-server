@@ -11,4 +11,6 @@ public interface IConversationParticipantService extends IService<ConversationPa
     Set<String> getConversationsByUserId(Long userId);
 
     void addParticipant(String conversationId, Long userId);
+
+    void removeParticipant(String conversationId, Long userId);
 }
