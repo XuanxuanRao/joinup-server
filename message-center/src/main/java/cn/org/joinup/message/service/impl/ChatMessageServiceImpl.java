@@ -1,6 +1,7 @@
 package cn.org.joinup.message.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.BriefConversationDTO;
 import cn.org.joinup.api.dto.ChatMessageDTO;
