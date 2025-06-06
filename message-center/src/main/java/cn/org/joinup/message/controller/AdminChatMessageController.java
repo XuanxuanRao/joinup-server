@@ -1,56 +1,53 @@
 package cn.org.joinup.message.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.service.IAdminChatLogService;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
 @RequestMapping("/admin/message/chat")
 @RequiredArgsConstructor
-public class AdminChatLogController {
+public class AdminChatMessageController {
 
-    private final IAdminChatLogService iAdminChatLogService;
+    private final IAdminChatLogService adminChatLogService;
 
     @GetMapping("/count")
     public Result<Long> count() {
-        Long count = iAdminChatLogService.count();
+        Long count = adminChatLogService.count();
         return Result.success(count);
     }
 
     // 分页加载数据
     @GetMapping("/list")
     public IPage<ChatMessage> list(Pageable pageable) {
-        return iAdminChatLogService.getPageChatMessages(pageable);
+        return adminChatLogService.getPageChatMessages(pageable);
     }
 
     @DeleteMapping("/delete")
     public Result<Void> delete(@RequestBody Map<String, Long> body) {
         Long id = body.get("id");
-        iAdminChatLogService.removeById(id);
+        adminChatLogService.removeById(id);
         return Result.success();
     }
 
     @DeleteMapping("/delete/batch")
     public Result<Void> deleteBatch(@RequestBody Map<String, List<Long>> body) {
         List<Long> ids = body.get("ids");
-        iAdminChatLogService.removeByIds(ids);
+        adminChatLogService.removeByIds(ids);
         return Result.success();
     }
 
     // 根据队伍名称模糊查询
     @GetMapping("/querySearch")
     public Result<List<ChatMessage>> querySearch(@RequestParam String name) {
-        List<ChatMessage> messages = iAdminChatLogService.list();
+        List<ChatMessage> messages = adminChatLogService.list();
         List<ChatMessage> result = new ArrayList<>();
         Set<String> seen = new HashSet<>();
 
@@ -68,7 +65,7 @@ public class AdminChatLogController {
     // 返回模糊查询数量
     @GetMapping("/searchCount")
     public Result<Long> searchCount(@RequestParam String name) {
-        List<ChatMessage> messages = iAdminChatLogService.list();
+        List<ChatMessage> messages = adminChatLogService.list();
         Long count = 0L;
         for (ChatMessage message : messages) {
             if (message.getConversationId().contains(name)) {
@@ -83,7 +80,7 @@ public class AdminChatLogController {
     public IPage<ChatMessage> search(@RequestParam String name,
                               @RequestParam("page") int page, @RequestParam("size") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return iAdminChatLogService.getPageChatMessagesSearch(name, pageable);
+        return adminChatLogService.getPageChatMessagesSearch(name, pageable);
     }
     
 }

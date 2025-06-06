@@ -2,19 +2,28 @@ package cn.org.joinup.message.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
+import cn.org.joinup.api.dto.BriefConversationDTO;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
+import cn.org.joinup.common.result.PageResult;
+import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.message.domain.dto.MessageFilterDTO;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.mapper.ChatMessageMapper;
 import cn.org.joinup.message.service.IChatMessageService;
 import cn.org.joinup.message.service.IConversationService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -63,8 +72,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     }
 
     private ChatMessage buildChatMessage(ChatMessageDTO chatMessageDTO) {
-        ChatMessage chatMessage = BeanUtil.copyProperties(chatMessageDTO, ChatMessage.class);
-        return chatMessage;
+        return BeanUtil.copyProperties(chatMessageDTO, ChatMessage.class);
     }
 
     private ChatMessageVO buildChatMessageVO(ChatMessage chatMessage, Long receiverId, boolean needConversation) {
@@ -80,6 +88,44 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     @Override
     public ChatMessageVO getChatMessageVO(Long id) {
         return getChatMessageVO(id, true);
+    }
+
+    @Override
+    public PageResult<ChatMessageVO> queryConversationMessage(String conversationId, MessageFilterDTO messageFilterDTO) {
+        LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChatMessage::getConversationId, conversationId);
+        if(messageFilterDTO.getSenderId() != null){
+            queryWrapper.eq(ChatMessage::getSenderId, messageFilterDTO.getSenderId());
+        }
+        if(messageFilterDTO.getMessageType() != null){
+            queryWrapper.eq(ChatMessage::getType, messageFilterDTO.getMessageType());
+        }
+        if(messageFilterDTO.getMessageDate() != null){
+            LocalDateTime startOfTheDay = messageFilterDTO.getMessageDate().atStartOfDay();
+            LocalDateTime endOfTheDay = messageFilterDTO.getMessageDate().plusDays(1).atStartOfDay().minusSeconds(1);
+            queryWrapper.between(ChatMessage::getCreateTime,startOfTheDay,endOfTheDay);
+        }
+        if(messageFilterDTO.getMessageContent() != null){
+            queryWrapper.apply("JSON_UNQUOTE(JSON_EXTRACT(content, '$.text')) LIKE {0}", "%" +
+                    messageFilterDTO.getMessageContent() + "%");
+        }
+
+        queryWrapper.orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
+
+        BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
+
+        Page<ChatMessage> page = page(new Page<>(messageFilterDTO.getPageNumber(), messageFilterDTO.getPageSize()), queryWrapper);
+
+        List<ChatMessageVO> collect = page.getRecords()
+                .stream()
+                .map(chat -> {
+                    ChatMessageVO vo = convertToVO(chat, UserContext.getUser(), false);
+                    vo.setConversation(conversation);
+                    return vo;
+                })
+                .collect(Collectors.toList());
+
+        return PageResult.of(page, collect);
     }
 
     @Override

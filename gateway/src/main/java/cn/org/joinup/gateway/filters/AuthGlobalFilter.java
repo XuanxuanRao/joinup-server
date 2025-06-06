@@ -38,9 +38,6 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-
-        log.info("Request: {}", request.getURI());
-
         String token = null;
         List<String> headers = request.getHeaders().get(SystemConstant.TOKEN_NAME);
         if (headers != null && !headers.isEmpty()) {
@@ -66,8 +63,14 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
         // 6. 传递用户信息
         ServerWebExchange newExchange = exchange.mutate()
-                .request(builder -> builder.header(SystemConstant.USER_ID_HEADER_NAME, jwtPayload.getUserId().toString()).header(SystemConstant.USER_ROLE_HEADER_NAME, jwtPayload.getRole()))
+                .request(builder -> builder.headers(httpHeaders -> {
+                    httpHeaders.set(SystemConstant.USER_ID_HEADER_NAME, jwtPayload.getUserId().toString());
+                    httpHeaders.set(SystemConstant.USER_ROLE_HEADER_NAME, jwtPayload.getRole());
+                }))
                 .build();
+
+
+        log.info("User ID: {}, Role: {}", jwtPayload.getUserId(), jwtPayload.getRole());
 
         return chain.filter(newExchange);
     }

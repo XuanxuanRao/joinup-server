@@ -14,9 +14,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,15 +33,16 @@ public class ChatMessageController {
     private final IConversationService conversationService;
 
     @ApiOperation("获取会话的聊天记录")
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
     @GetMapping("/{conversationId}")
     public Result<PageResult<ChatMessageVO>> list(@PathVariable String conversationId,
-                                            @RequestParam Long lastSelectId,
+                                            @RequestParam(required = false) Long lastSelectId,
                                             @RequestParam Integer pageSize) {
         long size = Math.min(pageSize,10);
         LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatMessage::getConversationId, conversationId);
-        queryWrapper.lt(ChatMessage::getId,lastSelectId)
-                    .orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
+        queryWrapper.lt(lastSelectId != null, ChatMessage::getId, lastSelectId)
+                    .orderByDesc(ChatMessage::getCreateTime, ChatMessage::getId);
 
         BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
       
@@ -58,44 +59,12 @@ public class ChatMessageController {
         return Result.success(PageResult.of(page, collect));
     }
 
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
     @PostMapping("/{conversationId}/filter")
     @ApiOperation("对聊天信息进行过滤")
     public Result<PageResult<ChatMessageVO>> filterMessage(@PathVariable String conversationId,
                                                            @RequestBody MessageFilterDTO messageFilterDTO){
-        LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ChatMessage::getConversationId, conversationId);
-        if(messageFilterDTO.getSenderId()!=null){
-            queryWrapper.eq(ChatMessage::getSenderId,messageFilterDTO.getSenderId());
-        }
-        if(messageFilterDTO.getMessageType()!=null){
-            queryWrapper.eq(ChatMessage::getType,messageFilterDTO.getMessageType());
-        }
-        if(messageFilterDTO.getMessageDate()!=null){
-            LocalDateTime startOfTheDay = messageFilterDTO.getMessageDate().atStartOfDay();
-            LocalDateTime endOfTheDay = messageFilterDTO.getMessageDate().plusDays(1).atStartOfDay().minusSeconds(1);
-            queryWrapper.between(ChatMessage::getCreateTime,startOfTheDay,endOfTheDay);
-        }
-        if(messageFilterDTO.getMessageContent()!=null){
-            queryWrapper.apply("JSON_UNQUOTE(JSON_EXTRACT(content, '$.text')) LIKE {0}", "%" +
-                   messageFilterDTO.getMessageContent() + "%");
-        }
-
-        queryWrapper.orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
-
-        BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
-
-        Page<ChatMessage> page = chatMessageService.page(new Page<>(messageFilterDTO.getPageNumber(), messageFilterDTO.getPageSize()), queryWrapper);
-
-        List<ChatMessageVO> collect = page.getRecords()
-                .stream()
-                .map(chat -> {
-                    ChatMessageVO vo = chatMessageService.convertToVO(chat, UserContext.getUser(), false);
-                    vo.setConversation(conversation);
-                    return vo;
-                })
-                .collect(Collectors.toList());
-
-        return Result.success(PageResult.of(page, collect));
+        return Result.success(chatMessageService.queryConversationMessage(conversationId, messageFilterDTO));
     }
 
 }

@@ -25,7 +25,6 @@ public class LogListener {
     ))
     public void handleLogInsert(LogEntry logEntry) {
         logEntryService.save(logEntry);
-        System.out.println("Log Inserted: " + logEntry);
     }
 
 }
