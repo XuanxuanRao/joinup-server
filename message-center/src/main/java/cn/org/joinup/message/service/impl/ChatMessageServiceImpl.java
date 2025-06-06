@@ -107,6 +107,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             LocalDateTime endOfTheDay = messageFilterDTO.getMessageDate().plusDays(1).atStartOfDay().minusSeconds(1);
             queryWrapper.between(ChatMessage::getCreateTime,startOfTheDay,endOfTheDay);
         }
+      
         if(StrUtil.isNotBlank(messageFilterDTO.getMessageContent()) &&
                 messageFilterDTO.getMessageType().equals(ChatMessageType.TEXT)){
             queryWrapper.apply("JSON_UNQUOTE(JSON_EXTRACT(content, '$.text')) LIKE {0}", "%" +

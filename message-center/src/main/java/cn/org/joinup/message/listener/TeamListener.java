@@ -2,6 +2,7 @@ package cn.org.joinup.message.listener;
 
 import cn.org.joinup.api.dto.TeamDTO;
 import cn.org.joinup.api.dto.UserJoinTeamDTO;
+import cn.org.joinup.api.dto.UserQuitTeamDTO;
 import cn.org.joinup.message.constant.MQConstant;
 import cn.org.joinup.message.domain.po.Conversation;
 import cn.org.joinup.message.service.IConversationParticipantService;
@@ -42,6 +43,24 @@ public class TeamListener {
                     conversationId -> conversationParticipantService.addParticipant(conversationId, userJoinTeamDTO.getUserId()),
                     () -> log.error("Error: conversation not found for user {} join team {}",
                             userJoinTeamDTO.getUserId(), userJoinTeamDTO.getTeamId())
+                );
+    }
+
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = MQConstant.USER_QUIT_TEAM_QUEUE, durable = "true"),
+            exchange = @org.springframework.amqp.rabbit.annotation.Exchange(value = MQConstant.TEAM_EXCHANGE),
+            key = {MQConstant.USER_QUIT_TEAM_KEY}
+    ))
+    public void handleUserQuitTeam(UserQuitTeamDTO userQuitTeamDTO) {
+        Optional.ofNullable(conversationService.lambdaQuery()
+                        .eq(Conversation::getTeamId, userQuitTeamDTO.getTeamId())
+                        .eq(Conversation::getType, "group")
+                        .one())
+                .map(Conversation::getId)
+                .ifPresentOrElse(
+                        conversationId -> conversationParticipantService.removeParticipant(conversationId, userQuitTeamDTO.getUserId()),
+                        () -> log.error("Error: conversation not found for user {} quit team {}",
+                                userQuitTeamDTO.getUserId(), userQuitTeamDTO.getTeamId())
                 );
     }
 

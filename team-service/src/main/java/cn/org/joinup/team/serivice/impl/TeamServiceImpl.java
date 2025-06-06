@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.TeamDTO;
 import cn.org.joinup.api.dto.UserDTO;
+import cn.org.joinup.api.dto.UserQuitTeamDTO;
 import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.result.PageQuery;
 import cn.org.joinup.common.result.Result;
@@ -22,7 +23,6 @@ import cn.org.joinup.team.enums.TeamStatus;
 import cn.org.joinup.team.mapper.TeamMapper;
 import cn.org.joinup.team.serivice.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
@@ -234,6 +234,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + UserContext.getUser();
         stringRedisTemplate.opsForSet().remove(key, String.valueOf(teamId));
 
+        // 发送消息通知 conversation
+        rabbitTemplate.convertAndSend(MQConstant.TEAM_EXCHANGE, MQConstant.USER_QUIT_TEAM_KEY, UserQuitTeamDTO.builder()
+                .userId(UserContext.getUser())
+                .teamId(teamId)
+                .createTime(LocalDateTime.now())
+                .build());
+
         return Result.success();
     }
 
@@ -331,6 +338,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         // 删除缓存
         String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + userId;
         stringRedisTemplate.opsForSet().remove(key, String.valueOf(teamId));
+
+        // 发送消息通知 conversation
+        rabbitTemplate.convertAndSend(MQConstant.TEAM_EXCHANGE, MQConstant.USER_QUIT_TEAM_KEY, UserQuitTeamDTO.builder()
+                .userId(userId)
+                .teamId(teamId)
+                .createTime(LocalDateTime.now())
+                .build());
 
         return Result.success();
     }

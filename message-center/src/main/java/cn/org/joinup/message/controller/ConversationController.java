@@ -125,4 +125,19 @@ public class ConversationController {
         return Result.success();
     }
 
+    @PostMapping("/{conversationId}/enter")
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
+    public Result<Void> enterConversation(@PathVariable String conversationId){
+        final String key = RedisConstant.USER_AT_CONVERSATION + UserContext.getUser();
+        stringRedisTemplate.opsForValue().set(key, conversationId);
+        return Result.success();
+    }
+
+    @DeleteMapping("/exit")
+    public Result<Void> exitConversation() {
+        String key = RedisConstant.USER_AT_CONVERSATION + UserContext.getUser();
+        stringRedisTemplate.delete(key);
+        return Result.success();
+    }
+
 }
