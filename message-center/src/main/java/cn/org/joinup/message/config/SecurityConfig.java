@@ -26,6 +26,7 @@ public class SecurityConfig {
                 // disable request cache so that the next request will not be replaced by the forbidden request in cache
                 // see RequestCacheAwareFilter for more details
                 .requestCache().disable()
+                .csrf().disable()
                 .headers().disable()
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement().disable()
