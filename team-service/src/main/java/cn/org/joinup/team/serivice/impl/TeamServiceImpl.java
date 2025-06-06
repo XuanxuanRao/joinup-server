@@ -253,6 +253,14 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .eq(Team::getOpen, true)
                 .list();
         System.out.println(teams);
+
+        // 新增按照课程名搜索
+        teams.addAll(lambdaQuery()
+                .like(Team::getCourseName, keyword)
+                .eq(Team::getStatus, TeamStatus.NORMAL)
+                .eq(Team::getOpen, true)
+                .list());
+
         // 如果没有结果，则根据队伍标签模糊查询
         Set<Long> ids = new HashSet<>();
         tagService.getTagByName(keyword).forEach(tag -> ids.addAll(teamTagRelationService.getTeamIdsByTagId(tag.getId())));
@@ -264,6 +272,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .eq(Team::getStatus, TeamStatus.NORMAL)
                 .eq(Team::getOpen, true)
                 .list());
+
         return teams.stream().map(this::convertToBriefTeamVO).collect(Collectors.toList());
     }
 

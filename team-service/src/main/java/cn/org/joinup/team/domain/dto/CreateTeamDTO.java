@@ -42,4 +42,7 @@ public class CreateTeamDTO {
     
     @ApiModelProperty("封面")
     private String cover;
+
+    @ApiModelProperty("课程名")
+    private String courseName;
 }

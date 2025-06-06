@@ -6,6 +6,7 @@ import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.BriefConversationDTO;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
+import cn.org.joinup.common.enums.ChatMessageType;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.domain.dto.MessageFilterDTO;
@@ -106,7 +107,9 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             LocalDateTime endOfTheDay = messageFilterDTO.getMessageDate().plusDays(1).atStartOfDay().minusSeconds(1);
             queryWrapper.between(ChatMessage::getCreateTime,startOfTheDay,endOfTheDay);
         }
-        if(StrUtil.isNotBlank(messageFilterDTO.getMessageContent())){
+      
+        if(StrUtil.isNotBlank(messageFilterDTO.getMessageContent()) &&
+                messageFilterDTO.getMessageType().equals(ChatMessageType.TEXT)){
             queryWrapper.apply("JSON_UNQUOTE(JSON_EXTRACT(content, '$.text')) LIKE {0}", "%" +
                     messageFilterDTO.getMessageContent() + "%");
         }

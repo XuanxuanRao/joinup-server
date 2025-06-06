@@ -83,4 +83,6 @@ public class Team implements Serializable {
     private String cover;
 
     private Integer maxMembers;
+
+    private String courseName;
 }

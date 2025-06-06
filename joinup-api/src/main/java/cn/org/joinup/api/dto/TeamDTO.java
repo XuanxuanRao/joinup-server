@@ -61,4 +61,5 @@ public class TeamDTO {
     private Integer maxMembers;
 
     private String cover;
+    private String courseName;
 }

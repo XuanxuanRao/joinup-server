@@ -25,4 +25,6 @@ public class UpdateTeamInfoDTO {
     private Integer maxMembers;
     @ApiModelProperty("新的队伍封面")
     private String cover;
+    @ApiModelProperty("绑定的课程名")
+    private String courseName;
 }
