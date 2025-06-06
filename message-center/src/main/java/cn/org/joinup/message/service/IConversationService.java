@@ -32,6 +32,12 @@ public interface IConversationService extends IService<Conversation> {
 
     BriefConversationDTO getBriefConversation(String conversationId, Long receiverId);
 
+    /**
+     * 当conversation收到新消息时，更新会话状态 <p>
+     * 更新用户未读消息数，conversation的最后一条消息
+     * @param conversationId 会话ID
+     * @param chatMessage 新消息
+     */
     void updateConversationOnMessage(String conversationId, ChatMessage chatMessage);
 
     void clearConversationUnreadMessage(String conversationId);

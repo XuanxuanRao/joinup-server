@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class ConversationController {
 
     @GetMapping("/{conversationId}")
     @ApiOperation("获取会话详情")
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
     public Result<ConversationDTO> getConversation(@PathVariable String conversationId) {
         return Result.success(conversationService.getConversationDTO(conversationId));
     }
@@ -86,6 +88,7 @@ public class ConversationController {
 
     @PostMapping("/{conversationId}/read")
     @ApiOperation("清除会话的未读消息")
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
     public Result<Void> clearConversationUnreadMessage(@PathVariable String conversationId) {
         conversationService.clearConversationUnreadMessage(conversationId);
         return Result.success();

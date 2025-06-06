@@ -29,4 +29,6 @@ public class UserDTO {
     private Integer joinedTeamCount;
     @ApiModelProperty("创建队伍的数量")
     private Integer createdTeamCount;
+    @ApiModelProperty("用户权限")
+    private String role;
 }

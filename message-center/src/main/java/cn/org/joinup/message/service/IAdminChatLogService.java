@@ -1,7 +1,6 @@
 package cn.org.joinup.message.service;
 
 import cn.org.joinup.message.domain.po.ChatMessage;
-import cn.org.joinup.message.domain.po.ChatMessage;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.data.domain.Pageable;

@@ -1,4 +1,4 @@
-package cn.org.joinup.message.service.checker;
+package cn.org.joinup.message.checker;
 
 import cn.hutool.extra.spring.SpringUtil;
 import cn.org.joinup.message.service.IVerifyLogService;

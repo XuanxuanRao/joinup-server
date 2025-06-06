@@ -1,4 +1,4 @@
-package cn.org.joinup.message.service.checker;
+package cn.org.joinup.message.checker;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

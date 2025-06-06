@@ -2,7 +2,6 @@ package cn.org.joinup.message.domain.dto;
 
 
 import cn.org.joinup.common.enums.ChatMessageType;
-import cn.org.joinup.message.enums.MessageType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,9 +26,9 @@ public class MessageFilterDTO {
 
     @ApiModelProperty("查询页码")
     @NotNull
-    private int pageNumber;
+    private Integer pageNumber;
 
     @ApiModelProperty("页大小")
     @NotNull
-    private int pageSize;
+    private Integer pageSize;
 }
