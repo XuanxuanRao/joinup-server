@@ -3,11 +3,9 @@ package cn.org.joinup.message.controller;
 import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.dto.ConversationDTO;
 import cn.org.joinup.api.dto.TeamDTO;
-import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.api.enums.TeamStatus;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.constant.RedisConstant;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.domain.po.Conversation;
@@ -129,9 +127,10 @@ public class ConversationController {
     }
 
     @PostMapping("/{conversationId}/enter")
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
     public Result<Void> enterConversation(@PathVariable String conversationId){
-        String key = RedisConstant.USER_AT_CONVERSATION + getUser();
-        stringRedisTemplate.opsForValue().set(key,conversationId);
+        final String key = RedisConstant.USER_AT_CONVERSATION + getUser();
+        stringRedisTemplate.opsForValue().set(key, conversationId);
         return Result.success();
     }
 
