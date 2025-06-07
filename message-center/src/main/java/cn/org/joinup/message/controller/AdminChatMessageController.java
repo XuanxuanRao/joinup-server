@@ -1,12 +1,18 @@
 package cn.org.joinup.message.controller;
 
+import cn.org.joinup.api.dto.ChatMessageVO;
+import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.message.domain.dto.MessageFilterDTO;
 import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.service.IAdminChatLogService;
+import cn.org.joinup.message.service.IChatMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -17,6 +23,8 @@ import java.util.*;
 public class AdminChatMessageController {
 
     private final IAdminChatLogService adminChatLogService;
+
+    private final IChatMessageService chatMessageService;
 
     @GetMapping("/count")
     public Result<Long> count() {
@@ -81,6 +89,14 @@ public class AdminChatMessageController {
                               @RequestParam("page") int page, @RequestParam("size") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return adminChatLogService.getPageChatMessagesSearch(name, pageable);
+    }
+
+    @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
+    @PostMapping("/{conversationId}/filter")
+    @ApiOperation("对聊天信息进行过滤")
+    public Result<PageResult<ChatMessageVO>> filterMessage(@PathVariable String conversationId,
+                                                           @RequestBody MessageFilterDTO messageFilterDTO){
+        return Result.success(chatMessageService.queryConversationMessage(conversationId, messageFilterDTO));
     }
     
 }
