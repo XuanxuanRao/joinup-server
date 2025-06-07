@@ -19,7 +19,12 @@ public class AdminChatLogService extends ServiceImpl<ChatMessageMapper, ChatMess
     @Override
     public IPage<ChatMessage> getPageChatMessages(Pageable pageable) {
         Page<ChatMessage> page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
-        return this.page(page);
+        // 添加按创建时间倒序排列
+        QueryWrapper<ChatMessage> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("create_time"); // 按创建时间倒序
+
+        return this.page(page, wrapper);
+        // return this.page(page);
     }
 
     @Override
@@ -28,6 +33,8 @@ public class AdminChatLogService extends ServiceImpl<ChatMessageMapper, ChatMess
 
         QueryWrapper<ChatMessage> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotBlank(conversationId), "conversation_id", conversationId);
+
+        wrapper.orderByDesc("create_time"); // 按创建时间倒序
 
         return this.baseMapper.selectPage(page, wrapper);
     }

@@ -46,10 +46,13 @@ public class AdminTagController {
         // Spring Pageable.page 从 0 开始，MyBatis-Plus Page 构造器页码从 1 开始
         Page<TagApplication> mpPage = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
 
+        QueryWrapper<TagApplication> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("create_time"); // 按创建时间倒序，字段名根据实际情况调整
+
         // 无任何过滤或排序
         IPage<TagApplication> backendPage = tagApplicationService.page(
                 mpPage,
-                new QueryWrapper<>()  // 空的 QueryWrapper，相当于 SELECT *
+                wrapper  // 空的 QueryWrapper，相当于 SELECT *
         );
 
         // 转为 VO 并填充用户信息

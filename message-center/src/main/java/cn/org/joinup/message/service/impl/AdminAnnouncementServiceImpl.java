@@ -1,6 +1,7 @@
 package cn.org.joinup.message.service.impl;
 
 import cn.org.joinup.message.domain.po.Announcement;
+import cn.org.joinup.message.domain.po.Feedback;
 import cn.org.joinup.message.mapper.AnnouncementMapper;
 import cn.org.joinup.message.service.IAdminAnnouncementService;
 import com.alibaba.nacos.common.utils.StringUtils;
@@ -19,7 +20,12 @@ public class AdminAnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper
     @Override
     public IPage<Announcement> getPageAnnouncements(Pageable pageable) {
         Page<Announcement> page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
-        return this.page(page);
+
+        QueryWrapper<Announcement> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("create_time"); // 按创建时间倒序
+
+        return this.page(page, wrapper);
+        // return this.page(page);
     }
 
     @Override
@@ -28,6 +34,8 @@ public class AdminAnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper
 
         QueryWrapper<Announcement> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotBlank(name), "name", name);
+
+        wrapper.orderByDesc("update_time"); // 按创建时间倒序
 
         return this.baseMapper.selectPage(page, wrapper);
     }
