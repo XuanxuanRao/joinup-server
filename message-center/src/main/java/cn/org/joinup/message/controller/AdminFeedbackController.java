@@ -1,6 +1,9 @@
 package cn.org.joinup.message.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.message.domain.dto.AddFeedbackDTO;
+import cn.org.joinup.message.domain.dto.UpdateFeedbackDTO;
 import cn.org.joinup.message.domain.po.Feedback;
 import cn.org.joinup.message.service.IAdminFeedbackService;
 import cn.org.joinup.message.service.IFeedbackService;
@@ -35,6 +38,15 @@ public class AdminFeedbackController {
     @GetMapping("/list")
     public IPage<Feedback> list(Pageable pageable) {
         return iAdminFeedbackService.getPageFeedbacks(pageable);
+    }
+
+    // 更新反馈
+    @PutMapping("/update/{id}")
+    public Result<Void> update(@PathVariable Long id, @RequestBody UpdateFeedbackDTO updateFeedbackDTO) {
+        Feedback feedback = BeanUtil.copyProperties(updateFeedbackDTO, Feedback.class);
+        feedback.setId(id);
+        iAdminFeedbackService.updateById(feedback);
+        return Result.success();
     }
 
     @DeleteMapping("/delete")

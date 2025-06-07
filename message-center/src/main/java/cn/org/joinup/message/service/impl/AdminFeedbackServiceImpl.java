@@ -1,5 +1,6 @@
 package cn.org.joinup.message.service.impl;
 
+import cn.org.joinup.message.domain.po.ChatMessage;
 import cn.org.joinup.message.domain.po.Feedback;
 import cn.org.joinup.message.mapper.FeedbackMapper;
 import cn.org.joinup.message.service.IAdminFeedbackService;
@@ -19,7 +20,12 @@ public class AdminFeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedba
     @Override
     public IPage<Feedback> getPageFeedbacks(Pageable pageable) {
         Page<Feedback> page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
-        return this.page(page);
+
+        QueryWrapper<Feedback> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("create_time"); // 按创建时间倒序
+
+        return this.page(page, wrapper);
+        // return this.page(page);
     }
 
     @Override
@@ -28,6 +34,8 @@ public class AdminFeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedba
 
         QueryWrapper<Feedback> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotBlank(name), "content", name);
+
+        wrapper.orderByDesc("create_time"); // 按创建时间倒序
 
         return this.baseMapper.selectPage(page, wrapper);
     }
