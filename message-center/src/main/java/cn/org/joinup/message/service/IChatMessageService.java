@@ -14,6 +14,8 @@ public interface IChatMessageService extends IService<ChatMessage> {
 
     ChatMessageVO convertToVO(ChatMessage chatMessage, Long receiverId, boolean needConversation);
 
+    ChatMessageVO convertToVO(ChatMessage chatMessage, Long receiverId, boolean needConversation, boolean needSender);
+
     ChatMessageVO getChatMessageVO(Long id, boolean needConversation);
 
     ChatMessageVO getChatMessageVO(Long id);

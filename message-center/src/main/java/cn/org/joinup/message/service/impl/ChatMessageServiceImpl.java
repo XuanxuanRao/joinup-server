@@ -6,6 +6,7 @@ import cn.org.joinup.api.client.UserClient;
 import cn.org.joinup.api.dto.BriefConversationDTO;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
+import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.enums.ChatMessageType;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.util.UserContext;
@@ -23,6 +24,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,7 +58,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                     if (Objects.equals(receiverId, chatMessage.getSenderId())) {
                         return;
                     }
-                    ChatMessageVO chatMessageVO = buildChatMessageVO(chatMessage, receiverId, true);
+                    ChatMessageVO chatMessageVO = buildChatMessageVO(chatMessage, receiverId, true, true);
                     rabbitTemplate.convertAndSend("chat.send.exchange", "message.send", chatMessageVO);
                 });
         // 4. 维护缓存
@@ -65,21 +67,28 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
     @Override
     public ChatMessageVO convertToVO(ChatMessage chatMessage, boolean needConversation) {
-        return buildChatMessageVO(chatMessage, null, needConversation);
+        return buildChatMessageVO(chatMessage, null, needConversation, true);
     }
 
     @Override
     public ChatMessageVO convertToVO(ChatMessage chatMessage, Long receiverId, boolean needConversation) {
-        return buildChatMessageVO(chatMessage, receiverId, needConversation);
+        return buildChatMessageVO(chatMessage, receiverId, needConversation, true);
+    }
+
+    @Override
+    public ChatMessageVO convertToVO(ChatMessage chatMessage, Long receiverId, boolean needConversation, boolean needSender) {
+        return buildChatMessageVO(chatMessage, receiverId, needConversation, needSender);
     }
 
     private ChatMessage buildChatMessage(ChatMessageDTO chatMessageDTO) {
         return BeanUtil.copyProperties(chatMessageDTO, ChatMessage.class);
     }
 
-    private ChatMessageVO buildChatMessageVO(ChatMessage chatMessage, Long receiverId, boolean needConversation) {
+    private ChatMessageVO buildChatMessageVO(ChatMessage chatMessage, Long receiverId, boolean needConversation, boolean needSender) {
         ChatMessageVO chatMessageVO = BeanUtil.copyProperties(chatMessage, ChatMessageVO.class);
-        chatMessageVO.setSender(userClient.queryUser(chatMessage.getSenderId()).getData());
+        if (needSender) {
+            chatMessageVO.setSender(userClient.queryUser(chatMessage.getSenderId()).getData());
+        }
         chatMessageVO.setReceiverId(receiverId);
         if (needConversation) {
             chatMessageVO.setConversation(conversationService.getBriefConversation(chatMessage.getConversationId(), receiverId));
@@ -120,11 +129,16 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
         Page<ChatMessage> page = page(new Page<>(messageFilterDTO.getPageNumber(), messageFilterDTO.getPageSize()), queryWrapper);
 
+        HashMap<Long, UserDTO> userCache = new HashMap<>();
         List<ChatMessageVO> collect = page.getRecords()
                 .stream()
-                .map(chat -> {
-                    ChatMessageVO vo = convertToVO(chat, UserContext.getUser(), false);
+                .map(message -> {
+                    ChatMessageVO vo = convertToVO(message, UserContext.getUser(), false, false);
                     vo.setConversation(conversation);
+                    vo.setSender(userCache.computeIfAbsent(
+                            message.getSenderId(),
+                            senderId -> userClient.queryUser(senderId).getData())
+                    );
                     return vo;
                 })
                 .collect(Collectors.toList());
