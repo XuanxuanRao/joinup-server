@@ -1,16 +1,17 @@
 package cn.org.joinup.file.controller;
 
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.file.domain.po.File;
 import cn.org.joinup.file.domain.vo.FileVO;
 import cn.org.joinup.file.service.IFileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/oss/file")
+@RequestMapping({"/oss/file", "/external/oss/file"})
 @RequiredArgsConstructor
 public class FileController {
 
@@ -23,6 +24,22 @@ public class FileController {
             return Result.error("OSS Service Error!");
         } else {
             return Result.success(fileVO);
+        }
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<Resource> download(@RequestParam String fileUrl) {
+        Resource resource = fileService.downloadFile(fileUrl);
+        File file = fileService.lambdaQuery()
+                .eq(File::getUrl, fileUrl)
+                .one();
+        if (resource == null || file == null) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
         }
     }
 

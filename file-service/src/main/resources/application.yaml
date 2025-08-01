@@ -44,6 +44,11 @@ spring:
         min-idle: 5
         time-between-eviction-runs: 10s
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 
 mybatis-plus:
   configuration:
@@ -70,3 +75,7 @@ joinup:
     accessKeySecret: ${joinup.aliyun.oss.accessKeySecret}
     bucketName: ${joinup.aliyun.oss.bucketName}
 
+
+service:
+  external:
+    api-key: ${EXTERNAL_API_KEY}

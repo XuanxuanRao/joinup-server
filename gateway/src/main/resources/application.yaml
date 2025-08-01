@@ -46,7 +46,7 @@ spring:
         - id: file-service
           uri: lb://file-service
           predicates:
-            - Path=/oss/file/**
+            - Path=/oss/file/**, /external/oss/file/**
         - id: websocket-service
           uri: lb://websocket-service
           predicates:
@@ -73,6 +73,7 @@ joinup:
       - /interest/all
       - /team/search
       - /message/announcement
+      - /external/**
     admin-regex-paths:
       - ^/user/\d+$
       - ^/ws/user/\d+$
