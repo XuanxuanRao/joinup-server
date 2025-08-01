@@ -2,7 +2,7 @@ joinup:
   db:
     host: ${DB_HOST}
     port: 3306
-    database: message-center-prod
+    database: joinup-message-center-prod
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   redis:

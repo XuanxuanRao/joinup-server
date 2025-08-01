@@ -4,7 +4,7 @@ joinup:
     port: 3306
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    database: user-service-prod
+    database: joinup-user-service-prod
   redis:
     host: ${REDIS_HOST}
     port: 6379
