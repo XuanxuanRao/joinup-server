@@ -9,11 +9,13 @@ import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.OSSObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 
 /**
  * 阿里云OSS操作工具类 <p>
@@ -82,7 +84,7 @@ public class OSSUtil {
      * @param objectPath 文件路径
      * @return 文件内容
      */
-    public String download(String objectPath) {
+    public Resource download(String objectPath) {
         // 创建OSSClient实例
         OSS ossClient = new OSSClientBuilder().build(ossConfig.getEndpoint(), ossConfig.getAccessKeyId(), ossConfig.getAccessKeySecret());
 
@@ -90,16 +92,12 @@ public class OSSUtil {
         String[] split = objectPath.split("/");
         String objectName = split[split.length - 1];
 
-        StringBuilder content = new StringBuilder();
         try {
             OSSObject object = ossClient.getObject(ossConfig.getBucketName(), objectName);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(object.getObjectContent()));
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) break;
-                content.append(line).append("\n");
-            }
-            return content.toString();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            StreamUtils.copy(object.getObjectContent(), outputStream);
+            ossClient.shutdown();
+            return new ByteArrayResource(outputStream.toByteArray());
         } catch (OSSException oe) {
             System.out.println("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
@@ -118,7 +116,7 @@ public class OSSUtil {
             }
         }
 
-        return content.toString();
+        return null;
     }
 
 }
