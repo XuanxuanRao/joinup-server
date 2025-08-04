@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @RestController
 @RequestMapping({"/oss/file", "/external/oss/file"})
 @RequiredArgsConstructor
@@ -35,12 +38,12 @@ public class FileController {
                 .one();
         if (resource == null || file == null) {
             return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"")
-                    .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
         }
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8) + "\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
 }
