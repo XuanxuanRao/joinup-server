@@ -22,6 +22,7 @@ public class PasswordUtil {
     private String aesKeyFromConfig;
 
     private static String key;
+    private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
 
     @PostConstruct
     public void init() {
@@ -40,7 +41,7 @@ public class PasswordUtil {
         // 创建 Cipher 对象
         Cipher cipher;
         try {
-            cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher = Cipher.getInstance(ALGORITHM);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +80,7 @@ public class PasswordUtil {
      */
     public static String decrypt(String hexInput) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
 
         // 将十六进制字符串转换为字节数组
