@@ -1,5 +1,6 @@
 package cn.org.joinup.user.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -8,25 +9,30 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 /**
  * Utility class for encrypting and decrypting long integer IDs using AES encryption.
  */
 @Component
+@Slf4j
 public class PasswordUtil {
     @Value("${joinup.aes.key}")
     private String aesKeyFromConfig;
+    @Value("${joinup.aes.iv}")
+    private String aseIvFromConfig;
 
     private static String key;
+    private static String iv;
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
 
     @PostConstruct
     public void init() {
         key = aesKeyFromConfig;
+        iv = aseIvFromConfig;
     }
 
     /**
@@ -48,9 +54,10 @@ public class PasswordUtil {
 
         // 初始化 Cipher 为加密模式
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            log.error("Encryption initialization failed", e);
+            return raw;
         }
 
         // 加密输入文本
@@ -81,7 +88,7 @@ public class PasswordUtil {
     public static String decrypt(String hexInput) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
         Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv.getBytes(StandardCharsets.UTF_8)));
 
         // 将十六进制字符串转换为字节数组
         byte[] encryptedBytes = new byte[hexInput.length() / 2];
