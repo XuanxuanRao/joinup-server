@@ -288,7 +288,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public User getUserById(Long id) {
         final String key = cn.org.joinup.user.constant.RedisConstant.USER_INFO_KEY_PREFIX + id;
-        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+        if (stringRedisTemplate.hasKey(key)) {
             String userJson = stringRedisTemplate.opsForValue().get(key);
             if (StrUtil.isBlank(userJson)) {
                 return null;
