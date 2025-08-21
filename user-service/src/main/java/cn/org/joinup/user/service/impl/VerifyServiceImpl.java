@@ -18,13 +18,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -139,20 +134,6 @@ public class VerifyServiceImpl implements IVerifyService {
             if (locked) {
                 lock.unlock();
             }
-        }
-    }
-
-    private String loadTemplate(final String fileName) {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (inputStream == null) {
-            log.error("Email template {} not found", fileName);
-            throw new RuntimeException("Email template not found");
-        }
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        } catch (Exception e) {
-            throw new RuntimeException("Error reading email template: " + fileName, e);
         }
     }
 
