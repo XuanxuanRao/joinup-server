@@ -13,7 +13,8 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,8 @@ import java.util.List;
 public class QuartzController {
 
     private final SchedulerFactoryBean schedulerFactoryBean;
+
+    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     @GetMapping("/triggers")
     public Result<List<QuartzTriggerDTO>> getTriggers() throws SchedulerException {
@@ -41,11 +44,16 @@ public class QuartzController {
                         quartzTriggerDTO.setGroupName(triggerGroupName);
                         quartzTriggerDTO.setJobName(trigger.getJobKey().getName());
                         quartzTriggerDTO.setJobDataMap(scheduler.getJobDetail(trigger.getJobKey()).getJobDataMap());
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                         quartzTriggerDTO.setPrevFireTime(
-                                trigger.getPreviousFireTime() == null ? "" : sdf.format(trigger.getPreviousFireTime()));
+                                trigger.getPreviousFireTime() == null ? "" :
+                                        trigger.getPreviousFireTime().toInstant()
+                                                .atZone(ZoneId.systemDefault())
+                                                .format(formatter));
                         quartzTriggerDTO.setNextFireTime(
-                                trigger.getNextFireTime() == null ? "" : sdf.format(trigger.getNextFireTime()));
+                                trigger.getNextFireTime() == null ? "" :
+                                        trigger.getNextFireTime().toInstant()
+                                                .atZone(ZoneId.systemDefault())
+                                                .format(formatter));
                         if (trigger instanceof SimpleTriggerImpl) {
                             quartzTriggerDTO.setRepeatInterval(((SimpleTriggerImpl) trigger).getRepeatInterval());
                         } else if (trigger instanceof CronTriggerImpl) {
@@ -72,7 +80,7 @@ public class QuartzController {
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
         Trigger trigger = scheduler.getTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
         if (!(trigger instanceof CronTriggerImpl)) {
-            return Result.failed("Trigger is not a cron trigger.");
+            return Result.error("Trigger is not a cron trigger.");
         }
         CronTriggerImpl cronTrigger = (CronTriggerImpl) trigger;
         scheduler.pauseTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
