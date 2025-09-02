@@ -63,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
 
         if (user == null) {
-            throw new RuntimeException("用户名错误");
+            throw new BadRequestException("用户不存在");
         }
 
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
