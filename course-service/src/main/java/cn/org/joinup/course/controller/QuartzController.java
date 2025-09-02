@@ -70,11 +70,14 @@ public class QuartzController {
                                             @RequestParam String cronExpression)
             throws SchedulerException, ParseException {
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
-        CronTriggerImpl trigger = (CronTriggerImpl) scheduler.getTrigger(
-                TriggerKey.triggerKey(triggerName, triggerGroupName));
+        Trigger trigger = scheduler.getTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
+        if (!(trigger instanceof CronTriggerImpl)) {
+            return Result.failed("Trigger is not a cron trigger.");
+        }
+        CronTriggerImpl cronTrigger = (CronTriggerImpl) trigger;
         scheduler.pauseTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
-        trigger.setCronExpression(cronExpression);
-        scheduler.rescheduleJob(TriggerKey.triggerKey(triggerName, triggerGroupName), trigger);
+        cronTrigger.setCronExpression(cronExpression);
+        scheduler.rescheduleJob(TriggerKey.triggerKey(triggerName, triggerGroupName), cronTrigger);
         scheduler.resumeTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
         return Result.success();
     }
