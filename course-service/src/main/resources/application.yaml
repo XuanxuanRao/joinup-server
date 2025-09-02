@@ -55,7 +55,7 @@ spring:
     startup-delay: 20
     job-store-type: jdbc
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
     wait-for-jobs-to-complete-on-shutdown: true
     properties:
       org:
