@@ -57,7 +57,6 @@ spring:
     jdbc:
       initialize-schema: never
     wait-for-jobs-to-complete-on-shutdown: true
-    overwrite-existing-jobs: false
     properties:
       org:
         threadPool:
