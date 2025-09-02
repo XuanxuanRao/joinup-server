@@ -51,6 +51,20 @@ spring:
     username: ${joinup.rabbitmq.username}
     password: ${joinup.rabbitmq.password}
 
+  quartz:
+    startup-delay: 20
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    wait-for-jobs-to-complete-on-shutdown: true
+    properties:
+      org:
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: 10
+          threadPriority: 5
+          threadsInheritContextClassLoaderOfInitializingThread: true
+
 
 mybatis-plus:
   configuration:
