@@ -93,7 +93,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             boolean isNewUser = user == null;
             // 如果用户不存在则注册
             if (user == null) {
-                if (!userRegisterProperties.getWxEnabled()) {
+                if (!userRegisterProperties.isWxEnabled()) {
                     throw new BadRequestException("Registration via WeChat is not allowed");
                 }
                 user = new User();
@@ -120,7 +120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     @Transactional
     public UserLoginVO register(RegisterFormDTO registerDTO) {
-        if (!userRegisterProperties.getEmailEnabled()) {
+        if (!userRegisterProperties.isEmailEnabled()) {
             throw new BadRequestException("Registration via email is not allowed");
         }
 
