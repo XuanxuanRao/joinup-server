@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "app.toggle.register")
 public class UserRegisterProperties {
-    private Boolean wxEnabled;
-    private Boolean emailEnabled;
+    private boolean wxEnabled;
+    private boolean emailEnabled;
 }
