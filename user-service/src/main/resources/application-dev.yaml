@@ -10,9 +10,6 @@ joinup:
     port: 6379
     password: ${REDIS_PASSWORD}
     database: 0
-  nacos:
-    addr: ${NACOS_ADDR}
-    namespace: ""
   jwt:
     location: classpath:joinup.jks
     alias: joinup

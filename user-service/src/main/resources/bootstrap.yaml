@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: local
+  cloud:
+    nacos:
+      server-addr: ${NACOS_ADDR}
+      config:
+        file-extension: yaml
+        namespace: ${NACOS_NAMESPACE}
+        shared-configs:
+          - dataId: user-service.yaml
+      discovery:
+        namespace: ${NACOS_NAMESPACE}
+        server-addr: ${NACOS_ADDR}
