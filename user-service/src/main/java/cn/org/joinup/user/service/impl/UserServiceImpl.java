@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.user.config.UserRegisterProperties;
 import cn.org.joinup.user.util.PasswordUtil;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.dto.*;
@@ -54,6 +55,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     private final SensitiveWordBs sensitiveWordBs;
 
+    private final UserRegisterProperties userRegisterProperties;
+
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
 
@@ -82,8 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         WxMaJscode2SessionResult sessionInfo;
         try {
             sessionInfo = wxMaService.getUserService().getSessionInfo(code);
-            log.info("openid: {}", sessionInfo.getOpenid());
-            log.info("session_key: {}", sessionInfo.getSessionKey());
+            log.info("openid: {}, session_key: {}", sessionInfo.getOpenid(), sessionInfo.getSessionKey());
 
             User user = lambdaQuery()
                     .eq(User::getOpenid, sessionInfo.getOpenid())
@@ -91,6 +93,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             boolean isNewUser = user == null;
             // 如果用户不存在则注册
             if (user == null) {
+                if (!userRegisterProperties.getWxEnabled()) {
+                    throw new BadRequestException("Registration via WeChat is not allowed");
+                }
                 user = new User();
                 user.setUsername("wx_" + sessionInfo.getOpenid().substring(0, 8));
                 user.setOpenid(sessionInfo.getOpenid());
@@ -115,6 +120,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     @Transactional
     public UserLoginVO register(RegisterFormDTO registerDTO) {
+        if (!userRegisterProperties.getEmailEnabled()) {
+            throw new BadRequestException("Registration via email is not allowed");
+        }
+
         User user = lambdaQuery()
                 .eq(User::getUsername, registerDTO.getUsername())
                 .one();
