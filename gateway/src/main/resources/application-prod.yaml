@@ -9,4 +9,6 @@ joinup:
     username: ${MQ_USERNAME}
     password: ${MQ_PASSWORD}
   jwt:
-    password: joinup123
+    location: classpath:joinup-prod.jks
+    password: ${JWT_PASSWORD}
+    alias: joinup-prod
