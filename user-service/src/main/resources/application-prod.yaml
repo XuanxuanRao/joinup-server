@@ -11,8 +11,8 @@ joinup:
     password: ${REDIS_PASSWORD}
     database: 1
   jwt:
-    location: classpath:joinup.jks
-    alias: joinup
+    location: classpath:joinup-prod.jks
+    alias: joinup-prod
     password: ${JWT_PASSWORD}
     tokenTTL: 30m
   aes:

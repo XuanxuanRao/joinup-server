@@ -10,3 +10,6 @@ joinup:
     password: ${MQ_PASSWORD}
   jwt:
     password: ${JWT_PASSWORD}
+    location: classpath:joinup.jks
+    alias: joinup
+    tokenTTL: 180m

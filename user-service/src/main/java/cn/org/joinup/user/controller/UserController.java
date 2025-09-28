@@ -40,8 +40,12 @@ public class UserController {
             return Result.error("System error");
         }
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
-        Result<UserTeamStatisticDTO> userTeamStatistic = teamClient.getMyTeamCount();
-        BeanUtil.copyProperties(userTeamStatistic.getData(), userDTO);
+        try {
+            Result<UserTeamStatisticDTO> userTeamStatistic = teamClient.getMyTeamCount();
+            BeanUtil.copyProperties(userTeamStatistic.getData(), userDTO);
+        } catch (Exception e) {
+            log.error("meet error while get user team count", e);
+        }
         return Result.success(userDTO);
     }
 
