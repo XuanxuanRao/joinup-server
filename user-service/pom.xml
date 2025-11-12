@@ -36,9 +36,14 @@
         </dependency>
 
         <!--数据库-->
+<!--        <dependency>-->
+<!--            <groupId>mysql</groupId>-->
+<!--            <artifactId>mysql-connector-java</artifactId>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.4</version> <!-- 建议使用最新稳定版 -->
         </dependency>
         <!--mybatis plus-->
         <dependency>

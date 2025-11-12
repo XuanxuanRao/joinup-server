@@ -1,7 +1,7 @@
 joinup:
   db:
     host: ${DB_HOST}
-    port: 3306
+    port: 5432
     database: joinup-message-center-dev
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
