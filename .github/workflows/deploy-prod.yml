@@ -31,7 +31,7 @@ jobs:
       - name: 构建 Docker 镜像
         run: |
           cd ${{ matrix.service }}
-          docker build --build-arg PROFILE=${{ env.ENV }} -t ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest .
+          docker build -t ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest .
 
       - name: 推送 Docker 镜像
         run: docker push ${{ vars.DOCKER_HUB_ADDR }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.service }}:latest
