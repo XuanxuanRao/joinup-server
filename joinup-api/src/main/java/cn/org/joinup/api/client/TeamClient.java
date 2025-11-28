@@ -13,7 +13,7 @@ public interface TeamClient {
     @GetMapping("/team/my/count")
     Result<UserTeamStatisticDTO> getMyTeamCount();
 
-    @GetMapping("/team/{teamId}")
+    @GetMapping("/integration/team/{teamId}")
     Result<TeamDTO> queryTeam(@PathVariable Long teamId);
 
     @GetMapping("/team/{teamId}/role")

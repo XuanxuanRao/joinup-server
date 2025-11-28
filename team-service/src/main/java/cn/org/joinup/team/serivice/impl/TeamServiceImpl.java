@@ -56,6 +56,15 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     private final RabbitTemplate rabbitTemplate;
 
     @Override
+    public Result<TeamVO> getTeamInfo(Long teamId) {
+        Team team = getById(teamId);
+        if (team == null) {
+            return Result.error("队伍不存在");
+        }
+        return Result.success(convertToTeamVO(team));
+    }
+
+    @Override
     public Result<TeamVO> userGetTeam(Long teamId) {
         Team team = getById(teamId);
         if (team == null) {

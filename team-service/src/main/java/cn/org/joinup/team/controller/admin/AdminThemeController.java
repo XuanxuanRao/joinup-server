@@ -1,4 +1,4 @@
-package cn.org.joinup.team.controller;
+package cn.org.joinup.team.controller.admin;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.result.Result;

@@ -15,6 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 public interface ITeamService extends IService<Team> {
+
+    Result<TeamVO> getTeamInfo(Long teamId);
+
     Result<TeamVO> userGetTeam(Long teamId);
 
     Result<Void> updateTeamInfo(Long teamId, UpdateTeamInfoDTO updateTeamInfoDTO);
