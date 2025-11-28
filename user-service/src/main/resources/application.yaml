@@ -11,10 +11,12 @@ feign:
 
 spring:
   datasource:
-    url: jdbc:mysql://${joinup.db.host}:${joinup.db.port}/${joinup.db.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://${joinup.db.host}:${joinup.db.port}/${joinup.db.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    driver-class-name: org.postgresql.Driver
     username: ${joinup.db.username}
     password: ${joinup.db.password}
+    hikari:
+      maximum-pool-size: 5
 
   cloud:
     sentinel:
