@@ -8,27 +8,22 @@ import cn.org.joinup.team.domain.vo.TeamBrowseVO;
 import cn.org.joinup.team.mapper.BrowseHistoryMapper;
 import cn.org.joinup.team.serivice.IBrowseService;
 import cn.org.joinup.team.serivice.ITeamService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
-@Service  // 标记为service的服务层
-@RequiredArgsConstructor //Lombok注解，为final字段生成构造方法，用于依赖注入
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHistory> implements IBrowseService {
-    // ServiceImpl：第二个为实体类，第一个是实体类对应的mapper接口，用于提供CURD方法：
-    /*
-    * boolean save(BrowseHistory entity);          // 插入
-    * boolean removeById(Serializable id);         // 删除
-    * boolean updateById(BrowseHistory entity);    // 更新
-    * BrowseHistory getById(Serializable id);      // 查询
-    * List<BrowseHistory> list();                  // 查询所有
-    * */
+
     private final ITeamService teamService;
 
     @Override
@@ -47,26 +42,20 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
 
     @Override
     public Result<List<TeamBrowseVO>> getUserBrowseHistory() {
-        List<BrowseHistory> histories = lambdaQuery()
-                .eq(BrowseHistory::getUserId, UserContext.getUser())
-                .orderByDesc(BrowseHistory::getCreateTime).list();
+        List<Map<String, Object>> histories = baseMapper.selectMaps(new QueryWrapper<BrowseHistory>()
+                .select("team_id", "max(create_time) as last_browse_time")
+                .eq("user_id", UserContext.getUser())
+                .groupBy("team_id", "user_id")
+                .orderByDesc("last_browse_time"));
 
-        HashSet<Long> teamIds = new HashSet<>();
-        ArrayList<BrowseHistory> finalHistories = new ArrayList<>();
-        for(BrowseHistory history:histories){
-            if(!teamIds.contains(history.getTeamId())){
-                teamIds.add(history.getTeamId());
-                finalHistories.add(history);
-            }
-        }
-        return Result.success(finalHistories.stream().map(this::convertToTeamBrowseVO).collect(Collectors.toList()));
+        return Result.success(histories.stream()
+                .map(his -> {
+                    TeamBrowseVO teamBrowseVO = new TeamBrowseVO();
+                    teamBrowseVO.setCreateTime(((java.sql.Timestamp) his.get("last_browse_time")).toLocalDateTime());
+                    teamBrowseVO.setTeam(teamService.convertToBriefTeamVO(teamService.getById((Long) his.get("team_id"))));
+                    return teamBrowseVO;
+                })
+                .collect(Collectors.toList()));
     }
 
-    private TeamBrowseVO convertToTeamBrowseVO(BrowseHistory browseHistory){
-        return TeamBrowseVO.builder()
-                .id(browseHistory.getId())
-                .createTime(browseHistory.getCreateTime())
-                .team(teamService.convertToBriefTeamVO(teamService.getById(browseHistory.getTeamId())))
-                .build();
-    }
 }

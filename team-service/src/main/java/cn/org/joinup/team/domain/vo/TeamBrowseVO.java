@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class TeamBrowseVO {
-    private Long id;
     private BriefTeamVO team;
     private LocalDateTime createTime;
 }
