@@ -121,6 +121,7 @@ public class UserController {
     @ApiOperation("第三方应用认证登录")
     @PostMapping("/third-auth")
     public Result<ThirdPartyAuthResponseVO> thirdPartyAuth(@Validated @RequestBody ThirdPartyAuthRequestDTO authRequestDTO) {
+        log.info("Login request from {}, appUUID: {}", authRequestDTO.getAppKey(), authRequestDTO.getAppUUID());
         try {
             return Result.success(authService.thirdPartyAuth(authRequestDTO));
         } catch (Exception e) {
