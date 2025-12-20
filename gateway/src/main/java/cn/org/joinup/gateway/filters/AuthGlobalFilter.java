@@ -54,6 +54,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             }
         } catch (UnauthorizedException e) {
             if (isNeedAuth(request.getPath().toString())) {
+                log.info("Unauthorized access to ({}) {}", request.getMethodValue(), request.getPath());
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             } else {

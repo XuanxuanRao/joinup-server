@@ -12,3 +12,4 @@ joinup:
     location: classpath:joinup-prod.jks
     password: ${JWT_PASSWORD}
     alias: joinup-prod
+    tokenTTL: 30m
