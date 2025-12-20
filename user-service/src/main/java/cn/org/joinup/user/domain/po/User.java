@@ -2,6 +2,7 @@ package cn.org.joinup.user.domain.po;
 
 import cn.org.joinup.common.enums.Gender;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -55,4 +56,15 @@ public class User implements Serializable {
      * 用户角色：ADMIN-管理员，USER-普通用户
      */
     private String role;
+
+    /**
+     * 第三方应用标识
+     */
+    private String appKey;
+
+    /**
+     * 第三方用户唯一标识
+     */
+    @TableField("app_uuid")
+    private String appUUID;
 }

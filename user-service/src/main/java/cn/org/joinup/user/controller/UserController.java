@@ -5,11 +5,14 @@ import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.user.domain.dto.*;
+import cn.org.joinup.user.domain.dto.request.ThirdPartyAuthRequestDTO;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.user.domain.vo.ThirdPartyAuthResponseVO;
 import cn.org.joinup.user.domain.vo.UserLoginVO;
+import cn.org.joinup.user.service.AuthService;
 import cn.org.joinup.user.service.IUserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +32,7 @@ public class UserController {
 
     private final IUserService userService;
     private final TeamClient teamClient;
-
+    private final AuthService authService;
 
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
@@ -113,5 +116,15 @@ public class UserController {
     @GetMapping("/ssoPassword")
     public Result<String> getSsoPassword() {
         return Result.success(userService.getSsoPassword());
+    }
+
+    @ApiOperation("第三方应用认证登录")
+    @PostMapping("/third-auth")
+    public Result<ThirdPartyAuthResponseVO> thirdPartyAuth(@Validated @RequestBody ThirdPartyAuthRequestDTO authRequestDTO) {
+        try {
+            return Result.success(authService.thirdPartyAuth(authRequestDTO));
+        } catch (Exception e) {
+            return Result.error("认证失败: " + e.getMessage());
+        }
     }
 }

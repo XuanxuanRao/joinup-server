@@ -311,4 +311,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         return user;
     }
+
+    @Override
+    public User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) {
+        User user = new User();
+        user.setUsername(registerDTO.getUsername());
+        user.setAppKey(registerDTO.getAppKey());
+        user.setAppUUID(registerDTO.getAppUUID());
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+        save(user);
+        return user;
+    }
 }

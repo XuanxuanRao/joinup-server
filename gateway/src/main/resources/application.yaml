@@ -60,6 +60,7 @@ joinup:
       - /chat/**
       - /user/wxLogin
       - /user/login
+      - /user/third-auth
       - /user/register
       - /verify/**
       - /test/hello

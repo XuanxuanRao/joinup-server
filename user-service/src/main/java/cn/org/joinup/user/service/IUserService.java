@@ -27,4 +27,6 @@ public interface IUserService extends IService<User> {
     String getSsoPassword();
 
     User getUserById(Long id);
+
+    User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO);
 }
