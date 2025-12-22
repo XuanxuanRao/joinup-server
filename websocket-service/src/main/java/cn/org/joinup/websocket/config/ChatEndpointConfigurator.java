@@ -1,6 +1,7 @@
 package cn.org.joinup.websocket.config;
 
 import cn.org.joinup.common.constant.SystemConstant;
+import cn.org.joinup.websocket.constant.EndpointConfigConstant;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.HandshakeResponse;
@@ -42,7 +43,7 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
             // 这些属性会在 Session 对象中传递到 @OnOpen 方法
             try {
                 Long userId = Long.parseLong(userIdStr);
-                sec.getUserProperties().put("userId", userId);
+                sec.getUserProperties().put(EndpointConfigConstant.USER_ID_PROP_NAME, userId);
                 log.info("User info stored in handshake properties: userId={}", userId);
             } catch (NumberFormatException e) {
                 log.error("WebSocket Handshake: Invalid userId format in configurator: {}", userIdStr, e);
