@@ -46,7 +46,7 @@ public class AutoSignTaskServiceImpl extends ServiceImpl<AutoSignTaskMapper, Aut
         }
 
         AutoSignTask autoSignTask = BeanUtil.copyProperties(addSignTaskDTO, AutoSignTask.class);
-        autoSignTask.setUserId(UserContext.getUser());
+        autoSignTask.setUserId(UserContext.getUserId());
         autoSignTask.setStudentId(studentId);
         autoSignTask.setStatus(SignTaskStatus.RUNNING);
         autoSignTask.setCreateTime(LocalDateTime.now());
@@ -67,7 +67,7 @@ public class AutoSignTaskServiceImpl extends ServiceImpl<AutoSignTaskMapper, Aut
 
         boolean success = remove(new QueryWrapper<AutoSignTask>()
                 .eq("id", taskId)
-                .eq("user_id", UserContext.getUser()));
+                .eq("user_id", UserContext.getUserId()));
 
         if (!success) {
             return Result.error("删除任务失败，请重试");

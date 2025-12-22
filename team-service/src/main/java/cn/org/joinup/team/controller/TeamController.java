@@ -91,7 +91,7 @@ public class TeamController {
     @GetMapping("/{teamId}/role")
     @ApiOperation("获取用户在队伍中的角色")
     public Result<TeamMemberRole> getUserRole(@PathVariable Long teamId) {
-        return Result.success(teamMemberService.getUserRole(teamId, UserContext.getUser()));
+        return Result.success(teamMemberService.getUserRole(teamId, UserContext.getUserId()));
     }
 
     @PostMapping("/{teamId}/kick/{userId}")

@@ -15,9 +15,11 @@ public class UserInfoInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String userInfo = request.getHeader(SystemConstant.USER_ID_HEADER_NAME);
-        if (StrUtil.isNotBlank(userInfo)) {
-            UserContext.setUser(Long.parseLong(userInfo));
+        String userId = request.getHeader(SystemConstant.USER_ID_HEADER_NAME);
+        String appKey = request.getHeader(SystemConstant.APP_KEY_HEADER_NAME);
+        String role = request.getHeader(SystemConstant.USER_ROLE_HEADER_NAME);
+        if (StrUtil.isNotBlank(userId)) {
+            UserContext.setUser(Long.parseLong(userId), appKey, role);
         }
         return true;
     }

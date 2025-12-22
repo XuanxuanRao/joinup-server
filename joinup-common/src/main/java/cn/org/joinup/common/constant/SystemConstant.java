@@ -11,10 +11,12 @@ public class SystemConstant {
     /**
      * 用户 id 在请求头中的 key(名字)
      */
-    public static final String USER_ID_HEADER_NAME = "user-id";
-    public static final String USER_ROLE_HEADER_NAME = "role";
+    public static final String USER_ID_HEADER_NAME = "X-Internal-User-ID";
+    public static final String USER_ROLE_HEADER_NAME = "X-Internal-Role";
+    public static final String APP_KEY_HEADER_NAME = "X-Internal-App-Key";
     public static final String USER_ID_PAYLOAD_NAME = "userId";
     public static final String USER_ROLE_PAYLOAD_NAME = "role";
+    public static final String APP_KEY_PAYLOAD_NAME = "appKey";
     /**
      * 允许上传文件的最大大小(20MB)
      */

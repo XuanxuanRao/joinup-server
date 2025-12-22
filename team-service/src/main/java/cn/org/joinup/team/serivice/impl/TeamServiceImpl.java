@@ -79,11 +79,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
             return Result.success(convertToTeamVO(team));
         }
 
-        if (Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
+        if (Objects.equals(team.getCreatorUserId(), UserContext.getUserId())) {
             return Result.success(convertToTeamVO(team));
         }
 
-        if (teamMemberService.isTeamMember(teamId, UserContext.getUser())) {
+        if (teamMemberService.isTeamMember(teamId, UserContext.getUserId())) {
             return Result.success(convertToTeamVO(team));
         }
 
@@ -118,7 +118,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         }
 
         Team team = BeanUtil.copyProperties(createTeamDTO, Team.class);
-        team.setCreatorUserId(UserContext.getUser());
+        team.setCreatorUserId(UserContext.getUserId());
         team.setCurrentMembersCount(1);
         team.setStatus(TeamStatus.NORMAL);
         team.setCreateTime(LocalDateTime.now());
@@ -131,7 +131,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         teamMemberService.save(TeamMember.builder()
                 .role(TeamMemberRole.CREATOR)
                 .teamId(team.getId())
-                .userId(UserContext.getUser())
+                .userId(UserContext.getUserId())
                 .createTime(LocalDateTime.now())
                 .build());
 
@@ -142,7 +142,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         );
 
         // 缓存
-        String key = RedisConstant.CREATE_TEAM_KEY_PREFIX + UserContext.getUser();
+        String key = RedisConstant.CREATE_TEAM_KEY_PREFIX + UserContext.getUserId();
         stringRedisTemplate.opsForSet().add(key, String.valueOf(team.getId()));
 
         // 发送消息
@@ -188,7 +188,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
 
     @Override
     public Result<List<Team>> getParticipatedTeam(TeamMemberRole role) {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         List<Long> teamIds = teamMemberService.list(new LambdaQueryWrapper<TeamMember>()
                         .eq(TeamMember::getUserId, userId)
                         .eq(role!=null, TeamMember::getRole, role))
@@ -207,8 +207,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     public Result<UserTeamStatisticDTO> getMyTeamCount() {
         return Result.success(
                 UserTeamStatisticDTO.builder()
-                        .joinedTeamCount(teamMemberService.getJoinedTeamIds(UserContext.getUser()).size())
-                        .createdTeamCount(teamMemberService.getCreatedTeamIds(UserContext.getUser()).size())
+                        .joinedTeamCount(teamMemberService.getJoinedTeamIds(UserContext.getUserId()).size())
+                        .createdTeamCount(teamMemberService.getCreatedTeamIds(UserContext.getUserId()).size())
                         .build()
         );
     }
@@ -219,17 +219,17 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
         Team team = getById(teamId);
         if (team == null || team.getStatus() != TeamStatus.NORMAL) {
             return Result.error("队伍不存在");
-        } else if (team.getCreatorUserId().equals(UserContext.getUser())) {
+        } else if (team.getCreatorUserId().equals(UserContext.getUserId())) {
             return Result.error("队伍创建者不能退出队伍");
         }
 
-        if (!teamMemberService.isTeamMember(teamId, UserContext.getUser())) {
+        if (!teamMemberService.isTeamMember(teamId, UserContext.getUserId())) {
             return Result.error("你不在该队伍中");
         }
 
         if (!teamMemberService.remove(new LambdaQueryWrapper<TeamMember>()
                 .eq(TeamMember::getTeamId, teamId)
-                .eq(TeamMember::getUserId, UserContext.getUser()))) {
+                .eq(TeamMember::getUserId, UserContext.getUserId()))) {
             return Result.error("退出队伍失败，请稍后重试");
         }
 
@@ -240,12 +240,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
                 .update();
 
         // 删除缓存
-        String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + UserContext.getUser();
+        String key = RedisConstant.JOIN_TEAM_KEY_PREFIX + UserContext.getUserId();
         stringRedisTemplate.opsForSet().remove(key, String.valueOf(teamId));
 
         // 发送消息通知 conversation
         rabbitTemplate.convertAndSend(MQConstant.TEAM_EXCHANGE, MQConstant.USER_QUIT_TEAM_KEY, UserQuitTeamDTO.builder()
-                .userId(UserContext.getUser())
+                .userId(UserContext.getUserId())
                 .teamId(teamId)
                 .createTime(LocalDateTime.now())
                 .build());
@@ -328,7 +328,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
 
         if (!teamMemberService.isTeamMember(teamId, userId)) {
             return Result.error("该用户不在队伍中");
-        } else if (userId.equals(UserContext.getUser())) {
+        } else if (userId.equals(UserContext.getUserId())) {
             return Result.error("队伍创建者不能踢出自己");
         }
 
@@ -368,7 +368,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
             return Result.error("队伍已解散");
         }
 
-        if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
+        if (!Objects.equals(team.getCreatorUserId(), UserContext.getUserId())) {
             return Result.error("非法操作");
         }
 

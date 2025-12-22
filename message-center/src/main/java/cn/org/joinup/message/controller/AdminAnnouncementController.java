@@ -35,7 +35,7 @@ public class AdminAnnouncementController {
     @PostMapping("/add")
     public Result<Long> addAnnouncement(@RequestBody @Validated AddAnnouncementDTO addAnnouncementDTO) {
         Announcement announcement = BeanUtil.copyProperties(addAnnouncementDTO, Announcement.class);
-        announcement.setPosterUserId(UserContext.getUser());
+        announcement.setPosterUserId(UserContext.getUserId());
         announcement.setUpdateTime(LocalDateTime.now());
         if (!iAdminAnnouncementService.save(announcement)) {
             return Result.error("公告发布失败，请稍后再试");

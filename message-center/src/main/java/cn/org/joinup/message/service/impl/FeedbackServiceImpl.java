@@ -33,7 +33,7 @@ public class FeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedback> i
     @Override
     public Result<Void> submit(AddFeedbackDTO addFeedbackDTO) {
         Feedback feedback = BeanUtil.copyProperties(addFeedbackDTO, Feedback.class);
-        feedback.setUserId(UserContext.getUser());
+        feedback.setUserId(UserContext.getUserId());
         feedback.setHandled(false);
         feedback.setCreateTime(LocalDateTime.now());
         save(feedback);

@@ -18,7 +18,7 @@ public class PermissionChecker {
     private final UserClient userClient;
 
     public boolean hasAccessToConversation(String conversationId) {
-        return conversationService.in(conversationId, UserContext.getUser()) ||
+        return conversationService.in(conversationId, UserContext.getUserId()) ||
                 "ADMIN".equals(userClient.getUserInfo().getData().getRole());
     }
 }

@@ -37,7 +37,7 @@ public class TagApplicationServiceImpl extends ServiceImpl<TagApplicationMapper,
 
         TagApplication tagApplication = BeanUtil.copyProperties(addTagDTO, TagApplication.class);
         tagApplication.setStatus(TagApplicationStatus.PENDING);
-        tagApplication.setSubmitterUserId(UserContext.getUser());
+        tagApplication.setSubmitterUserId(UserContext.getUserId());
         tagApplication.setCreateTime(LocalDateTime.now());
         save(tagApplication);
         return Result.success();

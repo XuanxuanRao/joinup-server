@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static cn.org.joinup.common.util.UserContext.getUser;
+import static cn.org.joinup.common.util.UserContext.getUserId;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -134,13 +134,13 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
     @Override
     public ConversationDTO getConversationDTO(String conversationId) {
         Conversation conversation = getConversationById(conversationId);
-        return convertToDTO(conversation, getUser());
+        return convertToDTO(conversation, getUserId());
     }
 
     @Override
     public ChatMessageVO getLastMessage(String conversationId) {
         final String key = RedisConstant.CONVERSATION_LAST_MESSAGE_KEY_PREFIX + conversationId;
-        if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+        if (!stringRedisTemplate.hasKey(key)) {
             return null;
         }
         String messageId = stringRedisTemplate.opsForValue().get(key);
@@ -152,7 +152,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
     private Set<String> findUserConversations(Long userId) {
         String key = RedisConstant.USER_CONVERSATIONS_KEY_PREFIX + userId;
-        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+        if (stringRedisTemplate.hasKey(key)) {
             return stringRedisTemplate.opsForSet().members(key);
         }
         Set<String> conversationIds = conversationParticipantService.getConversationsByUserId(userId);
@@ -221,7 +221,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
     @Override
     public BriefConversationDTO getBriefConversation(String conversationId) {
-        return getBriefConversation(conversationId, getUser());
+        return getBriefConversation(conversationId, getUserId());
     }
 
     @Override
@@ -266,7 +266,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
     @Override
     public void clearConversationUnreadMessage(String conversationId) {
-        Long userId = getUser();
+        Long userId = getUserId();
         String userUnreadMessageKey = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
         stringRedisTemplate.opsForValue().set(userUnreadMessageKey,String.valueOf(0));
     }
@@ -302,7 +302,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
 
     private int getUnreadMessageOfUserInConversation(String conversationId, Long userId) {
         String key = RedisConstant.USER_CONVERSATION_UNREAD_MESSAGE_KEY_PREFIX + conversationId + ":" + userId;
-        if (Boolean.FALSE.equals(stringRedisTemplate.hasKey(key))) {
+        if (!stringRedisTemplate.hasKey(key)) {
             return 0;
         }
         String num = stringRedisTemplate.opsForValue().get(key);
@@ -332,7 +332,7 @@ public class ConversationServiceImpl extends ServiceImpl<ConversationMapper, Con
                         });
                 break;
         }
-        conversationDTO.setUnreadMessageCount(getUnreadMessageOfUserInConversation(conversation.getId(), getUser()));
+        conversationDTO.setUnreadMessageCount(getUnreadMessageOfUserInConversation(conversation.getId(), getUserId()));
         conversationDTO.setLastMessage(getLastMessage(conversation.getId()));
         return conversationDTO;
     }
