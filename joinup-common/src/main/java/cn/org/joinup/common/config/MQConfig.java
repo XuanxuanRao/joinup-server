@@ -50,7 +50,7 @@ public class MQConfig {
 
         @Override
         public Object fromMessage(Message message) throws MessageConversionException {
-            Object userId = message.getMessageProperties().getHeader("user-info");
+            Object userId = message.getMessageProperties().getHeader("user-id");
             String appKey = message.getMessageProperties().getHeader("app-key");
             String role = message.getMessageProperties().getHeader("user-role");
             if (userId != null) {

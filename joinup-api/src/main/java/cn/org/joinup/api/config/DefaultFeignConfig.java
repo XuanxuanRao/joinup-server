@@ -22,6 +22,8 @@ public class DefaultFeignConfig {
             if (userId != null) {
                 requestTemplate.header(SystemConstant.USER_ID_HEADER_NAME, userId.toString());
             }
+            requestTemplate.header(SystemConstant.USER_ROLE_HEADER_NAME, String.valueOf(UserContext.getUserRole()));
+            requestTemplate.header(SystemConstant.APP_KEY_HEADER_NAME, UserContext.getAppKey());
         };
     }
 

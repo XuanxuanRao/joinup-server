@@ -63,7 +63,7 @@ public class JwtTool {
         try {
             Long userId = Long.valueOf(userPayload.toString());
             String role = rolePayload.toString();
-            String appKey = appKeyPayload.toString();
+            String appKey = appKeyPayload == null ? "" : appKeyPayload.toString();
             return new JwtPayload(userId, role, appKey);
         } catch (RuntimeException e) {
             // 数据格式有误

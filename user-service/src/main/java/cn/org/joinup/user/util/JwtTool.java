@@ -22,6 +22,8 @@ public class JwtTool {
      * 创建 access-token
      *
      * @param userId 用户id
+     * @param role   用户角色
+     * @param appKey 用户所属应用key
      * @param ttl    token有效期
      * @return access-token
      */
@@ -30,7 +32,7 @@ public class JwtTool {
         return JWT.create()
                 .setPayload(SystemConstant.USER_ID_PAYLOAD_NAME, userId)
                 .setPayload(SystemConstant.USER_ROLE_PAYLOAD_NAME, role)
-                .setPayload(SystemConstant.APP_KEY_PAYLOAD_NAME, appKey ==  null ? "" : appKey)
+                .setPayload(SystemConstant.APP_KEY_PAYLOAD_NAME, appKey == null ? "" : appKey)
                 .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis()))
                 .setSigner(jwtSigner)
                 .sign();

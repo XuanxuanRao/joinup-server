@@ -8,8 +8,10 @@ public class UserContext {
     /**
      * 保存当前登录用户信息到ThreadLocal
      * @param userId 用户id
+     * @param appKey 应用key
+     * @param role 用户角色
      */
-    public static void setUser(Long userId,  String appKey, String role) {
+    public static void setUser(Long userId, String appKey, String role) {
         UserContext.userId.set(userId);
         UserContext.appKey.set(appKey);
         UserContext.role.set(role);
@@ -23,10 +25,18 @@ public class UserContext {
         return userId.get();
     }
 
+    /**
+     * 获取当前登录用户所属的应用Key
+     * @return 应用Key
+     */
     public static String getAppKey() {
         return appKey.get();
     }
 
+    /**
+     * 获取当前登录用户角色
+     * @return 用户角色
+     */
     public static String getUserRole() {
         return role.get();
     }
