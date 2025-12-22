@@ -73,7 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new BadRequestException("用户名或密码错误");
         }
 
-        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;
@@ -103,7 +103,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 user.setUpdateTime(LocalDateTime.now());
                 save(user);
             }
-            String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+            String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), jwtProperties.getTokenTTL());
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
@@ -144,7 +144,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + registerDTO.getEmail());
 
-        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;
@@ -178,7 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             user.setUpdateTime(LocalDateTime.now());
             save(user);
 
-            String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+            String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), jwtProperties.getTokenTTL());
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
@@ -221,7 +221,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Result<Void> verifyIdentity(VerifyIdentityDTO verifyIdentityDTO) {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         User user = getById(userId);
 
         String correctCode = stringRedisTemplate.opsForValue().get(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
@@ -251,7 +251,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         User user = BeanUtil.copyProperties(updateUserDTO, User.class);
-        user.setId(UserContext.getUser());
+        user.setId(UserContext.getUserId());
         user.setUpdateTime(LocalDateTime.now());
         user.setSsoPassword(null);
         Optional.ofNullable(updateUserDTO.getSsoPassword())
@@ -269,12 +269,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Result<UserLoginVO> refreshToken() {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         User user = getById(userId);
         if (user == null) {
             return Result.error("用户不存在");
         }
-        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return Result.success(userLoginVO);
@@ -282,7 +282,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public String getSsoPassword() {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         User user = getUserById(userId);
         if (user == null) {
             return null;

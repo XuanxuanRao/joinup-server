@@ -125,7 +125,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
         queryWrapper.orderByDesc(ChatMessage::getCreateTime,ChatMessage::getId);
 
-        BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
+        BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUserId());
 
         Page<ChatMessage> page = page(new Page<>(messageFilterDTO.getPageNumber(), messageFilterDTO.getPageSize()), queryWrapper);
 
@@ -133,7 +133,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         List<ChatMessageVO> collect = page.getRecords()
                 .stream()
                 .map(message -> {
-                    ChatMessageVO vo = convertToVO(message, UserContext.getUser(), false, false);
+                    ChatMessageVO vo = convertToVO(message, UserContext.getUserId(), false, false);
                     vo.setConversation(conversation);
                     vo.setSender(userCache.computeIfAbsent(
                             message.getSenderId(),

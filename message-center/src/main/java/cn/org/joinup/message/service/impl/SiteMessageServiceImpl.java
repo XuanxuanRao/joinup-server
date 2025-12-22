@@ -29,7 +29,7 @@ public class SiteMessageServiceImpl extends ServiceImpl<SiteMessageMapper, SiteM
             queryWrapper.eq(SiteMessage::getNotifyType, type);
         }
         queryWrapper.eq(SiteMessage::getDeleted, false);
-        queryWrapper.eq(SiteMessage::getReceiverUserId, UserContext.getUser());
+        queryWrapper.eq(SiteMessage::getReceiverUserId, UserContext.getUserId());
         queryWrapper.orderByDesc(SiteMessage::getCreateTime);
         return page(new Page<>(pageNumber, pageSize), queryWrapper);
     }
@@ -63,7 +63,7 @@ public class SiteMessageServiceImpl extends ServiceImpl<SiteMessageMapper, SiteM
     private Result<SiteMessage> validateOperation(Long id) {
         SiteMessage siteMessage = lambdaQuery()
                 .eq(SiteMessage::getId, id)
-                .eq(SiteMessage::getReceiverUserId, UserContext.getUser())
+                .eq(SiteMessage::getReceiverUserId, UserContext.getUserId())
                 .one();
 
         if (siteMessage == null || siteMessage.getDeleted()) {

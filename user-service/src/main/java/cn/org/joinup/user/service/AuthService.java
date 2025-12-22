@@ -68,7 +68,7 @@ public class AuthService {
 
         // 5. 验证通过，生成 token 并返回
         return ThirdPartyAuthResponseVO.builder()
-                .token(jwtTool.createToken(user.getId(), user.getRole(), Duration.ofMinutes(appInfo.getTokenExpireSeconds())))
+                .token(jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), Duration.ofMinutes(appInfo.getTokenExpireSeconds())))
                 .expireAt(LocalDateTime.now().plusMinutes(appInfo.getTokenExpireSeconds()))
                 .build();
     }

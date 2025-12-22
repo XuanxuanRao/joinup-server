@@ -44,14 +44,14 @@ public class ChatMessageController {
         queryWrapper.lt(lastSelectId != null, ChatMessage::getId, lastSelectId)
                     .orderByDesc(ChatMessage::getCreateTime, ChatMessage::getId);
 
-        BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUser());
+        BriefConversationDTO conversation = conversationService.getBriefConversation(conversationId, UserContext.getUserId());
       
         Page<ChatMessage> page = chatMessageService.page(new Page<>(1, size), queryWrapper);
       
         List<ChatMessageVO> collect = page.getRecords()
                 .stream()
                 .map(chat -> {
-                    ChatMessageVO vo = chatMessageService.convertToVO(chat, UserContext.getUser(), false);
+                    ChatMessageVO vo = chatMessageService.convertToVO(chat, UserContext.getUserId(), false);
                     vo.setConversation(conversation);
                     return vo;
                 })

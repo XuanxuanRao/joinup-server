@@ -37,7 +37,7 @@ public class UserController {
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
     public Result<UserDTO> getUserInfo() {
-        User user = userService.getUserById(UserContext.getUser());
+        User user = userService.getUserById(UserContext.getUserId());
         if (user == null) {
             log.info("用户不存在");
             return Result.error("System error");

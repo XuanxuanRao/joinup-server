@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 
 /**
  * @author chenxuanrao06@gmail.com
- * @Description:
  */
 public class DefaultFeignConfig {
     @Bean
@@ -19,7 +18,7 @@ public class DefaultFeignConfig {
     @Bean
     public RequestInterceptor userInfoRequestInterceptor() {
         return requestTemplate -> {
-            Long userId = UserContext.getUser();
+            Long userId = UserContext.getUserId();
             if (userId != null) {
                 requestTemplate.header(SystemConstant.USER_ID_HEADER_NAME, userId.toString());
             }

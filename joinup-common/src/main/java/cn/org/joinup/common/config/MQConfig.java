@@ -39,18 +39,22 @@ public class MQConfig {
         @Override
         public Message toMessage(Object o, MessageProperties messageProperties) throws MessageConversionException {
             Map<String, Object> headers = messageProperties.getHeaders();
-            Long userId = UserContext.getUser();
+            Long userId = UserContext.getUserId();
             if (userId != null) {
-                headers.put("user-info", userId);
+                headers.put("user-id", userId);
             }
+            headers.put("user-role", UserContext.getUserRole());
+            headers.put("app-key", UserContext.getAppKey());
             return delegate.toMessage(o, messageProperties);
         }
 
         @Override
         public Object fromMessage(Message message) throws MessageConversionException {
             Object userId = message.getMessageProperties().getHeader("user-info");
+            String appKey = message.getMessageProperties().getHeader("app-key");
+            String role = message.getMessageProperties().getHeader("user-role");
             if (userId != null) {
-                UserContext.setUser((Long) userId);
+                UserContext.setUser((Long) userId, appKey, role);
             }
             return delegate.fromMessage(message);
         }

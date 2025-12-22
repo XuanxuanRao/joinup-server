@@ -59,13 +59,13 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
             return Result.error("队伍不存在");
         } else if (team.getCurrentMembersCount() >= team.getMaxMembers()) {
             return Result.error("队伍人数已满");
-        } else if (teamMemberService.isTeamMember(teamId, UserContext.getUser())) {
+        } else if (teamMemberService.isTeamMember(teamId, UserContext.getUserId())) {
             return Result.error("已在队伍中");
         }
 
         TeamJoinApplication teamJoinApplication = BeanUtil.copyProperties(joinTeamDTO, TeamJoinApplication.class);
         teamJoinApplication.setTeamId(teamId);
-        teamJoinApplication.setUserId(UserContext.getUser());
+        teamJoinApplication.setUserId(UserContext.getUserId());
         teamJoinApplication.setStatus(TeamJoinApplicationStatus.PENDING);
         if (!save(teamJoinApplication)) {
             return Result.error("发送申请失败，请稍后重试");
@@ -167,7 +167,7 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
         Team team = teamService.getById(teamId);
         if (team == null || team.getStatus() != TeamStatus.NORMAL) {
             return Result.error("队伍不存在");
-        } else if (!Objects.equals(team.getCreatorUserId(), UserContext.getUser())) {
+        } else if (!Objects.equals(team.getCreatorUserId(), UserContext.getUserId())) {
             return Result.error("非法操作");
         }
 
@@ -198,7 +198,7 @@ public class TeamJoinApplicationServiceImpl extends ServiceImpl<TeamJoinApplicat
         Team team = teamService.getById(teamId);
         if (team == null || team.getStatus() != TeamStatus.NORMAL) {
             return Result.error("队伍不存在");
-        } else if (!Objects.equals(UserContext.getUser(), team.getCreatorUserId())) {
+        } else if (!Objects.equals(UserContext.getUserId(), team.getCreatorUserId())) {
             return Result.error("非法操作");
         }
 

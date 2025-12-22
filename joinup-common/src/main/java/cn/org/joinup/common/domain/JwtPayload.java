@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class JwtPayload {
     private Long userId;
     private String role;
+    private String appKey;
 }

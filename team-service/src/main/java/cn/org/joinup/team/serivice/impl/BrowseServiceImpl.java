@@ -31,7 +31,7 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
 
        BrowseHistory browseHistory = new BrowseHistory();
        browseHistory.setTeamId(teamId);
-       browseHistory.setUserId(UserContext.getUser());
+       browseHistory.setUserId(UserContext.getUserId());
        browseHistory.setCreateTime(DateTime.now().toLocalDateTime());
 
        if(!save(browseHistory)) {
@@ -44,7 +44,7 @@ public class BrowseServiceImpl extends ServiceImpl<BrowseHistoryMapper,BrowseHis
     public Result<List<TeamBrowseVO>> getUserBrowseHistory() {
         List<Map<String, Object>> histories = baseMapper.selectMaps(new QueryWrapper<BrowseHistory>()
                 .select("team_id", "max(create_time) as last_browse_time")
-                .eq("user_id", UserContext.getUser())
+                .eq("user_id", UserContext.getUserId())
                 .groupBy("team_id", "user_id")
                 .orderByDesc("last_browse_time"));
 
