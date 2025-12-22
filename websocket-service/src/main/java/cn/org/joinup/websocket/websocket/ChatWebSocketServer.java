@@ -4,11 +4,10 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
-import cn.org.joinup.common.constant.RedisConstant;
-import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.websocket.config.ChatEndpointConfigurator;
 import cn.org.joinup.websocket.config.ChatMessageDTOEncoder;
 import cn.org.joinup.websocket.config.ClientChatMessageDecoder;
+import cn.org.joinup.websocket.constant.EndpointConfigConstant;
 import cn.org.joinup.websocket.domain.ClientChatMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -79,7 +78,7 @@ public class ChatWebSocketServer {
             Map<String, Object> userProperties = config.getUserProperties();
 
             // 检查 Configurator 中是否发生了认证错误或未成功设置用户信息
-            if (userProperties.containsKey("authError") || !userProperties.containsKey(SystemConstant.USER_ID_HEADER_NAME)) {
+            if (userProperties.containsKey("authError") || !userProperties.containsKey(EndpointConfigConstant.USER_ID_PROP_NAME)) {
                 String errorMsg = (String) userProperties.getOrDefault("authError", "Missing user info");
                 log.warn("WebSocket连接失败：握手阶段认证失败 - {}", errorMsg);
                 try {
@@ -90,14 +89,14 @@ public class ChatWebSocketServer {
                 return;
             }
 
-            Long userId = (Long) userProperties.get("userId");
+            Long userId = (Long) userProperties.get(EndpointConfigConstant.USER_ID_PROP_NAME);
 
             log.info("WebSocket Handshake: User ID: {}", userId);
 
             // 2. 认证成功，将用户ID与Session关联
             SESSION_MAP.put(userId, session);
             // 也将用户信息存储到 session 的用户属性中，方便在其他生命周期方法中访问
-            session.getUserProperties().put("userId", userId);
+            session.getUserProperties().put(EndpointConfigConstant.USER_ID_PROP_NAME, userId);
 
             log.info("用户 {} 连接成功. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
         } catch (Exception e) {
@@ -116,7 +115,8 @@ public class ChatWebSocketServer {
      */
     @OnClose
     public void onClose(Session session) {
-        Long userId = (Long) session.getUserProperties().get("userId"); // 从 Session 属性获取用户 ID
+        // 从 Session 属性获取用户 ID
+        Long userId = (Long) session.getUserProperties().get(EndpointConfigConstant.USER_ID_PROP_NAME);
         if (userId != null) {
             SESSION_MAP.remove(userId); // 从映射中移除 Session
             log.info("用户 {} 断开连接. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
@@ -137,7 +137,7 @@ public class ChatWebSocketServer {
     @OnMessage
     public void onMessage(ClientChatMessage clientChatMessage, Session session) {
         // 从 session 的用户属性中获取用户 ID 和角色
-        Long userId = (Long) session.getUserProperties().get("userId");
+        Long userId = (Long) session.getUserProperties().get(EndpointConfigConstant.USER_ID_PROP_NAME);
         if (userId == null) {
             // 理论上，如果 @OnOpen 中认证失败，连接应该已经被关闭。如果这里收到消息，说明有未认证的 session 仍在尝试通信。
             log.warn("收到来自未认证 Session ({}) 的消息", session.getId());
@@ -164,7 +164,7 @@ public class ChatWebSocketServer {
      */
     @OnError
     public void onError(Session session, Throwable error) {
-        Long userId = (Long) session.getUserProperties().get("userId");
+        Long userId = (Long) session.getUserProperties().get(EndpointConfigConstant.USER_ID_PROP_NAME);
         if (userId != null) {
             log.error("用户 {} 的 WebSocket 发生错误. Session ID: {}", userId, session.getId(), error);
             SESSION_MAP.remove(userId);
