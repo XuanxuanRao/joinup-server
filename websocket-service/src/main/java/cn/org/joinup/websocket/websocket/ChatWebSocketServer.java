@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import cn.org.joinup.api.dto.ChatMessageDTO;
 import cn.org.joinup.api.dto.ChatMessageVO;
 import cn.org.joinup.common.constant.RedisConstant;
+import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.websocket.config.ChatEndpointConfigurator;
 import cn.org.joinup.websocket.config.ChatMessageDTOEncoder;
 import cn.org.joinup.websocket.config.ClientChatMessageDecoder;
@@ -78,7 +79,7 @@ public class ChatWebSocketServer {
             Map<String, Object> userProperties = config.getUserProperties();
 
             // 检查 Configurator 中是否发生了认证错误或未成功设置用户信息
-            if (userProperties.containsKey("authError") || !userProperties.containsKey("userId")) {
+            if (userProperties.containsKey("authError") || !userProperties.containsKey(SystemConstant.USER_ID_HEADER_NAME)) {
                 String errorMsg = (String) userProperties.getOrDefault("authError", "Missing user info");
                 log.warn("WebSocket连接失败：握手阶段认证失败 - {}", errorMsg);
                 try {
