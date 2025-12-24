@@ -16,6 +16,9 @@ import java.util.Set;
 public class WebSocketController {
     @GetMapping("/user/online")
     public Result<Set<Long>> getOnlineUsers(String userType, String appKey) {
+        if (userType == null) {
+            return Result.error("userType must not be null");
+        }
         return Result.success(ChatWebSocketServer.getOnlineUsers(userType, appKey));
     }
 

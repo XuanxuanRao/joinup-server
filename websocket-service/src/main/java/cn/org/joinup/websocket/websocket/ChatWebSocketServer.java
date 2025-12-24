@@ -46,9 +46,27 @@ public class ChatWebSocketServer {
     }
 
     public static Set<Long> getOnlineUsers(String userType, String appKey) {
-        return SESSION_MAP.keySet().stream()
-                .filter(userId -> userType != null && userType.equals(SESSION_MAP.get(userId).getUserProperties().get(EndpointConfigConstant.USER_TYPE_PROP_NAME)))
-                .filter(userId -> appKey == null || appKey.equals(SESSION_MAP.get(userId).getUserProperties().get(EndpointConfigConstant.APP_KEY_PROP_NAME)))
+        return SESSION_MAP.entrySet().stream()
+                .filter(entry -> {
+                    Session session = entry.getValue();
+                    if (session == null) {
+                        return false;
+                    }
+                    Object sessionUserType = session.getUserProperties().get(EndpointConfigConstant.USER_TYPE_PROP_NAME);
+                    return userType != null && userType.equals(sessionUserType);
+                })
+                .filter(entry -> {
+                    if (appKey == null) {
+                        return true;
+                    }
+                    Session session = entry.getValue();
+                    if (session == null) {
+                        return false;
+                    }
+                    Object sessionAppKey = session.getUserProperties().get(EndpointConfigConstant.APP_KEY_PROP_NAME);
+                    return appKey.equals(sessionAppKey);
+                })
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
     }
 

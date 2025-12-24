@@ -68,6 +68,7 @@ public class AuthService {
         }
         if (user.getUserType() == UserType.INTERNAL) {
             log.warn("内部用户 {} 尝试使用第三方app {} 授权", user.getId(),  authRequestDTO.getAppKey());
+            throw new BadRequestException("非法的登录请求");
         }
 
         // 5. 验证通过，生成 token 并返回

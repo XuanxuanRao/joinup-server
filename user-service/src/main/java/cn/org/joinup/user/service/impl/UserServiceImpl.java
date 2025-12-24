@@ -186,7 +186,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             user.setUserType(UserType.INTERNAL);
             save(user);
 
-            String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), UserType.INTERNAL, jwtProperties.getTokenTTL());
+            String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), user.getUserType(), jwtProperties.getTokenTTL());
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
