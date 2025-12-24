@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.WebSocketClient;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.user.domain.po.User;
+import cn.org.joinup.user.enums.UserType;
 import cn.org.joinup.user.mapper.UserMapper;
 import cn.org.joinup.user.service.IAdminUserService;
 import cn.org.joinup.user.service.IUserService;
@@ -14,7 +15,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +59,7 @@ public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implemen
 
     @Override
     public List<UserDTO> onlineUsers() {
-        return webSocketClient.getOnlineUsers().getData()
+        return webSocketClient.getOnlineUsers(UserType.INTERNAL.getDesc(), "").getData()
                 .stream()
                 .map(userId -> {
                     User user = userService.getUserById(userId);
@@ -70,7 +70,7 @@ public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implemen
 
     @Override
     public IPage<User> onlineUsersList(Pageable pageable) {
-        Set<Long> onlineIds = webSocketClient.getOnlineUsers().getData();
+        Set<Long> onlineIds = webSocketClient.getOnlineUsers(UserType.INTERNAL.getDesc(), "").getData();
         if (onlineIds == null || onlineIds.isEmpty()) {
             // MyBatis-Plus 的 Page 当前页从 1 开始，因此 +1
             return new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize(), 0);

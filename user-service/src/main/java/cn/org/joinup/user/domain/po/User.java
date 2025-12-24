@@ -1,6 +1,7 @@
 package cn.org.joinup.user.domain.po;
 
 import cn.org.joinup.common.enums.Gender;
+import cn.org.joinup.user.enums.UserType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -67,4 +68,7 @@ public class User implements Serializable {
      */
     @TableField("app_uuid")
     private String appUUID;
+
+    @TableField("user_type")
+    private UserType userType;
 }

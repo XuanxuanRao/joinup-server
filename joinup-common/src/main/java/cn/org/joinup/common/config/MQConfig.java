@@ -45,6 +45,7 @@ public class MQConfig {
             }
             headers.put("user-role", UserContext.getUserRole());
             headers.put("app-key", UserContext.getAppKey());
+            headers.put("user-type", UserContext.getUserType());
             return delegate.toMessage(o, messageProperties);
         }
 
@@ -53,8 +54,9 @@ public class MQConfig {
             Object userId = message.getMessageProperties().getHeader("user-id");
             String appKey = message.getMessageProperties().getHeader("app-key");
             String role = message.getMessageProperties().getHeader("user-role");
+            String userType = message.getMessageProperties().getHeader("user-type");
             if (userId != null) {
-                UserContext.setUser((Long) userId, appKey, role);
+                UserContext.setUser((Long) userId, appKey, role, userType);
             }
             return delegate.fromMessage(message);
         }

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -44,8 +45,11 @@ public class ChatWebSocketServer {
         ChatWebSocketServer.rabbitTemplate = rabbitTemplate;
     }
 
-    public static Set<Long> getOnlineUsers() {
-        return SESSION_MAP.keySet();
+    public static Set<Long> getOnlineUsers(String userType, String appKey) {
+        return SESSION_MAP.keySet().stream()
+                .filter(userId -> userType != null && userType.equals(SESSION_MAP.get(userId).getUserProperties().get(EndpointConfigConstant.USER_TYPE_PROP_NAME)))
+                .filter(userId -> appKey == null || appKey.equals(SESSION_MAP.get(userId).getUserProperties().get(EndpointConfigConstant.APP_KEY_PROP_NAME)))
+                .collect(Collectors.toSet());
     }
 
     public static boolean forceDisconnect(Long userId, String reason) {
@@ -90,6 +94,8 @@ public class ChatWebSocketServer {
             }
 
             Long userId = (Long) userProperties.get(EndpointConfigConstant.USER_ID_PROP_NAME);
+            String appKey = (String) userProperties.get(EndpointConfigConstant.APP_KEY_PROP_NAME);
+            String userType = (String) userProperties.get(EndpointConfigConstant.USER_TYPE_PROP_NAME);
 
             log.info("WebSocket Handshake: User ID: {}", userId);
 
@@ -97,6 +103,8 @@ public class ChatWebSocketServer {
             SESSION_MAP.put(userId, session);
             // 也将用户信息存储到 session 的用户属性中，方便在其他生命周期方法中访问
             session.getUserProperties().put(EndpointConfigConstant.USER_ID_PROP_NAME, userId);
+            session.getUserProperties().put(EndpointConfigConstant.APP_KEY_PROP_NAME, appKey);
+            session.getUserProperties().put(EndpointConfigConstant.USER_TYPE_PROP_NAME, userType);
 
             log.info("用户 {} 连接成功. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
         } catch (Exception e) {

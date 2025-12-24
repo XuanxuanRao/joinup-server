@@ -15,8 +15,8 @@ import java.util.Set;
 @Slf4j
 public class WebSocketController {
     @GetMapping("/user/online")
-    public Result<Set<Long>> getOnlineUsers() {
-        return Result.success(ChatWebSocketServer.getOnlineUsers());
+    public Result<Set<Long>> getOnlineUsers(String userType, String appKey) {
+        return Result.success(ChatWebSocketServer.getOnlineUsers(userType, appKey));
     }
 
     @DeleteMapping("/user/{userId}")
