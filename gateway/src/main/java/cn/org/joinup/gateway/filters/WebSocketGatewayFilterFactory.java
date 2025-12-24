@@ -49,7 +49,11 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
             }
 
             ServerWebExchange newExchange = exchange.mutate()
-                    .request(builder -> builder.header(SystemConstant.USER_ID_HEADER_NAME, jwtPayload.getUserId().toString()).header(SystemConstant.USER_ROLE_HEADER_NAME, jwtPayload.getRole()))
+                    .request(builder -> builder
+                            .header(SystemConstant.USER_ID_HEADER_NAME, jwtPayload.getUserId().toString())
+                            .header(SystemConstant.USER_ROLE_HEADER_NAME, jwtPayload.getRole())
+                            .header(SystemConstant.USER_TYPE_HEADER_NAME, jwtPayload.getUserType())
+                            .header(SystemConstant.APP_KEY_HEADER_NAME, jwtPayload.getAppKey()))
                     .build();
 
             return chain.filter(newExchange);
