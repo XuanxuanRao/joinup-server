@@ -27,8 +27,12 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
         // 1. 从 HTTP 握手请求头中提取 Gateway 添加的用户信息
         Map<String, List<String>> headers = request.getHeaders();
         List<String> userIdHeaders = headers.get(SystemConstant.USER_ID_HEADER_NAME);
+        List<String> appKeyHeaders = headers.get(SystemConstant.APP_KEY_HEADER_NAME);
+        List<String> userTypeHeaders = headers.get(SystemConstant.USER_TYPE_HEADER_NAME);
 
         String userIdStr = (userIdHeaders != null && !userIdHeaders.isEmpty()) ? userIdHeaders.get(0) : null;
+        String appKey = (appKeyHeaders != null && !appKeyHeaders.isEmpty()) ? appKeyHeaders.get(0) : null;
+        String userType = (userTypeHeaders != null && !userTypeHeaders.isEmpty()) ? userTypeHeaders.get(0) : null;
 
         log.info("Extracted headers in configurator: {}: {}", SystemConstant.USER_ID_HEADER_NAME, userIdStr);
 
@@ -44,6 +48,8 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
             try {
                 Long userId = Long.parseLong(userIdStr);
                 sec.getUserProperties().put(EndpointConfigConstant.USER_ID_PROP_NAME, userId);
+                sec.getUserProperties().put(EndpointConfigConstant.APP_KEY_PROP_NAME, appKey);
+                sec.getUserProperties().put(EndpointConfigConstant.USER_TYPE_PROP_NAME, userType);
                 log.info("User info stored in handshake properties: userId={}", userId);
             } catch (NumberFormatException e) {
                 log.error("WebSocket Handshake: Invalid userId format in configurator: {}", userIdStr, e);

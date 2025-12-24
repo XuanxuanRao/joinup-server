@@ -1,6 +1,5 @@
 package cn.org.joinup.user.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.domain.dto.AdminUpdateUserDTO;
@@ -26,33 +25,33 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AdminUserController {
 
-    private final IAdminUserService iAdminUserService;
+    private final IAdminUserService adminUserService;
 
 
     // 计算数据数量
     @GetMapping("/count")
     public Result<Long> count() {
-        Long count = iAdminUserService.count();
+        Long count = adminUserService.count();
         return Result.success(count);
     }
 
     // 分页加载数据
     @GetMapping("/list")
     public IPage<User> list(Pageable pageable) {
-        return iAdminUserService.getPageUsers(pageable);
+        return adminUserService.getPageUsers(pageable);
     }
 
     @DeleteMapping("/delete")
     public Result<Void> delete(@RequestBody Map<String, Long> body) {
         Long id = body.get("id");
-        iAdminUserService.removeById(id);
+        adminUserService.removeById(id);
         return Result.success();
     }
 
     @DeleteMapping("/delete/batch")
     public Result<Void> deleteBatch(@RequestBody Map<String, List<Long>> body) {
         List<Long> ids = body.get("ids");
-        iAdminUserService.removeByIds(ids);
+        adminUserService.removeByIds(ids);
         return Result.success();
     }
 
@@ -66,14 +65,14 @@ public class AdminUserController {
                 .set("verified", adminUpdateUserDTO.getVerified())
                 .set("update_time", LocalDateTime.now());  // 假设你也记录更新时间
 
-        iAdminUserService.update(null, uw);
+        adminUserService.update(null, uw);
         return Result.success();
     }
 
     // 根据主题名称模糊查询（用户名）
     @GetMapping("/querySearch")
     public Result<List<User>> querySearch(@RequestParam String username) {
-        List<User> users = iAdminUserService.list();
+        List<User> users = adminUserService.list();
         List<User> result = new ArrayList<>();
         for (User user : users) {
             if (user.getUsername().contains(username)) {
@@ -87,7 +86,7 @@ public class AdminUserController {
     // 返回模糊查询数量（用户名）
     @GetMapping("/searchCountUsername")
     public Result<Long> searchCount(@RequestParam String username) {
-        List<User> users = iAdminUserService.list();
+        List<User> users = adminUserService.list();
         Long count = 0L;
         for (User user : users) {
             if (user.getUsername().contains(username)) {
@@ -100,7 +99,7 @@ public class AdminUserController {
     // 返回模糊查询数量（学号）
     @GetMapping("/searchCountStudentId")
     public Result<Long> searchCountStudentId(@RequestParam String studentId) {
-        List<User> users = iAdminUserService.list();
+        List<User> users = adminUserService.list();
         Long count = 0L;
         for (User user : users) {
             if (user.getStudentId()!= null && user.getStudentId().contains(studentId)) {
@@ -115,7 +114,7 @@ public class AdminUserController {
     public IPage<User> search(@RequestParam String username,
                                @RequestParam("page") int page, @RequestParam("size") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return iAdminUserService.getPageUsersSearchUsername(username, pageable);
+        return adminUserService.getPageUsersSearchUsername(username, pageable);
     }
 
     // 分页显示模糊查询结果（学号）
@@ -123,23 +122,23 @@ public class AdminUserController {
     public IPage<User> searchStudentId(@RequestParam String studentId,
                                         @RequestParam("page") int page, @RequestParam("size") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return iAdminUserService.getPageUsersSearchStudentId(studentId, pageable);
+        return adminUserService.getPageUsersSearchStudentId(studentId, pageable);
     }
 
     @GetMapping("/online")
     public Result<List<UserDTO>> getOnlineUsers() {
-        return Result.success(iAdminUserService.onlineUsers());
+        return Result.success(adminUserService.onlineUsers());
     }
 
     @GetMapping("/online/list")
     public IPage<User> listOnlineUsers(Pageable pageable) {
-        return iAdminUserService.onlineUsersList(pageable);
+        return adminUserService.onlineUsersList(pageable);
 
     }
 
     @GetMapping("/online/count")
     public Result<Long> countOnlineUsers() {
-        return Result.success((long) iAdminUserService.onlineUsers().size());
+        return Result.success((long) adminUserService.onlineUsers().size());
     }
 
 

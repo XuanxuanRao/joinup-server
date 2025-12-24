@@ -1,6 +1,7 @@
 package cn.org.joinup.user.domain.vo;
 
 import cn.org.joinup.common.enums.Gender;
+import cn.org.joinup.user.enums.UserType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,6 +19,6 @@ public class UserLoginVO {
     private Gender gender;
     @ApiModelProperty(value = "是否完成了身份认证")
     private Boolean verified;
-    @ApiModelProperty(value = "是否是新用户")
-    private Boolean newUser;
+    @ApiModelProperty(value = "用户类型")
+    private UserType userType;
 }

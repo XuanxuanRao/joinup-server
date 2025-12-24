@@ -4,17 +4,20 @@ public class UserContext {
     private static final ThreadLocal<Long> userId = new ThreadLocal<>();
     private static final ThreadLocal<String> appKey = new ThreadLocal<>();
     private static final ThreadLocal<String> role = new ThreadLocal<>();
+    private static final ThreadLocal<String> userType = new ThreadLocal<>();
 
     /**
      * 保存当前登录用户信息到ThreadLocal
      * @param userId 用户id
      * @param appKey 应用key
      * @param role 用户角色
+     * @param userType 用户类型, INTERNAL or EXTERNAL
      */
-    public static void setUser(Long userId, String appKey, String role) {
+    public static void setUser(Long userId, String appKey, String role, String userType) {
         UserContext.userId.set(userId);
         UserContext.appKey.set(appKey);
         UserContext.role.set(role);
+        UserContext.userType.set(userType);
     }
 
     /**
@@ -41,6 +44,14 @@ public class UserContext {
         return role.get();
     }
 
+     /**
+     * 获取当前登录用户类型
+     * @return 用户类型, INTERNAL or EXTERNAL
+     */
+    public static String getUserType() {
+        return userType.get();
+    }
+
     /**
      * 移除当前登录用户信息
      */
@@ -48,5 +59,6 @@ public class UserContext {
         userId.remove();
         appKey.remove();
         role.remove();
+        userType.remove();
     }
 }

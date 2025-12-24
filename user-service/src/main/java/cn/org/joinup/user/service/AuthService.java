@@ -7,6 +7,7 @@ import cn.org.joinup.user.domain.dto.request.ThirdPartyAuthRequestDTO;
 import cn.org.joinup.user.domain.po.APPInfo;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.domain.vo.ThirdPartyAuthResponseVO;
+import cn.org.joinup.user.enums.UserType;
 import cn.org.joinup.user.util.JwtTool;
 import cn.org.joinup.user.util.SignUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class AuthService {
 
     public ThirdPartyAuthResponseVO thirdPartyAuth(ThirdPartyAuthRequestDTO authRequestDTO) {
         // 1. 根据 timestamp 防止重放攻击
-        if (System.currentTimeMillis() - authRequestDTO.getTimestamp() > NONCE_CACHE_EXPIRY) {
+        if (Math.abs(System.currentTimeMillis() - authRequestDTO.getTimestamp()) > NONCE_CACHE_EXPIRY) {
             throw new BadRequestException("请求已过期");
         }
 
@@ -65,10 +66,19 @@ public class AuthService {
                             .build());
             log.info("{} 用户注册成功，userId={}", authRequestDTO.getAppKey(), user.getId());
         }
+        if (user.getUserType() == UserType.INTERNAL) {
+            log.warn("内部用户 {} 尝试使用第三方app {} 授权", user.getId(),  authRequestDTO.getAppKey());
+            throw new BadRequestException("非法的登录请求");
+        }
 
         // 5. 验证通过，生成 token 并返回
         return ThirdPartyAuthResponseVO.builder()
-                .token(jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), Duration.ofMinutes(appInfo.getTokenExpireSeconds())))
+                .token(jwtTool.createToken(
+                        user.getId(),
+                        user.getRole(),
+                        user.getAppKey(),
+                        UserType.EXTERNAL,
+                        Duration.ofMinutes(appInfo.getTokenExpireSeconds())))
                 .expireAt(LocalDateTime.now().plusMinutes(appInfo.getTokenExpireSeconds()))
                 .build();
     }

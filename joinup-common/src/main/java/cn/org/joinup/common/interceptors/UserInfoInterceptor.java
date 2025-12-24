@@ -18,8 +18,9 @@ public class UserInfoInterceptor implements HandlerInterceptor {
         String userId = request.getHeader(SystemConstant.USER_ID_HEADER_NAME);
         String appKey = request.getHeader(SystemConstant.APP_KEY_HEADER_NAME);
         String role = request.getHeader(SystemConstant.USER_ROLE_HEADER_NAME);
+        String userType = request.getHeader(SystemConstant.USER_TYPE_HEADER_NAME);
         if (StrUtil.isNotBlank(userId)) {
-            UserContext.setUser(Long.parseLong(userId), appKey, role);
+            UserContext.setUser(Long.parseLong(userId), appKey, role, userType);
         }
         return true;
     }
