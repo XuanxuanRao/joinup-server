@@ -60,9 +60,6 @@ public class ChatWebSocketServer {
                         return true;
                     }
                     Session session = entry.getValue();
-                    if (session == null) {
-                        return false;
-                    }
                     Object sessionAppKey = session.getUserProperties().get(EndpointConfigConstant.APP_KEY_PROP_NAME);
                     return appKey.equals(sessionAppKey);
                 })
