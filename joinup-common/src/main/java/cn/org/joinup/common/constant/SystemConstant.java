@@ -23,6 +23,10 @@ public class SystemConstant {
     public static final String APP_KEY_PAYLOAD_NAME = "appKey";
     public static final String USER_TYPE_PAYLOAD_NAME = "userType";
 
+    public static final String INTERNAL_USER_TYPE = "INTERNAL";
+    public static final String EXTERNAL_USER_TYPE = "EXTERNAL";
+
+
     /**
      * 允许上传文件的最大大小(20MB)
      */

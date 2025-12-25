@@ -16,8 +16,10 @@ ENV JAVA_OPTS="\
     -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath=/app/dump \
     -XX:+PrintFlagsFinal \
+    -Xmx256m \
+    -Xms64m \
     -XX:+UseContainerSupport \
-    -XX:MaxRAMPercentage=75.0 \
+    -XX:MaxRAMPercentage=50.0 \
     -XX:MinRAMPercentage=20.0 \
     -XX:+UseStringDeduplication"
 

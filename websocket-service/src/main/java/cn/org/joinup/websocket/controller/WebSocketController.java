@@ -32,4 +32,9 @@ public class WebSocketController {
             return Result.error("User with ID " + userId + " is not online or does not exist.");
         }
     }
+
+    @PostMapping("/command/invoke")
+    public Result<Void> pushCommand(Long userId, @RequestParam String command) {
+        return Result.error("NOT IMPLEMENTED YET");
+    }
 }

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @ServerEndpoint(
-        value = "/chat",
+        value = "/push/chat",
         configurator = ChatEndpointConfigurator.class,
         encoders = ChatMessageDTOEncoder.class,
         decoders = ClientChatMessageDecoder.class

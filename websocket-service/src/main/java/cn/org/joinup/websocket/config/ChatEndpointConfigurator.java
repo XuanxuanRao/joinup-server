@@ -63,20 +63,4 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
         }
     }
 
-    /**
-     * 返回 WebSocketEndpoint 实例。
-     * 使用 SpringContextHolder 从 Spring 容器获取实例，以实现依赖注入。
-     */
-//    @Override
-//    public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
-//        // 从 Spring 容器中获取 @Component 标注的 SimpleWebSocketServer 实例
-//        // 这样 SimpleWebSocketServer 中的 @Autowired 才能生效
-//        try {
-//            return SpringContextHolder.getBean(endpointClass);
-//        } catch (Exception e) {
-//            log.error("Failed to get WebSocket endpoint instance from Spring context.", e);
-//            // 如果无法获取 Bean，容器无法创建 Endpoint 实例，握手会失败
-//            throw new InstantiationException("Could not get endpoint instance from Spring context: " + e.getMessage());
-//        }
-//    }
 }

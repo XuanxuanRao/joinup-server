@@ -31,11 +31,9 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
-            if (!request.getURI().getPath().startsWith("/chat")) {
+            if (!request.getURI().getPath().startsWith("/push")) {
                 return chain.filter(exchange);
             }
-
-            log.info("WebSocket: {}", request.getURI());
 
             String token;
             JwtPayload jwtPayload;
@@ -46,6 +44,20 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
             } catch (UnauthorizedException | IndexOutOfBoundsException e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
+            }
+
+            if (request.getURI().getPath().startsWith("/push/chat")) {
+                if (!jwtPayload.getUserType().equals(SystemConstant.INTERNAL_USER_TYPE)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                    log.warn("External User {} try to access chat endpoint, access denied.", jwtPayload.getUserId());
+                    return exchange.getResponse().setComplete();
+                }
+            } else if (request.getURI().getPath().startsWith("/push/command")) {
+                if (!jwtPayload.getUserType().equals(SystemConstant.EXTERNAL_USER_TYPE)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                    log.warn("Internal User {} try to access external command endpoint, access denied.", jwtPayload.getUserId());
+                    return exchange.getResponse().setComplete();
+                }
             }
 
             ServerWebExchange newExchange = exchange.mutate()
