@@ -18,11 +18,11 @@ import java.util.Map;
 @SuppressWarnings("resource")
 public abstract class BaseWebSocketServer {
 
-    protected static RabbitTemplate rabbitTemplate;
+    protected RabbitTemplate rabbitTemplate;
 
     @Autowired
     public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
-        BaseWebSocketServer.rabbitTemplate = rabbitTemplate;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
