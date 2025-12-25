@@ -49,13 +49,13 @@ public class WebSocketGatewayFilterFactory extends AbstractGatewayFilterFactory<
             if (request.getURI().getPath().startsWith("/push/chat")) {
                 if (!jwtPayload.getUserType().equals(SystemConstant.INTERNAL_USER_TYPE)) {
                     exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                    log.warn("External User {} try to access chat endpoint, access denied.", jwtPayload.getUserId());
+                    log.warn("Non-Internal User {} try to access chat endpoint, access denied.", jwtPayload.getUserId());
                     return exchange.getResponse().setComplete();
                 }
             } else if (request.getURI().getPath().startsWith("/push/command")) {
                 if (!jwtPayload.getUserType().equals(SystemConstant.EXTERNAL_USER_TYPE)) {
                     exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                    log.warn("Internal User {} try to access external command endpoint, access denied.", jwtPayload.getUserId());
+                    log.warn("Non-External User {} try to access command endpoint, access denied.", jwtPayload.getUserId());
                     return exchange.getResponse().setComplete();
                 }
             }

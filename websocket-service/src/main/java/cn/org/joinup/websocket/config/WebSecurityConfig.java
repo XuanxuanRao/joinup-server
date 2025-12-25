@@ -17,7 +17,7 @@ public class WebSecurityConfig {
         http
                 .csrf().disable()
                 .authorizeRequests(authorize -> authorize
-                        .antMatchers("/push/**").permitAll()
+                        .antMatchers("/push").permitAll()
                         .antMatchers("/push/**").permitAll()
                         .antMatchers("/ws").permitAll()
                         .antMatchers("/ws/**").permitAll()
