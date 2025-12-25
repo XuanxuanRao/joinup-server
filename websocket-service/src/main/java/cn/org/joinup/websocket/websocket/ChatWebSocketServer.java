@@ -29,13 +29,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
+@SuppressWarnings("resource")
 @ServerEndpoint(
         value = "/push/chat",
         configurator = ChatEndpointConfigurator.class,
         encoders = ChatMessageDTOEncoder.class,
         decoders = ClientChatMessageDecoder.class
 )
-public class ChatWebSocketServer {
+public class ChatWebSocketServer extends BaseWebSocketServer {
     // 维护用户ID与Session的映射，用于点对点发送和广播
     private static final Map<Long, Session> SESSION_MAP = new ConcurrentHashMap<>();
     private static RabbitTemplate rabbitTemplate;
@@ -43,6 +44,11 @@ public class ChatWebSocketServer {
     @Autowired
     public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
         ChatWebSocketServer.rabbitTemplate = rabbitTemplate;
+    }
+
+    @Override
+    protected Map<Long, Session> getSessionMap() {
+        return SESSION_MAP;
     }
 
     public static Set<Long> getOnlineUsers(String userType, String appKey) {
@@ -90,46 +96,7 @@ public class ChatWebSocketServer {
      */
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
-        log.info("WebSocket Handshake: @OnOpen called. Session ID: {}", session.getId());
-
-        try {
-            // 1. 从 session 的用户属性中获取 Configurator 传递的用户信息或认证错误
-            Map<String, Object> userProperties = config.getUserProperties();
-
-            // 检查 Configurator 中是否发生了认证错误或未成功设置用户信息
-            if (userProperties.containsKey("authError") || !userProperties.containsKey(EndpointConfigConstant.USER_ID_PROP_NAME)) {
-                String errorMsg = (String) userProperties.getOrDefault("authError", "Missing user info");
-                log.warn("WebSocket连接失败：握手阶段认证失败 - {}", errorMsg);
-                try {
-                    session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Authentication failed: " + errorMsg));
-                } catch (IOException ex) {
-                    log.error("关闭WebSocket连接失败", ex);
-                }
-                return;
-            }
-
-            Long userId = (Long) userProperties.get(EndpointConfigConstant.USER_ID_PROP_NAME);
-            String appKey = (String) userProperties.get(EndpointConfigConstant.APP_KEY_PROP_NAME);
-            String userType = (String) userProperties.get(EndpointConfigConstant.USER_TYPE_PROP_NAME);
-
-            log.info("WebSocket Handshake: User ID: {}", userId);
-
-            // 2. 认证成功，将用户ID与Session关联
-            SESSION_MAP.put(userId, session);
-            // 也将用户信息存储到 session 的用户属性中，方便在其他生命周期方法中访问
-            session.getUserProperties().put(EndpointConfigConstant.USER_ID_PROP_NAME, userId);
-            session.getUserProperties().put(EndpointConfigConstant.APP_KEY_PROP_NAME, appKey);
-            session.getUserProperties().put(EndpointConfigConstant.USER_TYPE_PROP_NAME, userType);
-
-            log.info("用户 {} 连接成功. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
-        } catch (Exception e) {
-            log.error("WebSocket @OnOpen 发生异常", e);
-            try {
-                session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Internal server error"));
-            } catch (IOException ex) {
-                log.error("关闭WebSocket连接失败", ex);
-            }
-        }
+        super.doOpen(session, config);
     }
 
     /**
@@ -138,17 +105,13 @@ public class ChatWebSocketServer {
      */
     @OnClose
     public void onClose(Session session) {
+        super.doClose(session);
         // 从 Session 属性获取用户 ID
         Long userId = (Long) session.getUserProperties().get(EndpointConfigConstant.USER_ID_PROP_NAME);
         if (userId != null) {
-            SESSION_MAP.remove(userId); // 从映射中移除 Session
-            log.info("用户 {} 断开连接. Session ID: {}. 当前在线用户数：{}", userId, session.getId(), SESSION_MAP.size());
             String key = "user:at:conversation:" + userId;
             StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
             stringRedisTemplate.delete(key);
-        } else {
-            // 如果用户 ID 为 null，说明可能在 @OnOpen 认证前或认证失败时连接就关闭了
-            log.info("未知用户断开连接. Session ID: {}", session.getId());
         }
     }
 

@@ -10,7 +10,7 @@ import javax.websocket.EndpointConfig;
 /**
  * @author chenxuanrao06@gmail.com
  */
-public class ClientChatMessageDecoder implements Decoder.Text<ClientChatMessage>{
+public class ClientChatMessageDecoder implements Decoder.Text<ClientChatMessage> {
     @Override
     public ClientChatMessage decode(String s) throws DecodeException {
         try {
