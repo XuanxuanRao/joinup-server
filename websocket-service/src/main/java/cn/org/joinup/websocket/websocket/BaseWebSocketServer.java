@@ -2,8 +2,6 @@ package cn.org.joinup.websocket.websocket;
 
 import cn.org.joinup.websocket.constant.EndpointConfigConstant;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -17,13 +15,6 @@ import java.util.Map;
 @Slf4j
 @SuppressWarnings("resource")
 public abstract class BaseWebSocketServer {
-
-    protected RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
 
     /**
      * 获取具体的 Session Map，由子类实现
