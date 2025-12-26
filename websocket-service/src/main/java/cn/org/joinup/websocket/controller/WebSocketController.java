@@ -1,11 +1,20 @@
 package cn.org.joinup.websocket.controller;
 
+import cn.org.joinup.api.dto.CommandRequestDTO;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.websocket.domain.CommandDTO;
+import cn.org.joinup.websocket.domain.CommandExecutionResult;
+import cn.org.joinup.websocket.service.CommandWebSocketProxyService;
 import cn.org.joinup.websocket.websocket.ChatWebSocketServer;
+import cn.org.joinup.websocket.websocket.CommandWebSocketServer;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -13,13 +22,20 @@ import java.util.Set;
 @RestController
 @RequestMapping("/ws")
 @Slf4j
+@RequiredArgsConstructor
 public class WebSocketController {
+
+    private final CommandWebSocketProxyService  commandWebSocketProxyService;
+
     @GetMapping("/user/online")
     public Result<Set<Long>> getOnlineUsers(String userType, String appKey) {
         if (userType == null) {
             return Result.error("userType must not be null");
         }
-        return Result.success(ChatWebSocketServer.getOnlineUsers(userType, appKey));
+        Set<Long> onlineUsers = new HashSet<>();
+        onlineUsers.addAll(ChatWebSocketServer.getOnlineUsers(userType, appKey));
+        onlineUsers.addAll(CommandWebSocketServer.getOnlineUsers(userType, appKey));
+        return Result.success(onlineUsers);
     }
 
     @DeleteMapping("/user/{userId}")
@@ -33,8 +49,19 @@ public class WebSocketController {
         }
     }
 
-    @PostMapping("/command/invoke")
-    public Result<Void> pushCommand(Long userId, @RequestParam String command) {
-        return Result.error("NOT IMPLEMENTED YET");
+    @PostMapping("/command/execute")
+    public Result<CommandExecutionResult> pushCommand(@RequestBody @Validated CommandRequestDTO commandRequestDTO) {
+        try {
+            return Result.success(commandWebSocketProxyService.sendCommand(commandRequestDTO));
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    private CommandDTO convertToCommandDTO(CommandRequestDTO commandRequestDTO) {
+        CommandDTO commandDTO = new CommandDTO();
+        commandDTO.setCommandType(commandRequestDTO.getCommandType());
+        commandDTO.setParams(commandRequestDTO.getParams());
+        return commandDTO;
     }
 }

@@ -5,6 +5,7 @@ import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.course.domain.vo.ScheduleVO;
 import cn.org.joinup.course.domain.po.SignLog;
+import cn.org.joinup.course.service.ClientCourseCrawler;
 import cn.org.joinup.course.service.ICourseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +27,9 @@ public class CourseController {
     @Resource
     private ICourseService courseService;
 
+    @Resource
+    private ClientCourseCrawler clientCourseCrawler;
+
     @PostMapping("/sign")
     @ApiOperation("课程签到")
     public Result<Void> signClass(@RequestParam Integer courseScheduleId){
@@ -35,7 +39,8 @@ public class CourseController {
     @GetMapping("/list")
     @ApiOperation("获得date日的课表")
     public Result<ScheduleVO> getClassList(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
-        return courseService.list(date);
+//        return courseService.list(date);
+        return Result.success(clientCourseCrawler.getScheduleByDate("123456", date));
     }
 
     @PostMapping("/log")
