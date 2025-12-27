@@ -103,3 +103,8 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - cn.org.joinup.course.controller
+
+iclass-crawler:
+  channel: client
+  app-keys:
+    - buaa-classhopper-android
