@@ -34,6 +34,7 @@ public class ClientCourseCrawler implements CourseCrawler {
         return "client";
     }
 
+    @Override
     public ScheduleVO getScheduleByDate(String studentId, LocalDate date) {
         Long targetUserId = findAvailableUserId();
         if (targetUserId == null) {

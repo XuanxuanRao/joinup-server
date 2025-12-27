@@ -34,7 +34,7 @@ public class CommandWebSocketServer extends BaseWebSocketServer {
     private static CommandWebSocketProxyService commandWebSocketProxyService;
 
     @Autowired
-    public void setRabbitTemplate(CommandWebSocketProxyService commandWebSocketProxyService) {
+    public void setCommandWebSocketProxyService(CommandWebSocketProxyService commandWebSocketProxyService) {
         CommandWebSocketServer.commandWebSocketProxyService = commandWebSocketProxyService;
     }
 
