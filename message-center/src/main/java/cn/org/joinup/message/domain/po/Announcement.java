@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -36,4 +37,9 @@ public class Announcement implements Serializable {
     private LocalDateTime updateTime;
     @ApiModelProperty("是否已删除")
     private Boolean deleted;
+
+    @ApiModelProperty("目标用户类型")
+    private String targetUserType;
+    @ApiModelProperty("目标 app")
+    private List<String> targetAppKeys;
 }

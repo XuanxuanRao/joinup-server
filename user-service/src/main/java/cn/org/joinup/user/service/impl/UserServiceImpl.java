@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.user.config.UserDefaultAvatarProperties;
 import cn.org.joinup.user.config.UserRegisterProperties;
 import cn.org.joinup.user.enums.UserType;
 import cn.org.joinup.user.util.PasswordUtil;
@@ -57,6 +58,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private final SensitiveWordBs sensitiveWordBs;
 
     private final UserRegisterProperties userRegisterProperties;
+
+    private final UserDefaultAvatarProperties userDefaultAvatarProperties;
 
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
@@ -328,6 +331,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         user.setUserType(UserType.EXTERNAL);
+        user.setAvatar(userDefaultAvatarProperties.getAvatar(UserType.EXTERNAL, registerDTO.getAppKey()));
         save(user);
         return user;
     }

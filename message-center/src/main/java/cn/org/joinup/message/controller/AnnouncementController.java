@@ -38,20 +38,11 @@ public class AnnouncementController {
     @ApiOperation("根据id获取公告详情")
     @GetMapping("/{announcementId}")
     public Result<AnnouncementVO> getAnnouncement(@PathVariable Long announcementId) {
-        Announcement announcement = announcementService.lambdaQuery()
-                .eq(Announcement::getId, announcementId)
-                .eq(Announcement::getDeleted, false)
-                .one();
-
-        if (announcement == null) {
-            return Result.error("公告不存在");
+        try {
+            return Result.success(announcementService.getDetail(announcementId));
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
         }
-
-        UserDTO info = userClient.queryUser(announcement.getPosterUserId()).getData();
-        AnnouncementVO announcementVO = BeanUtil.copyProperties(announcement, AnnouncementVO.class);
-        announcementVO.setPosterUsername(info.getUsername());
-        announcementVO.setPosterAvatar(info.getAvatar());
-        return Result.success(announcementVO);
     }
 
 }
