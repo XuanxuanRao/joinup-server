@@ -78,8 +78,8 @@ public class AuthService {
                         user.getRole(),
                         user.getAppKey(),
                         UserType.EXTERNAL,
-                        Duration.ofMinutes(appInfo.getTokenExpireSeconds())))
-                .expireAt(LocalDateTime.now().plusMinutes(appInfo.getTokenExpireSeconds()))
+                        Duration.ofMinutes(appInfo.getTokenExpireMinutes())))
+                .expireAt(LocalDateTime.now().plusMinutes(appInfo.getTokenExpireMinutes()))
                 .build();
     }
 

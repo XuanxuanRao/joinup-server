@@ -10,15 +10,11 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- *
- * @author chenxuanrao06@gmail.com
- */
-@TableName("app_info")
+@TableName("app_application")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class APPInfo implements Serializable {
+public class AppApplication implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
@@ -26,15 +22,12 @@ public class APPInfo implements Serializable {
 
     private String appKey;
 
-    private String appSecret;
+    private String contactEmail;
 
-    private Boolean enabled;
+    private Long applicantUserId;
 
-    private Boolean deleted;
-
-    private Long tokenExpireMinutes;
+    private String status;
 
     private LocalDateTime createTime;
-
     private LocalDateTime updateTime;
 }
