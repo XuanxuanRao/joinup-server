@@ -32,7 +32,7 @@ public class APPInfo implements Serializable {
 
     private Boolean deleted;
 
-    private Long tokenExpireSeconds;
+    private Long tokenExpireMinutes;
 
     private LocalDateTime createTime;
 

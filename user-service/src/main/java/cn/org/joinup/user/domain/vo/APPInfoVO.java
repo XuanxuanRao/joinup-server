@@ -8,5 +8,6 @@ import java.time.LocalDateTime;
 public class APPInfoVO {
     private String appKey;
     private Boolean enabled;
+    private Long tokenExpireMinutes;
     private LocalDateTime createTime;
 }

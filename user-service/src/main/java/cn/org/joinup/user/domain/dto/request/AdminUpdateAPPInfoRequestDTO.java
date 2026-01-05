@@ -7,5 +7,5 @@ import org.hibernate.validator.constraints.Range;
 public class AdminUpdateAPPInfoRequestDTO {
     private Boolean enabled;
     @Range(min = 30, max = 48 * 60)
-    private Long tokenExpireSeconds;
+    private Long tokenExpireMinutes;
 }
