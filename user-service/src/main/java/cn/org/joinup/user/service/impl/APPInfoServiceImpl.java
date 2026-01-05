@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,6 +64,7 @@ public class APPInfoServiceImpl extends ServiceImpl<APPInfoMapper, APPInfo> impl
 
         BeanUtil.copyProperties(updateAPPInfoDTO, app);
         updateById(app);
+        app.setUpdateTime(LocalDateTime.now());
         return app;
     }
 
