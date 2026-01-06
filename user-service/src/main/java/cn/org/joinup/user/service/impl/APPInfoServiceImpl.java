@@ -4,12 +4,15 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.user.domain.dto.request.AdminUpdateAPPInfoRequestDTO;
 import cn.org.joinup.user.domain.po.APPInfo;
+import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.domain.vo.APPInfoVO;
 import cn.org.joinup.user.mapper.APPInfoMapper;
 import cn.org.joinup.user.service.IAPPInfoService;
+import cn.org.joinup.user.service.IUserService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +25,10 @@ import java.util.stream.Collectors;
  * @author chenxuanrao06@gmail.com
  */
 @Service
+@RequiredArgsConstructor
 public class APPInfoServiceImpl extends ServiceImpl<APPInfoMapper, APPInfo> implements IAPPInfoService {
+
+    private final IUserService userService;
 
     @Override
     public Optional<APPInfo> getActiveAPPInfo(String appKey) {
@@ -37,15 +43,22 @@ public class APPInfoServiceImpl extends ServiceImpl<APPInfoMapper, APPInfo> impl
         Page<APPInfo> page = page(new Page<>(pageNum, pageSize),
                 new LambdaQueryWrapper<APPInfo>()
                         .eq(enabled != null, APPInfo::getEnabled, enabled)
+                        .eq(APPInfo::getDeleted, false)
                         .orderByDesc(APPInfo::getCreateTime));
 
-        List<APPInfoVO> collect = page.getRecords()
+        List<APPInfoVO> appInfoVOList = page.getRecords()
                 .stream()
-                .map(appInfo -> BeanUtil.copyProperties(appInfo, APPInfoVO.class))
+                .map(appInfo -> {
+                    var vo = BeanUtil.copyProperties(appInfo, APPInfoVO.class);
+                    vo.setUsersCount(userService.lambdaQuery()
+                            .eq(User::getAppKey, appInfo.getAppKey())
+                            .count());
+                    return vo;
+                })
                 .collect(Collectors.toList());
 
         return PageResult.of(new Page<APPInfoVO>()
-                .setRecords(collect)
+                .setRecords(appInfoVOList)
                 .setTotal(page.getTotal())
                 .setSize(page.getSize())
                 .setCurrent(page.getCurrent()));
