@@ -1,8 +1,7 @@
-package cn.org.joinup.message.controller;
+package cn.org.joinup.message.controller.admin;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.message.domain.dto.AddFeedbackDTO;
 import cn.org.joinup.message.domain.dto.UpdateFeedbackDTO;
 import cn.org.joinup.message.domain.po.Feedback;
 import cn.org.joinup.message.service.IAdminFeedbackService;

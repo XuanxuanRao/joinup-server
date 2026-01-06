@@ -67,8 +67,9 @@ joinup:
       - /theme/list
       - /interest/all
       - /team/search
-      - /message/announcement
+      - /message/announcement/**
       - /external/**
+      - /message/splash/**
     admin-regex-paths:
       - ^/user/\d+$
       - ^/ws/user/\d+$

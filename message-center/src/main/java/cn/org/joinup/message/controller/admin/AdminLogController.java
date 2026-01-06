@@ -1,4 +1,4 @@
-package cn.org.joinup.message.controller;
+package cn.org.joinup.message.controller.admin;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.message.domain.po.LogEntry;
