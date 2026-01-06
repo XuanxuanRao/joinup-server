@@ -10,4 +10,5 @@ public class APPInfoVO {
     private Boolean enabled;
     private Long tokenExpireMinutes;
     private LocalDateTime createTime;
+    private Long usersCount;
 }
