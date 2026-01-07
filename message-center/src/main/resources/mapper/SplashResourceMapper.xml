@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.org.joinup.message.mapper.SplashResourceMapper">
+
+    <select id="selectPageByPlatform" resultType="cn.org.joinup.message.domain.po.splash.SplashResource">
+        SELECT r.* FROM splash_resource r
+        WHERE r.deleted = false
+        <if test="enabled != null">
+            AND r.enabled = #{enabled}
+        </if>
+        <if test="platform != null and platform != ''">
+            AND EXISTS (
+            SELECT 1
+            FROM splash_strategy s
+            WHERE s.enabled = true AND s.deleted = false AND s.resource_id = r.id
+            AND s.start_time &lt;= now() and s.end_time > now()
+            AND s.target_platforms @> ARRAY[#{platform}::text]
+            )
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+</mapper>

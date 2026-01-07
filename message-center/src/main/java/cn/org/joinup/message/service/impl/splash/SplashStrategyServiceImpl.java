@@ -1,5 +1,7 @@
 package cn.org.joinup.message.service.impl.splash;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.org.joinup.message.domain.dto.request.SplashStrategyUpdateDTO;
 import cn.org.joinup.message.domain.po.splash.SplashStrategy;
 import cn.org.joinup.message.mapper.SplashStrategyMapper;
 import cn.org.joinup.message.service.ISplashStrategyService;
@@ -24,6 +26,19 @@ public class SplashStrategyServiceImpl extends ServiceImpl<SplashStrategyMapper,
                 .ge(SplashStrategy::getEndTime, LocalDateTime.now())
                 .orderByDesc(SplashStrategy::getPriority)
                 .list();
+    }
+
+    @Override
+    public SplashStrategy updateSplashStrategy(Long strategyId, SplashStrategyUpdateDTO updateDTO) {
+        SplashStrategy strategy = getById(strategyId);
+        if (strategy == null) {
+            log.error("splash strategy not found, strategyId: {}", strategyId);
+            return null;
+        }
+
+        BeanUtil.copyProperties(updateDTO, strategy);
+        updateById(strategy);
+        return strategy;
     }
 
 }
