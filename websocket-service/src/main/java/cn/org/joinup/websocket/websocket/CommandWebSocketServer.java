@@ -34,7 +34,7 @@ public class CommandWebSocketServer extends BaseWebSocketServer {
     private static CommandWebSocketProxyService commandWebSocketProxyService;
 
     public static boolean forceDisconnect(Long userId, String reason) {
-        Session session = SESSION_MAP.remove(userId);
+        Session session = SESSION_MAP.get(userId);
         if (session != null && session.isOpen()) {
             try {
                 session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, reason));

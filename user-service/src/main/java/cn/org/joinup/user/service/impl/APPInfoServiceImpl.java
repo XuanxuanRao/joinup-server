@@ -32,7 +32,7 @@ public class APPInfoServiceImpl extends ServiceImpl<APPInfoMapper, APPInfo> impl
 
     @Override
     public Optional<APPInfo> getActiveAPPInfo(String appKey) {
-        return Optional.of(lambdaQuery().eq(APPInfo::getAppKey, appKey)
+        return Optional.ofNullable(lambdaQuery().eq(APPInfo::getAppKey, appKey)
                 .eq(APPInfo::getEnabled, true)
                 .eq(APPInfo::getDeleted, false)
                 .one());
