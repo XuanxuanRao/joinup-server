@@ -3,6 +3,7 @@ package cn.org.joinup.user.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.WebSocketClient;
 import cn.org.joinup.api.dto.UserDTO;
+import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.user.enums.UserType;
 import cn.org.joinup.user.mapper.UserMapper;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -87,4 +89,10 @@ public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implemen
         return page(page, wrapper);
 
     }
+
+    @Override
+    public boolean removeOnlineUser(Long userId, String connectType) {
+        return Objects.equals(webSocketClient.removeOnlineUser(userId, connectType).getCode(), Result.SUCCESS);
+    }
+
 }

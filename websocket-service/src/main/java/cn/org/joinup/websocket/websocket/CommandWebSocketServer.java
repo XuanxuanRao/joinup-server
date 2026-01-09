@@ -33,6 +33,21 @@ public class CommandWebSocketServer extends BaseWebSocketServer {
 
     private static CommandWebSocketProxyService commandWebSocketProxyService;
 
+    public static boolean forceDisconnect(Long userId, String reason) {
+        Session session = SESSION_MAP.get(userId);
+        if (session != null && session.isOpen()) {
+            try {
+                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, reason));
+                log.info("Disconnected from user {} with reason {}", userId, reason);
+            } catch (IOException e) {
+                log.error("Error while closing session for user {}", userId, e);
+            }
+            return true;
+        }
+        log.info("User {} is not connected or already closed", userId);
+        return false;
+    }
+
     @Autowired
     public void setCommandWebSocketProxyService(CommandWebSocketProxyService commandWebSocketProxyService) {
         CommandWebSocketServer.commandWebSocketProxyService = commandWebSocketProxyService;

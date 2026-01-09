@@ -141,5 +141,14 @@ public class AdminUserController {
         return Result.success((long) adminUserService.onlineUsers().size());
     }
 
+    @DeleteMapping("/online/{userId}")
+    public Result<Void> disconnect(@PathVariable Long userId,
+                                   @RequestParam(required = false, defaultValue = "chat") String connectType) {
+        if (adminUserService.removeOnlineUser(userId, connectType)) {
+            return Result.success();
+        }
+        return Result.error("用户不存在或未连接");
+    }
+
 
 }

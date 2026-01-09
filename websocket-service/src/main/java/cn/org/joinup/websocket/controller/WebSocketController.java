@@ -2,7 +2,7 @@ package cn.org.joinup.websocket.controller;
 
 import cn.org.joinup.api.dto.CommandRequestDTO;
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.websocket.domain.CommandDTO;
+import cn.org.joinup.websocket.constant.WebSocketServiceTypeConstant;
 import cn.org.joinup.websocket.domain.CommandExecutionResult;
 import cn.org.joinup.websocket.service.CommandWebSocketProxyService;
 import cn.org.joinup.websocket.websocket.ChatWebSocketServer;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -39,10 +38,16 @@ public class WebSocketController {
     }
 
     @DeleteMapping("/user/{userId}")
-    public Result<Void> kickUserConnection(@PathVariable Long userId) {
-        boolean success = ChatWebSocketServer.forceDisconnect(userId, "Admin killed the connection for dev");
+    public Result<Void> kickUserConnection(@PathVariable Long userId,
+                                           @RequestParam(required = false, defaultValue = "chat") String connectType) {
+        boolean success = false;
+        if (WebSocketServiceTypeConstant.CHAT.equals(connectType)) {
+            success = ChatWebSocketServer.forceDisconnect(userId, "Admin killed the connection for dev");
+        } else if (WebSocketServiceTypeConstant.COMMAND.equals(connectType)) {
+            success = CommandWebSocketServer.forceDisconnect(userId, "Admin killed the connection for dev");
+        }
         if (success) {
-            log.info("User with ID {} has been kicked from WebSocket connection.", userId);
+            log.info("User with ID {} has been kicked from WebSocket connection {}.", userId, connectType);
             return Result.success();
         } else {
             return Result.error("User with ID " + userId + " is not online or does not exist.");
@@ -58,10 +63,4 @@ public class WebSocketController {
         }
     }
 
-    private CommandDTO convertToCommandDTO(CommandRequestDTO commandRequestDTO) {
-        CommandDTO commandDTO = new CommandDTO();
-        commandDTO.setCommandType(commandRequestDTO.getCommandType());
-        commandDTO.setParams(commandRequestDTO.getParams());
-        return commandDTO;
-    }
 }

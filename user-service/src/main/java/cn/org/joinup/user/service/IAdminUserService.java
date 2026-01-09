@@ -10,13 +10,15 @@ import java.util.List;
 
 public interface IAdminUserService extends IService<User> {
 
-    public IPage<User> getPageUsers(Pageable pageable);
+    IPage<User> getPageUsers(Pageable pageable);
 
-    public IPage<User> getPageUsersSearchUsername(String name, Pageable pageable);
+    IPage<User> getPageUsersSearchUsername(String name, Pageable pageable);
 
-    public IPage<User> getPageUsersSearchStudentId(String studentId, Pageable pageable);
+    IPage<User> getPageUsersSearchStudentId(String studentId, Pageable pageable);
 
     List<UserDTO> onlineUsers();
 
-    public IPage<User> onlineUsersList(Pageable pageable);
+    IPage<User> onlineUsersList(Pageable pageable);
+
+    boolean removeOnlineUser(Long userId, String connectType);
 }
