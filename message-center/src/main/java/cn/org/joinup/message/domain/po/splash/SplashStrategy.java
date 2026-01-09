@@ -1,6 +1,8 @@
 package cn.org.joinup.message.domain.po.splash;
 
+import cn.org.joinup.common.handler.StringArrayTypeHandler;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -35,6 +37,7 @@ public class SplashStrategy implements Serializable {
 
     private Integer priority;
 
+    @TableField(typeHandler = StringArrayTypeHandler.class)
     private List<String> targetPlatforms;
 
     private Boolean enabled;
