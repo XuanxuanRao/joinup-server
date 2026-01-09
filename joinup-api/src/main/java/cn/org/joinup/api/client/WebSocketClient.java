@@ -1,8 +1,10 @@
 package cn.org.joinup.api.client;
 
+import cn.org.joinup.api.dto.CommandExecutionResultDTO;
+import cn.org.joinup.api.dto.CommandRequestDTO;
 import cn.org.joinup.common.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -10,6 +12,12 @@ import java.util.Set;
 public interface WebSocketClient {
 
     @GetMapping("/ws/user/online")
-    Result<Set<Long>> getOnlineUsers();
+    Result<Set<Long>> getOnlineUsers(@RequestParam String userType, @RequestParam(required = false) String appKey);
+
+    @PostMapping("/ws/command/execute")
+    Result<CommandExecutionResultDTO<Object>> pushCommand(@RequestBody CommandRequestDTO command);
+
+    @DeleteMapping("/ws/user/{userId}")
+    Result<Boolean> removeOnlineUser(@PathVariable Long userId, @RequestParam String connectType);
 
 }

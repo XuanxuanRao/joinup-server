@@ -54,6 +54,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             }
         } catch (UnauthorizedException e) {
             if (isNeedAuth(request.getPath().toString())) {
+                log.info("Unauthorized access to ({}) {}", request.getMethodValue(), request.getPath());
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             } else {
@@ -66,11 +67,13 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                 .request(builder -> builder.headers(httpHeaders -> {
                     httpHeaders.set(SystemConstant.USER_ID_HEADER_NAME, jwtPayload.getUserId().toString());
                     httpHeaders.set(SystemConstant.USER_ROLE_HEADER_NAME, jwtPayload.getRole());
+                    httpHeaders.set(SystemConstant.USER_TYPE_HEADER_NAME, jwtPayload.getUserType());
+                    httpHeaders.set(SystemConstant.APP_KEY_HEADER_NAME, jwtPayload.getAppKey());
                 }))
                 .build();
 
 
-        log.info("User ID: {}, Role: {}", jwtPayload.getUserId(), jwtPayload.getRole());
+        log.info("User ID: {}, Role: {}, UserType: {}", jwtPayload.getUserId(), jwtPayload.getRole(), jwtPayload.getUserType());
 
         return chain.filter(newExchange);
     }

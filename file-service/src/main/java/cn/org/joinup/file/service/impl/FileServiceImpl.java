@@ -57,7 +57,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         fileEntity.setSize(file.getSize());
         fileEntity.setUrl(url);
         fileEntity.setMd5(FileUtil.calculateMD5(file));
-        fileEntity.setUploaderId(UserContext.getUser());
+        fileEntity.setUploaderId(UserContext.getUserId());
         save(fileEntity);
 
         return BeanUtil.copyProperties(fileEntity, FileVO.class);

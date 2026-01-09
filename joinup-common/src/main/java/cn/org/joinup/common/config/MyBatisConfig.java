@@ -1,6 +1,8 @@
 package cn.org.joinup.common.config;
 
+import cn.org.joinup.common.handler.StringArrayTypeHandler;
 import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
@@ -20,5 +22,12 @@ public class MyBatisConfig {
         paginationInnerInterceptor.setMaxLimit(100L);
         interceptor.addInnerInterceptor(paginationInnerInterceptor);
         return interceptor;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConfigurationCustomizer configurationCustomizer() {
+        return configuration -> configuration.getTypeHandlerRegistry()
+                .register(StringArrayTypeHandler.class);
     }
 }

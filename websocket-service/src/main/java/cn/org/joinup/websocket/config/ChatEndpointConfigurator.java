@@ -1,6 +1,7 @@
 package cn.org.joinup.websocket.config;
 
 import cn.org.joinup.common.constant.SystemConstant;
+import cn.org.joinup.websocket.constant.EndpointConfigConstant;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.HandshakeResponse;
@@ -26,8 +27,12 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
         // 1. 从 HTTP 握手请求头中提取 Gateway 添加的用户信息
         Map<String, List<String>> headers = request.getHeaders();
         List<String> userIdHeaders = headers.get(SystemConstant.USER_ID_HEADER_NAME);
+        List<String> appKeyHeaders = headers.get(SystemConstant.APP_KEY_HEADER_NAME);
+        List<String> userTypeHeaders = headers.get(SystemConstant.USER_TYPE_HEADER_NAME);
 
         String userIdStr = (userIdHeaders != null && !userIdHeaders.isEmpty()) ? userIdHeaders.get(0) : null;
+        String appKey = (appKeyHeaders != null && !appKeyHeaders.isEmpty()) ? appKeyHeaders.get(0) : null;
+        String userType = (userTypeHeaders != null && !userTypeHeaders.isEmpty()) ? userTypeHeaders.get(0) : null;
 
         log.info("Extracted headers in configurator: {}: {}", SystemConstant.USER_ID_HEADER_NAME, userIdStr);
 
@@ -42,7 +47,9 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
             // 这些属性会在 Session 对象中传递到 @OnOpen 方法
             try {
                 Long userId = Long.parseLong(userIdStr);
-                sec.getUserProperties().put("userId", userId);
+                sec.getUserProperties().put(EndpointConfigConstant.USER_ID_PROP_NAME, userId);
+                sec.getUserProperties().put(EndpointConfigConstant.APP_KEY_PROP_NAME, appKey);
+                sec.getUserProperties().put(EndpointConfigConstant.USER_TYPE_PROP_NAME, userType);
                 log.info("User info stored in handshake properties: userId={}", userId);
             } catch (NumberFormatException e) {
                 log.error("WebSocket Handshake: Invalid userId format in configurator: {}", userIdStr, e);
@@ -56,20 +63,4 @@ public class ChatEndpointConfigurator extends ServerEndpointConfig.Configurator 
         }
     }
 
-    /**
-     * 返回 WebSocketEndpoint 实例。
-     * 使用 SpringContextHolder 从 Spring 容器获取实例，以实现依赖注入。
-     */
-//    @Override
-//    public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
-//        // 从 Spring 容器中获取 @Component 标注的 SimpleWebSocketServer 实例
-//        // 这样 SimpleWebSocketServer 中的 @Autowired 才能生效
-//        try {
-//            return SpringContextHolder.getBean(endpointClass);
-//        } catch (Exception e) {
-//            log.error("Failed to get WebSocket endpoint instance from Spring context.", e);
-//            // 如果无法获取 Bean，容器无法创建 Endpoint 实例，握手会失败
-//            throw new InstantiationException("Could not get endpoint instance from Spring context: " + e.getMessage());
-//        }
-//    }
 }

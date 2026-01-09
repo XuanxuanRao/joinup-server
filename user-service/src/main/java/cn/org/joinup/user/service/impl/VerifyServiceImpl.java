@@ -96,7 +96,7 @@ public class VerifyServiceImpl implements IVerifyService {
 
     @Override
     public Result<Void> sendVerifyCodeForIdentity(String email) {
-        User user = userService.getById(UserContext.getUser());
+        User user = userService.getById(UserContext.getUserId());
         if (user == null) {
             return Result.error("用户不存在");
         }

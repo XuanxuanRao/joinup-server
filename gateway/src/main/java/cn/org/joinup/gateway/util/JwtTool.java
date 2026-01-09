@@ -53,7 +53,9 @@ public class JwtTool {
         // 4.数据格式校验
         Object userPayload = jwt.getPayload(SystemConstant.USER_ID_PAYLOAD_NAME);
         Object rolePayload = jwt.getPayload(SystemConstant.USER_ROLE_PAYLOAD_NAME);
-        if (userPayload == null || rolePayload == null) {
+        Object appKeyPayload = jwt.getPayload(SystemConstant.APP_KEY_PAYLOAD_NAME);
+        Object userTypePayload = jwt.getPayload(SystemConstant.USER_TYPE_PAYLOAD_NAME);
+        if (userPayload == null || rolePayload == null || userTypePayload == null) {
             // 数据为空
             throw new UnauthorizedException("无效的token");
         }
@@ -62,7 +64,9 @@ public class JwtTool {
         try {
             Long userId = Long.valueOf(userPayload.toString());
             String role = rolePayload.toString();
-            return new JwtPayload(userId, role);
+            String appKey = appKeyPayload == null ? "" : appKeyPayload.toString();
+            String userType = userTypePayload.toString();
+            return new JwtPayload(userId, role, appKey, userType);
         } catch (RuntimeException e) {
             // 数据格式有误
             throw new UnauthorizedException("无效的token");

@@ -1,4 +1,4 @@
-package cn.org.joinup.team.controller;
+package cn.org.joinup.team.controller.admin;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.team.domain.po.TeamMember;

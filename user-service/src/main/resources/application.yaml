@@ -59,3 +59,10 @@ wx:
     app-id: ${joinup.wx.miniapp.app-id}
     app-secret: ${joinup.wx.miniapp.app-secret}
     msg-data-format: JSON
+
+
+user:
+  avatar:
+    external-config:
+      buaa-classhopper-android: https://joinup.oss-cn-beijing.aliyuncs.com/app-resources/buaa-school-emblem.png
+    default-avatar: https://joinup.oss-cn-beijing.aliyuncs.com/app-resources/wuthering_waves.jpeg

@@ -45,7 +45,7 @@ public class ConversationController {
             @RequestParam(required = false) String type,
             @RequestParam Integer pageNumber,
             @RequestParam Integer pageSize) {
-        return Result.success(conversationService.queryConversations(UserContext.getUser(), pageNumber, pageSize, type));
+        return Result.success(conversationService.queryConversations(UserContext.getUserId(), pageNumber, pageSize, type));
     }
 
     @GetMapping("/{conversationId}")
@@ -62,13 +62,13 @@ public class ConversationController {
             return Result.error("userId and teamId cannot be both set");
         }
         if (userId != null) {
-            if (Objects.equals(UserContext.getUser(), userId)) {
+            if (Objects.equals(UserContext.getUserId(), userId)) {
                 return Result.error("Cannot create conversation with yourself");
             } else {
-                return Result.success(conversationService.tryCreatePrivateConversation(UserContext.getUser(), userId));
+                return Result.success(conversationService.tryCreatePrivateConversation(UserContext.getUserId(), userId));
             }
         } else if (teamId != null) {
-            return Optional.ofNullable(conversationService.tryCreateGroupConversation(UserContext.getUser(), teamId))
+            return Optional.ofNullable(conversationService.tryCreateGroupConversation(UserContext.getUserId(), teamId))
                     .map(Result::success)
                     .orElseGet(() -> Result.error("未加入该队伍"));
         }
@@ -128,14 +128,14 @@ public class ConversationController {
     @PostMapping("/{conversationId}/enter")
     @PreAuthorize("@permissionChecker.hasAccessToConversation(#conversationId)")
     public Result<Void> enterConversation(@PathVariable String conversationId){
-        final String key = RedisConstant.USER_AT_CONVERSATION + UserContext.getUser();
+        final String key = RedisConstant.USER_AT_CONVERSATION + UserContext.getUserId();
         stringRedisTemplate.opsForValue().set(key, conversationId);
         return Result.success();
     }
 
     @DeleteMapping("/exit")
     public Result<Void> exitConversation() {
-        String key = RedisConstant.USER_AT_CONVERSATION + UserContext.getUser();
+        String key = RedisConstant.USER_AT_CONVERSATION + UserContext.getUserId();
         stringRedisTemplate.delete(key);
         return Result.success();
     }

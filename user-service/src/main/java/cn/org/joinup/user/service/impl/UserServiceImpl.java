@@ -8,7 +8,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.user.config.UserDefaultAvatarProperties;
 import cn.org.joinup.user.config.UserRegisterProperties;
+import cn.org.joinup.user.enums.UserType;
 import cn.org.joinup.user.util.PasswordUtil;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.dto.*;
@@ -57,11 +59,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     private final UserRegisterProperties userRegisterProperties;
 
+    private final UserDefaultAvatarProperties userDefaultAvatarProperties;
+
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
 
         User user = lambdaQuery()
                 .eq(User::getUsername, loginDTO.getUsername())
+                .eq(User::getUserType, UserType.INTERNAL)
                 .one();
 
 
@@ -73,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new BadRequestException("用户名或密码错误");
         }
 
-        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), user.getUserType(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;
@@ -89,8 +94,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
             User user = lambdaQuery()
                     .eq(User::getOpenid, sessionInfo.getOpenid())
+                    .eq(User::getUserType, UserType.INTERNAL)
                     .one();
-            boolean isNewUser = user == null;
             // 如果用户不存在则注册
             if (user == null) {
                 if (!userRegisterProperties.isWxEnabled()) {
@@ -101,13 +106,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 user.setOpenid(sessionInfo.getOpenid());
                 user.setCreateTime(LocalDateTime.now());
                 user.setUpdateTime(LocalDateTime.now());
+                user.setUserType(UserType.INTERNAL);
                 save(user);
             }
-            String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+            String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), user.getUserType(), jwtProperties.getTokenTTL());
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
-            userLoginVO.setNewUser(isNewUser);
             return userLoginVO;
         } catch (WxErrorException e) {
             log.error("微信登录失败: {}", e.getLocalizedMessage());
@@ -139,12 +144,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         user = BeanUtil.copyProperties(registerDTO, User.class);
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+        user.setUserType(UserType.INTERNAL);
+
         if (!save(user)) {
             return null;
         }
+
         stringRedisTemplate.delete(RedisConstant.VERIFY_CODE_PREFIX + registerDTO.getEmail());
 
-        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), user.getUserType(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return userLoginVO;
@@ -176,13 +186,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             user.setOpenid(sessionInfo.getOpenid());
             user.setCreateTime(LocalDateTime.now());
             user.setUpdateTime(LocalDateTime.now());
+            user.setUserType(UserType.INTERNAL);
             save(user);
 
-            String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+            String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), user.getUserType(), jwtProperties.getTokenTTL());
             // 返回登录结果
             UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
             userLoginVO.setToken(token);
-            userLoginVO.setNewUser(true);
             return Result.success(userLoginVO);
         } catch (WxErrorException e) {
             return Result.error("微信登录失败");
@@ -221,7 +231,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Result<Void> verifyIdentity(VerifyIdentityDTO verifyIdentityDTO) {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         User user = getById(userId);
 
         String correctCode = stringRedisTemplate.opsForValue().get(RedisConstant.VERIFY_CODE_PREFIX + verifyIdentityDTO.getEmail());
@@ -251,7 +261,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         User user = BeanUtil.copyProperties(updateUserDTO, User.class);
-        user.setId(UserContext.getUser());
+        user.setId(UserContext.getUserId());
         user.setUpdateTime(LocalDateTime.now());
         user.setSsoPassword(null);
         Optional.ofNullable(updateUserDTO.getSsoPassword())
@@ -269,12 +279,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Result<UserLoginVO> refreshToken() {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         User user = getById(userId);
         if (user == null) {
             return Result.error("用户不存在");
         }
-        String token = jwtTool.createToken(user.getId(), user.getRole(), jwtProperties.getTokenTTL());
+        String token = jwtTool.createToken(user.getId(), user.getRole(), user.getAppKey(), user.getUserType(), jwtProperties.getTokenTTL());
         UserLoginVO userLoginVO = BeanUtil.copyProperties(user, UserLoginVO.class);
         userLoginVO.setToken(token);
         return Result.success(userLoginVO);
@@ -282,7 +292,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public String getSsoPassword() {
-        Long userId = UserContext.getUser();
+        Long userId = UserContext.getUserId();
         User user = getUserById(userId);
         if (user == null) {
             return null;
@@ -309,6 +319,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (user != null) {
             stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(user), cn.org.joinup.user.constant.RedisConstant.USER_INFO_TTL, TimeUnit.SECONDS);
         }
+        return user;
+    }
+
+    @Override
+    public User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) {
+        User user = new User();
+        user.setUsername(registerDTO.getUsername());
+        user.setAppKey(registerDTO.getAppKey());
+        user.setAppUUID(registerDTO.getAppUUID());
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+        user.setUserType(UserType.EXTERNAL);
+        user.setAvatar(userDefaultAvatarProperties.getAvatar(UserType.EXTERNAL, registerDTO.getAppKey()));
+        save(user);
         return user;
     }
 }

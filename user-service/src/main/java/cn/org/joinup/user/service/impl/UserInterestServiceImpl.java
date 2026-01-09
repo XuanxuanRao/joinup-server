@@ -33,7 +33,7 @@ public class UserInterestServiceImpl extends ServiceImpl<UserInterestMapper, Use
 
         UserInterest userInterest = new UserInterest();
         userInterest.setInterestId(interestId);
-        userInterest.setUserId(UserContext.getUser());
+        userInterest.setUserId(UserContext.getUserId());
         userInterest.setCreateTime(LocalDateTime.now());
 
         save(userInterest);
@@ -44,7 +44,7 @@ public class UserInterestServiceImpl extends ServiceImpl<UserInterestMapper, Use
     @Override
     public List<Interest> getUserInterests(Long parentInterestId) {
         return lambdaQuery()
-                .eq(UserInterest::getUserId, UserContext.getUser())
+                .eq(UserInterest::getUserId, UserContext.getUserId())
                 .eq(parentInterestId != null, UserInterest::getInterestId, parentInterestId)
                 .list()
                 .stream()
@@ -59,7 +59,7 @@ public class UserInterestServiceImpl extends ServiceImpl<UserInterestMapper, Use
         }
 
         remove(new LambdaQueryWrapper<UserInterest>()
-                .eq(UserInterest::getUserId, UserContext.getUser())
+                .eq(UserInterest::getUserId, UserContext.getUserId())
                 .eq(UserInterest::getInterestId, interestId)
         );
     }

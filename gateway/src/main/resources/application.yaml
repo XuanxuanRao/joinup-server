@@ -50,24 +50,26 @@ spring:
         - id: websocket-service
           uri: lb://websocket-service
           predicates:
-            - Path=/chat/**, /ws/user/**
+            - Path=/push/**
           filters:
             - WebSocket
 
 joinup:
   auth:
     exclude-paths:
-      - /chat/**
+      - /push/**
       - /user/wxLogin
       - /user/login
+      - /user/third-auth
       - /user/register
       - /verify/**
       - /test/hello
       - /theme/list
       - /interest/all
       - /team/search
-      - /message/announcement
+      - /message/announcement/**
       - /external/**
+      - /message/splash/**
     admin-regex-paths:
       - ^/user/\d+$
       - ^/ws/user/\d+$

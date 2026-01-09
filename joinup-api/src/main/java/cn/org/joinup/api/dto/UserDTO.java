@@ -31,4 +31,6 @@ public class UserDTO {
     private Integer createdTeamCount;
     @ApiModelProperty("用户权限")
     private String role;
+    @ApiModelProperty("Optional, 所属第三方应用的 APP Key")
+    private String appKey;
 }
