@@ -2,7 +2,8 @@ package cn.org.joinup.message.service.impl.splash;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.exception.BadRequestException;
-import cn.org.joinup.message.domain.dto.request.SplashResourceUpdateDTO;
+import cn.org.joinup.message.domain.dto.request.splash.SplashResourceCreateDTO;
+import cn.org.joinup.message.domain.dto.request.splash.SplashResourceUpdateDTO;
 import cn.org.joinup.message.domain.po.splash.SplashResource;
 import cn.org.joinup.message.mapper.SplashResourceMapper;
 import cn.org.joinup.message.service.ISplashResourceService;
@@ -58,6 +59,17 @@ public class SplashResourceServiceImpl extends ServiceImpl<SplashResourceMapper,
         BeanUtil.copyProperties(updateDTO, splashResource);
         splashResource.setUpdateTime(LocalDateTime.now());
         updateById(splashResource);
+        return splashResource;
+    }
+
+    @Override
+    public SplashResource createSplashResource(SplashResourceCreateDTO resourceCreateDTO) {
+        SplashResource splashResource = BeanUtil.copyProperties(resourceCreateDTO, SplashResource.class);
+        splashResource.setEnabled(true);
+        splashResource.setDeleted(false);
+        splashResource.setCreateTime(LocalDateTime.now());
+        splashResource.setUpdateTime(LocalDateTime.now());
+        save(splashResource);
         return splashResource;
     }
 

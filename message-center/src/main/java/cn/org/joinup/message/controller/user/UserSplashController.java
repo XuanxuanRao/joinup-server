@@ -1,7 +1,7 @@
 package cn.org.joinup.message.controller.user;
 
 import cn.org.joinup.common.result.Result;
-import cn.org.joinup.message.domain.dto.request.UserFetchSplashRequestDTO;
+import cn.org.joinup.message.domain.dto.request.splash.UserFetchSplashRequestDTO;
 import cn.org.joinup.message.domain.vo.SplashUserVO;
 import cn.org.joinup.message.service.impl.splash.SplashService;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package cn.org.joinup.message.service.impl.splash;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.common.result.PageResult;
-import cn.org.joinup.message.domain.dto.request.UserFetchSplashRequestDTO;
+import cn.org.joinup.message.domain.dto.request.splash.UserFetchSplashRequestDTO;
 import cn.org.joinup.message.domain.po.splash.SplashResource;
 import cn.org.joinup.message.domain.po.splash.SplashStrategy;
 import cn.org.joinup.message.domain.vo.SplashStatisticsVO;
