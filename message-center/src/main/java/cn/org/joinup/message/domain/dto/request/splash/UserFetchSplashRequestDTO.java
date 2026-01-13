@@ -1,4 +1,4 @@
-package cn.org.joinup.message.domain.dto.request;
+package cn.org.joinup.message.domain.dto.request.splash;
 
 import lombok.Data;
 

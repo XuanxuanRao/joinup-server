@@ -1,6 +1,7 @@
 package cn.org.joinup.message.service;
 
-import cn.org.joinup.message.domain.dto.request.SplashResourceUpdateDTO;
+import cn.org.joinup.message.domain.dto.request.splash.SplashResourceCreateDTO;
+import cn.org.joinup.message.domain.dto.request.splash.SplashResourceUpdateDTO;
 import cn.org.joinup.message.domain.po.splash.SplashResource;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -13,4 +14,6 @@ public interface ISplashResourceService extends IService<SplashResource> {
     Page<SplashResource> listSplash(Integer pageNum, Integer pageSize, Boolean enabled, String platform);
 
     SplashResource updateSplashResource(Long resourceId, SplashResourceUpdateDTO updateDTO);
+
+    SplashResource createSplashResource(SplashResourceCreateDTO resourceCreateDTO);
 }
