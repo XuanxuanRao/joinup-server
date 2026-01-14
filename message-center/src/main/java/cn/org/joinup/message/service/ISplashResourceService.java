@@ -1,5 +1,6 @@
 package cn.org.joinup.message.service;
 
+import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.message.domain.dto.request.splash.SplashResourceCreateDTO;
 import cn.org.joinup.message.domain.dto.request.splash.SplashResourceUpdateDTO;
 import cn.org.joinup.message.domain.po.splash.SplashResource;
@@ -16,4 +17,6 @@ public interface ISplashResourceService extends IService<SplashResource> {
     SplashResource updateSplashResource(Long resourceId, SplashResourceUpdateDTO updateDTO);
 
     SplashResource createSplashResource(SplashResourceCreateDTO resourceCreateDTO);
+
+    PageResult<SplashResource> listSplashResource(Integer pageNum, Integer pageSize, String title, Boolean enabled);
 }
