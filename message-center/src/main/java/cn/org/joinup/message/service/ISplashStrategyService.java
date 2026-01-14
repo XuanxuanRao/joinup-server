@@ -13,4 +13,6 @@ public interface ISplashStrategyService extends IService<SplashStrategy> {
     SplashStrategy updateSplashStrategy(Long strategyId, SplashStrategyUpdateDTO updateDTO);
 
     SplashStrategy createSplashStrategy(SplashStrategyCreateDTO createStrategyDTO);
+
+    boolean markAsDeleted(Long strategyId);
 }

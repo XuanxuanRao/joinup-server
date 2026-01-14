@@ -87,4 +87,34 @@ public class AdminSplashController {
         return Result.success(splashResourceService.listSplashResource(pageNum, pageSize, title, enabled));
     }
 
+    @DeleteMapping("/resource/{resourceId}")
+    public Result<Void> deleteSplashResource(@PathVariable Long resourceId) {
+        log.info("delete splash resource {}", resourceId);
+        try {
+            if (splashResourceService.markAsDeleted(resourceId)) {
+                return Result.success();
+            } else {
+                return Result.error("SplashResource not found");
+            }
+        } catch (Exception e) {
+            log.error("delete splash resource error", e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/strategy/{strategyId}")
+    public Result<Void> deleteSplashStrategy(@PathVariable Long strategyId) {
+        log.info("delete splash strategy {}", strategyId);
+        try {
+            if (splashStrategyService.markAsDeleted(strategyId)) {
+                return Result.success();
+            } else {
+                return Result.error("SplashStrategy not found");
+            }
+        } catch (Exception e) {
+            log.error("delete splash strategy error", e);
+            return Result.error(e.getMessage());
+        }
+    }
+
 }

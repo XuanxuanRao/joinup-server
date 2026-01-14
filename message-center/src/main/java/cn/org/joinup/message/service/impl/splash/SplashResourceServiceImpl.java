@@ -90,4 +90,18 @@ public class SplashResourceServiceImpl extends ServiceImpl<SplashResourceMapper,
         return PageResult.of(splashResourceIPage);
     }
 
+    @Override
+    public boolean markAsDeleted(Long resourceId) {
+        SplashResource splashResource = getById(resourceId);
+        if (splashResource == null) {
+            log.warn("SplashResource not found, resourceId: {}", resourceId);
+            return false;
+        }
+
+        splashResource.setDeleted(true);
+        splashResource.setUpdateTime(LocalDateTime.now());
+        updateById(splashResource);
+        return true;
+    }
+
 }

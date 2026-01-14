@@ -53,4 +53,18 @@ public class SplashStrategyServiceImpl extends ServiceImpl<SplashStrategyMapper,
         return strategy;
     }
 
+    @Override
+    public boolean markAsDeleted(Long strategyId) {
+        SplashStrategy strategy = getById(strategyId);
+        if (strategy == null) {
+            log.error("splash strategy not found, strategyId: {}", strategyId);
+            return false;
+        }
+
+        strategy.setDeleted(true);
+        strategy.setUpdateTime(LocalDateTime.now());
+        updateById(strategy);
+        return true;
+    }
+
 }
