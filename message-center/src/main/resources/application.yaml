@@ -93,7 +93,7 @@ mybatis-plus:
 
 logging:
   level:
-    com.hmall: debug
+    cn.org.joinup.message: debug
   pattern:
     dateformat: HH:mm:ss:SSS
   file:

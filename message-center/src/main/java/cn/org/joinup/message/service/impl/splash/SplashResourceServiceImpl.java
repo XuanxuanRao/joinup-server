@@ -1,12 +1,15 @@
 package cn.org.joinup.message.service.impl.splash;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.common.exception.BadRequestException;
+import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.message.domain.dto.request.splash.SplashResourceCreateDTO;
 import cn.org.joinup.message.domain.dto.request.splash.SplashResourceUpdateDTO;
 import cn.org.joinup.message.domain.po.splash.SplashResource;
 import cn.org.joinup.message.mapper.SplashResourceMapper;
 import cn.org.joinup.message.service.ISplashResourceService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -71,6 +74,20 @@ public class SplashResourceServiceImpl extends ServiceImpl<SplashResourceMapper,
         splashResource.setUpdateTime(LocalDateTime.now());
         save(splashResource);
         return splashResource;
+    }
+
+    @Override
+    public PageResult<SplashResource> listSplashResource(Integer pageNum, Integer pageSize, String title, Boolean enabled) {
+        Page<SplashResource> splashResourceIPage = page(
+                new Page<>(pageNum, pageSize),
+                new LambdaQueryWrapper<SplashResource>()
+                        .like(StrUtil.isNotBlank(title), SplashResource::getTitle, title)
+                        .eq(enabled != null, SplashResource::getEnabled, enabled)
+                        .eq(SplashResource::getDeleted, false)
+                        .orderByDesc(SplashResource::getCreateTime)
+        );
+
+        return PageResult.of(splashResourceIPage);
     }
 
 }

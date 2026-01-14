@@ -79,4 +79,12 @@ public class AdminSplashController {
         }
     }
 
+    @GetMapping("/resource")
+    public Result<PageResult<SplashResource>> listSplashResource(
+            @RequestParam Integer pageNum, @RequestParam Integer pageSize,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Boolean enabled) {
+        return Result.success(splashResourceService.listSplashResource(pageNum, pageSize, title, enabled));
+    }
+
 }
