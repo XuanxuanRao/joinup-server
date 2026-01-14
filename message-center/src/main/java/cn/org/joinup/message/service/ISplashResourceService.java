@@ -19,4 +19,6 @@ public interface ISplashResourceService extends IService<SplashResource> {
     SplashResource createSplashResource(SplashResourceCreateDTO resourceCreateDTO);
 
     PageResult<SplashResource> listSplashResource(Integer pageNum, Integer pageSize, String title, Boolean enabled);
+
+    boolean markAsDeleted(Long resourceId);
 }
