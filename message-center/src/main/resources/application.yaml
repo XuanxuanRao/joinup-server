@@ -142,8 +142,10 @@ exchange:
       secondary: "alpha_vantage"
       urls:
         exchangerate: "https://v6.exchangerate-api.com/v6"
+        alpha_vantage: "https://api.tatum.io/v4/data/rate/symbol"
       api-keys:
         exchangerate: ${EXCHANGE_RATE_API_KEY}
+        alpha_vantage: ${ALPHA_VANTAGE_API_KEY}
     thresholds:
       absolute-upper: 22.75
       absolute-lower: 20.00
