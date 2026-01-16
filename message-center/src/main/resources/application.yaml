@@ -114,3 +114,25 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - cn.org.joinup.message.controller
+
+
+exchange:
+  monitor:
+    fetch-rate-in-milliseconds: 300000
+    datasource:
+      primary: "exchangerate.host"
+      secondary: "alpha_vantage"
+      urls:
+        exchangerate_host: "https://v6.exchangerate-api.com/v6/%s/pair"
+      primary-api-key: ${RATE_PRIMARY_SOURCE_API_KEY}
+      secondary-api-key: ${RATE_SECONDARY_SOURCE_API_KEY}
+    thresholds:
+      absolute-upper: 21.50
+      absolute-lower: 20.00
+      hysteresis-margin: 0.02
+      relative-increase-percentage: 0.5
+    event:
+      enabled: true
+      exchange-name: "exchange.rate.topic"
+      routing-key: "rate.cnyjpy.triggered"
+      suppress-duration-in-minutes: 60
