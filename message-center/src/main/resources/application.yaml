@@ -136,13 +136,14 @@ knife4j:
 exchange:
   monitor:
     fetch-rate-cron: "0 0 10 * * ?"
+    retry-times: 3
     datasource:
       primary: "exchangerate.host"
       secondary: "alpha_vantage"
       urls:
-        exchangerate_host: "https://v6.exchangerate-api.com/v6/%s/pair"
-      primary-api-key: ${RATE_PRIMARY_SOURCE_API_KEY}
-      secondary-api-key: ${RATE_SECONDARY_SOURCE_API_KEY}
+        exchangerate_host: "https://v6.exchangerate-api.com"
+      api-keys:
+        exchangerate_host: ${EXCHANGE_RATE_API_KEY}
     thresholds:
       absolute-upper: 21.50
       absolute-lower: 20.00

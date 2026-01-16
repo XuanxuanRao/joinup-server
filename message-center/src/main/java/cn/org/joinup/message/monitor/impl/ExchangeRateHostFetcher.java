@@ -36,21 +36,11 @@ public class ExchangeRateHostFetcher implements RateFetcher {
 
     @Override
     public Optional<ExchangeRate> fetchRate(String fromCurrency, String toCurrency) {
-        String urlTemplate = monitorConfig.getDatasource()
-                .getUrls()
-                .get("exchangerate_host");
-        if (urlTemplate == null) {
-            // Fallback default if not configured
-            urlTemplate = "https://v6.exchangerate-api.com/v6/%s/pair/%s/%s";
-        }
-        
-        // Ensure the URL matches the requested currency if possible, or assume config is correct for now as per requirement
-        // Ideally we should replace params if the URL template supports it.
-        // For Phase 1, we focus on CNY/JPY as per requirement.
-        
-        String url = String.format(urlTemplate, monitorConfig.getDatasource().getPrimaryApiKey(), fromCurrency, toCurrency);
-
-        return fetchWithRetry(url, 3, fromCurrency, toCurrency);
+        return fetchWithRetry(
+                buildUrl(fromCurrency, toCurrency),
+                monitorConfig.getRetryTimes(),
+                fromCurrency,
+                toCurrency);
     }
 
     private Optional<ExchangeRate> fetchWithRetry(String url, int maxRetries, String fromCurrency, String toCurrency) {
@@ -110,6 +100,17 @@ public class ExchangeRateHostFetcher implements RateFetcher {
             log.error("[RateFetcher] Failed to parse response: {}", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    private String buildUrl(String fromCurrency, String toCurrency) {
+        // https://v6.exchangerate-api.com/v6/{apiKey}/pair/{fromCurrency}/{toCurrency}
+        String urlTemplate = monitorConfig.getDatasource()
+                .getUrls()
+                .getOrDefault("exchangerate_host", "https://v6.exchangerate-api.com");
+        urlTemplate = urlTemplate + "/v6/%s/pair/%s/%s";
+
+        return String.format(urlTemplate,
+                monitorConfig.getDatasource().getApiKeys().get("exchangerate_host"), fromCurrency, toCurrency);
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "exchange.monitor")
 public class MonitorConfig {
-    private long fetchRateInMilliseconds = 300000;
+    private Integer retryTimes;
     private Datasource datasource = new Datasource();
     private Thresholds thresholds = new Thresholds();
     private Event event = new Event();
@@ -21,9 +21,8 @@ public class MonitorConfig {
     public static class Datasource {
         private String primary;
         private String secondary;
-        private String primaryApiKey;
-        private String secondaryApiKey;
         private Map<String, String> urls = new HashMap<>();
+        private Map<String, String> apiKeys = new HashMap<>();
     }
 
     @Data
