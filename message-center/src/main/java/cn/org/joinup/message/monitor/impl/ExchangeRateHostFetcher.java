@@ -106,16 +106,16 @@ public class ExchangeRateHostFetcher implements RateFetcher {
         // https://v6.exchangerate-api.com/v6/{apiKey}/pair/{fromCurrency}/{toCurrency}
         String urlTemplate = monitorConfig.getDatasource()
                 .getUrls()
-                .getOrDefault("exchangerate_host", "https://v6.exchangerate-api.com");
-        urlTemplate = urlTemplate + "/v6/%s/pair/%s/%s";
+                .getOrDefault(getSourceId(), "https://v6.exchangerate-api.com/v6");
+        urlTemplate = urlTemplate + "/%s/pair/%s/%s";
 
         return String.format(urlTemplate,
-                monitorConfig.getDatasource().getApiKeys().get("exchangerate_host"), fromCurrency, toCurrency);
+                monitorConfig.getDatasource().getApiKeys().get(getSourceId()), fromCurrency, toCurrency);
     }
 
     @Override
     public String getSourceId() {
-        return "exchangerate.host";
+        return "exchangerate";
     }
 
 }

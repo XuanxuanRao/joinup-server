@@ -138,14 +138,14 @@ exchange:
     fetch-rate-cron: "0 0 10 * * ?"
     retry-times: 3
     datasource:
-      primary: "exchangerate.host"
+      primary: "exchangerate"
       secondary: "alpha_vantage"
       urls:
-        exchangerate_host: "https://v6.exchangerate-api.com"
+        exchangerate: "https://v6.exchangerate-api.com/v6"
       api-keys:
-        exchangerate_host: ${EXCHANGE_RATE_API_KEY}
+        exchangerate: ${EXCHANGE_RATE_API_KEY}
     thresholds:
-      absolute-upper: 21.50
+      absolute-upper: 22.75
       absolute-lower: 20.00
       hysteresis-margin: 0.02
       relative-increase-percentage: 0.5

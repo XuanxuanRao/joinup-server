@@ -12,7 +12,7 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "exchange.monitor")
 public class MonitorConfig {
-    private Integer retryTimes;
+    private Integer retryTimes = 3;
     private Datasource datasource = new Datasource();
     private Thresholds thresholds = new Thresholds();
     private Event event = new Event();
