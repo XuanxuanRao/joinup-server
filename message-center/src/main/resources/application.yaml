@@ -81,6 +81,23 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
             fallback: false
 
+  quartz:
+    startup-delay: 20
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    wait-for-jobs-to-complete-on-shutdown: true
+    properties:
+      org:
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: 10
+          threadPriority: 5
+          threadsInheritContextClassLoaderOfInitializingThread: true
+        quartz:
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+
 
 mybatis-plus:
   configuration:
@@ -118,7 +135,7 @@ knife4j:
 
 exchange:
   monitor:
-    fetch-rate-in-milliseconds: 300000
+    fetch-rate-cron: "0 0 10 * * ?"
     datasource:
       primary: "exchangerate.host"
       secondary: "alpha_vantage"
