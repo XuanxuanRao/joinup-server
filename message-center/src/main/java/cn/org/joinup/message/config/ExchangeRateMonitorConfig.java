@@ -12,6 +12,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "exchange.monitor")
 public class ExchangeRateMonitorConfig {
     private Integer retryTimes = 3;
+    private String googleFinanceLink;
     private Datasource datasource = new Datasource();
     private Event event = new Event();
 

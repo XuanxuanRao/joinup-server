@@ -101,7 +101,7 @@
                         <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="left" style="border-collapse:collapse;margin-top:4px;margin-bottom:12px;">
                             <tr>
                                 <td align="center" bgcolor="#2563eb" style="border-radius:6px;">
-                                    <a href="[[${detailsUrl}]]" target="_blank" style="display:inline-block;padding:10px 24px;font-size:14px;font-weight:500;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                                    <a th:href="${detailsUrl}" target="_blank" style="display:inline-block;padding:10px 24px;font-size:14px;font-weight:500;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
                                         查看详情
                                     </a>
                                 </td>
@@ -110,7 +110,7 @@
 
                         <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.6;">
                             如果按钮无法正常打开，请将以下链接复制到浏览器中访问：<br>
-                            <span style="font-family:Menlo,Consolas,monospace;word-break:break-all;color:#2563eb;">{{detailsUrl}</span>
+                            <span style="font-family:Menlo,Consolas,monospace;word-break:break-all;color:#2563eb;">[[${detailsUrl}]]</span>
                         </p>
                     </td>
                 </tr>

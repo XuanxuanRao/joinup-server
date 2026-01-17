@@ -151,3 +151,4 @@ exchange:
       exchange-name: "exchange.rate.topic"
       routing-key-format: "rate.%s.%s.triggered"
       suppress-duration-in-minutes: 60
+    google-finance-link: "https://www.google.com/finance/quote/%s-%s"

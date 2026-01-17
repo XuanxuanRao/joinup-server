@@ -2,7 +2,8 @@ package cn.org.joinup.message.controller.user;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
-import cn.org.joinup.message.domain.dto.request.splash.AddExchangeRateMonitorRuleDTO;
+import cn.org.joinup.message.domain.dto.request.monitor.AddExchangeRateMonitorRuleDTO;
+import cn.org.joinup.message.domain.dto.request.monitor.UpdateExchangeRateMonitorRuleDTO;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.service.IExchangeRateRuleService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,18 @@ public class ExchangeRateMonitorController {
         } catch (Exception e) {
             log.error("Add exchange rate monitor rule failed, userId={}, addRuleDTO={}", UserContext.getUserId(), addRuleDTO, e);
             return Result.error("Add exchange rate monitor rule failed");
+        }
+    }
+
+    @PutMapping("/rules/{ruleId}")
+    public Result<ExchangeRateMonitorRule> updateRule(@PathVariable Long ruleId,
+                                                      @RequestBody @Validated UpdateExchangeRateMonitorRuleDTO updateRuleDTO) {
+        try {
+            log.info("Update exchange rate monitor rule, userId={}, ruleId={}, updateRuleDTO={}", UserContext.getUserId(), ruleId, updateRuleDTO);
+            return Result.success(exchangeRateRuleService.updateRule(ruleId, updateRuleDTO));
+        } catch (Exception e) {
+            log.error("Update exchange rate monitor rule failed, userId={}, ruleId={}, updateRuleDTO={}", UserContext.getUserId(), ruleId, updateRuleDTO, e);
+            return Result.error("Update exchange rate monitor rule failed");
         }
     }
 

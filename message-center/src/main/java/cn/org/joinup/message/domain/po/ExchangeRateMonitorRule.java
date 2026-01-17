@@ -37,6 +37,7 @@ public class ExchangeRateMonitorRule implements Serializable {
     @TableField(value = "thresholds", typeHandler = JacksonTypeHandler.class)
     private Thresholds thresholds;
 
+    @TableField(value = "active")
     private Boolean active;
 
     private LocalDateTime createTime;
