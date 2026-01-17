@@ -1,7 +1,7 @@
 package cn.org.joinup.message.monitor.impl;
 
 import cn.org.joinup.message.monitor.RateFetcher;
-import cn.org.joinup.message.monitor.config.MonitorConfig;
+import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,11 +22,11 @@ import java.util.Optional;
 @Component
 public class ExchangeRateHostFetcher implements RateFetcher {
 
-    private final MonitorConfig monitorConfig;
+    private final ExchangeRateMonitorConfig monitorConfig;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public ExchangeRateHostFetcher(MonitorConfig monitorConfig, ObjectMapper objectMapper) {
+    public ExchangeRateHostFetcher(ExchangeRateMonitorConfig monitorConfig, ObjectMapper objectMapper) {
         this.monitorConfig = monitorConfig;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()

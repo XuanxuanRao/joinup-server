@@ -1,6 +1,7 @@
 package cn.org.joinup.message.monitor;
 
-import cn.org.joinup.message.monitor.config.MonitorConfig;
+import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
+import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 public class ExchangeRateMonitorServiceTest {
 
-    private MonitorConfig monitorConfig;
+    private ExchangeRateMonitorConfig monitorConfig;
     private ThresholdJudger thresholdJudger;
     private RateFetcher primaryFetcher;
     private RateFetcher secondaryFetcher;
@@ -24,7 +25,7 @@ public class ExchangeRateMonitorServiceTest {
 
     @BeforeEach
     public void setUp() {
-        monitorConfig = new MonitorConfig();
+        monitorConfig = new ExchangeRateMonitorConfig();
         monitorConfig.getDatasource().setPrimary("primary");
         monitorConfig.getDatasource().setSecondary("secondary");
 
@@ -47,11 +48,11 @@ public class ExchangeRateMonitorServiceTest {
                 .rate(BigDecimal.TEN)
                 .fromCurrency("CNY").toCurrency("JPY").source("primary").build()));
 
-        service.performCheck();
+        service.performCheck(ExchangeRateMonitorRule.builder().build());
 
         verify(primaryFetcher, times(1)).fetchRate(any(), any());
         verify(secondaryFetcher, never()).fetchRate(any(), any());
-        verify(thresholdJudger, times(1)).judge(any());
+        verify(thresholdJudger, times(1)).judge(any(), any());
     }
 
     @Test
@@ -61,11 +62,11 @@ public class ExchangeRateMonitorServiceTest {
                 .rate(BigDecimal.TEN)
                 .fromCurrency("CNY").toCurrency("JPY").source("secondary").build()));
 
-        service.performCheck();
+        service.performCheck(ExchangeRateMonitorRule.builder().build());
 
         verify(primaryFetcher, times(1)).fetchRate(any(), any());
         verify(secondaryFetcher, times(1)).fetchRate(any(), any());
-        verify(thresholdJudger, times(1)).judge(any());
+        verify(thresholdJudger, times(1)).judge(any(), any());
     }
 
     @Test
@@ -73,10 +74,10 @@ public class ExchangeRateMonitorServiceTest {
         when(primaryFetcher.fetchRate(any(), any())).thenReturn(Optional.empty());
         when(secondaryFetcher.fetchRate(any(), any())).thenReturn(Optional.empty());
 
-        service.performCheck();
+        service.performCheck(ExchangeRateMonitorRule.builder().build());
 
         verify(primaryFetcher, times(1)).fetchRate(any(), any());
         verify(secondaryFetcher, times(1)).fetchRate(any(), any());
-        verify(thresholdJudger, never()).judge(any());
+        verify(thresholdJudger, never()).judge(any(), any());
     }
 }

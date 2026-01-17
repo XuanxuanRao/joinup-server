@@ -1,20 +1,18 @@
-package cn.org.joinup.message.monitor.config;
+package cn.org.joinup.message.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "exchange.monitor")
-public class MonitorConfig {
+public class ExchangeRateMonitorConfig {
     private Integer retryTimes = 3;
     private Datasource datasource = new Datasource();
-    private Thresholds thresholds = new Thresholds();
     private Event event = new Event();
 
     @Data
@@ -23,14 +21,6 @@ public class MonitorConfig {
         private String secondary;
         private Map<String, String> urls = new HashMap<>();
         private Map<String, String> apiKeys = new HashMap<>();
-    }
-
-    @Data
-    public static class Thresholds {
-        private BigDecimal absoluteUpper = new BigDecimal("21.50");
-        private BigDecimal absoluteLower = new BigDecimal("20.00");
-        private BigDecimal hysteresisMargin = new BigDecimal("0.02");
-        private BigDecimal relativeIncreasePercentage = new BigDecimal("0.5");
     }
 
     @Data

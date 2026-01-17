@@ -1,6 +1,6 @@
 package cn.org.joinup.message.monitor;
 
-import cn.org.joinup.message.monitor.config.MonitorConfig;
+import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EventPublisher {
 
     private final RabbitTemplate rabbitTemplate;
-    private final MonitorConfig monitorConfig;
+    private final ExchangeRateMonitorConfig monitorConfig;
     
     // For suppression: key = triggerType, value = lastTriggerTime
     private final Map<String, Long> lastTriggeredMap = new ConcurrentHashMap<>();

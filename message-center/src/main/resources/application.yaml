@@ -146,13 +146,8 @@ exchange:
       api-keys:
         exchangerate: ${EXCHANGE_RATE_API_KEY}
         alpha_vantage: ${ALPHA_VANTAGE_API_KEY}
-    thresholds:
-      absolute-upper: 22.75
-      absolute-lower: 20.00
-      hysteresis-margin: 0.02
-      relative-increase-percentage: 0.5
     event:
       enabled: true
       exchange-name: "exchange.rate.topic"
-      routing-key: "rate.cnyjpy.triggered"
+      routing-key: "rate.cny.jpy.triggered"
       suppress-duration-in-minutes: 60

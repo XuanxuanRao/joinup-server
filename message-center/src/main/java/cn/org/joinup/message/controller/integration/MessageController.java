@@ -1,4 +1,4 @@
-package cn.org.joinup.message.controller;
+package cn.org.joinup.message.controller.integration;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.message.domain.EmailSendModel;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author chenxuanrao06@gmail.com
  */
 @RestController
-@RequestMapping("/message")
+@RequestMapping("/integration/message")
 @RequiredArgsConstructor
 public class MessageController {
 

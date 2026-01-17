@@ -1,6 +1,7 @@
 package cn.org.joinup.message.monitor;
 
-import cn.org.joinup.message.monitor.config.MonitorConfig;
+import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
+import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ThresholdJudger {
 
-    private final MonitorConfig monitorConfig;
+    private final ExchangeRateMonitorConfig monitorConfig;
     private final EventPublisher eventPublisher;
 
     // State for Hysteresis: true if currently in "High" state
     private boolean isHighState = false;
 
-    public void judge(ExchangeRate exchangeRate) {
+    public void judge(ExchangeRate exchangeRate, ExchangeRateMonitorRule rule) {
         BigDecimal currentRate = exchangeRate.getRate();
-        BigDecimal upper = monitorConfig.getThresholds().getAbsoluteUpper();
-        BigDecimal margin = monitorConfig.getThresholds().getHysteresisMargin();
+        BigDecimal upper = rule.getThresholds().getAbsoluteUpper();
+        BigDecimal margin = rule.getThresholds().getHysteresisMargin();
         
         log.info("[ThresholdJudger] Current: {}, Upper: {}, Margin: {}, HighState: {}", 
                 currentRate, upper, margin, isHighState);

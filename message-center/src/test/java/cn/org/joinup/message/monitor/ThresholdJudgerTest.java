@@ -1,6 +1,7 @@
 package cn.org.joinup.message.monitor;
 
-import cn.org.joinup.message.monitor.config.MonitorConfig;
+import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
+import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,10 +21,7 @@ public class ThresholdJudgerTest {
 
     @BeforeEach
     public void setUp() {
-        MonitorConfig monitorConfig = new MonitorConfig();
-        // Set defaults
-        monitorConfig.getThresholds().setAbsoluteUpper(new BigDecimal("21.50"));
-        monitorConfig.getThresholds().setHysteresisMargin(new BigDecimal("0.02"));
+        ExchangeRateMonitorConfig monitorConfig = new ExchangeRateMonitorConfig();
         
         eventPublisher = Mockito.mock(EventPublisher.class);
         thresholdJudger = new ThresholdJudger(monitorConfig, eventPublisher);
@@ -39,7 +37,12 @@ public class ThresholdJudgerTest {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        thresholdJudger.judge(rate);
+        thresholdJudger.judge(rate, ExchangeRateMonitorRule.builder()
+                        .thresholds(ExchangeRateMonitorRule.Thresholds.builder()
+                                .absoluteUpper(new BigDecimal("21.50"))
+                                .hysteresisMargin(new BigDecimal("0.02"))
+                                .build())
+                .build());
 
         verify(eventPublisher, times(1)).publish(any(RateThresholdEvent.class));
     }
@@ -50,14 +53,24 @@ public class ThresholdJudgerTest {
         ExchangeRate rateHigh = ExchangeRate.builder()
                 .rate(new BigDecimal("21.51"))
                 .fromCurrency("CNY").toCurrency("JPY").source("test").build();
-        thresholdJudger.judge(rateHigh);
+        thresholdJudger.judge(rateHigh, ExchangeRateMonitorRule.builder()
+                        .thresholds(ExchangeRateMonitorRule.Thresholds.builder()
+                                .absoluteUpper(new BigDecimal("21.50"))
+                                .hysteresisMargin(new BigDecimal("0.02"))
+                                .build())
+                .build());
         verify(eventPublisher, times(1)).publish(any(RateThresholdEvent.class));
 
         // 2. Stay in High State (between 21.48 and 21.50)
         ExchangeRate rateMiddle = ExchangeRate.builder()
                 .rate(new BigDecimal("21.49"))
                 .fromCurrency("CNY").toCurrency("JPY").source("test").build();
-        thresholdJudger.judge(rateMiddle);
+        thresholdJudger.judge(rateMiddle, ExchangeRateMonitorRule.builder()
+                        .thresholds(ExchangeRateMonitorRule.Thresholds.builder()
+                                .absoluteUpper(new BigDecimal("21.50"))
+                                .hysteresisMargin(new BigDecimal("0.02"))
+                                .build())
+                .build());
         // Should NOT trigger anything (stay high)
         verify(eventPublisher, times(1)).publish(any(RateThresholdEvent.class));
 
@@ -65,13 +78,23 @@ public class ThresholdJudgerTest {
         ExchangeRate rateLow = ExchangeRate.builder()
                 .rate(new BigDecimal("21.47"))
                 .fromCurrency("CNY").toCurrency("JPY").source("test").build();
-        thresholdJudger.judge(rateLow);
+        thresholdJudger.judge(rateLow, ExchangeRateMonitorRule.builder()
+                        .thresholds(ExchangeRateMonitorRule.Thresholds.builder()
+                                .absoluteUpper(new BigDecimal("21.50"))
+                                .hysteresisMargin(new BigDecimal("0.02"))
+                                .build())
+                .build());
         // Should have exited state (internally), but no event published for exit in current impl
         // Verify no new event
         verify(eventPublisher, times(1)).publish(any(RateThresholdEvent.class));
 
         // 4. Re-enter High State
-        thresholdJudger.judge(rateHigh);
+        thresholdJudger.judge(rateHigh, ExchangeRateMonitorRule.builder()
+                        .thresholds(ExchangeRateMonitorRule.Thresholds.builder()
+                                .absoluteUpper(new BigDecimal("21.50"))
+                                .hysteresisMargin(new BigDecimal("0.02"))
+                                .build())
+                .build());
         // Should trigger again
         verify(eventPublisher, times(2)).publish(any(RateThresholdEvent.class));
     }

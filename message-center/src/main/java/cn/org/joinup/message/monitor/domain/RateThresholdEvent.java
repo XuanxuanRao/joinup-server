@@ -21,4 +21,5 @@ public class RateThresholdEvent {
     private String triggerType; // ABSOLUTE_UPPER, ABSOLUTE_LOWER
     private String dataSource;
     private String message;
+    private Long exchangeRateMonitorSubscriptionId;
 }
