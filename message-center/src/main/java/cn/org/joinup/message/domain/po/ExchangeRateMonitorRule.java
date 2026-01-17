@@ -1,5 +1,6 @@
 package cn.org.joinup.message.domain.po;
 
+import cn.org.joinup.message.enums.CurrencyCode;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -30,9 +31,9 @@ public class ExchangeRateMonitorRule implements Serializable {
 
     private String email;
 
-    private String baseCurrency;
+    private CurrencyCode baseCurrency;
 
-    private String quoteCurrency;
+    private CurrencyCode quoteCurrency;
 
     @TableField(value = "thresholds", typeHandler = JacksonTypeHandler.class)
     private Thresholds thresholds;

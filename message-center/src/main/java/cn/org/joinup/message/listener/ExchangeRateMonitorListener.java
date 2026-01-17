@@ -58,8 +58,8 @@ public class ExchangeRateMonitorListener {
 
     private Map<String, Object> buildParams(RateThresholdEvent event, ExchangeRateMonitorRule currentRule) {
         return new HashMap<>() {{
-            put("baseCurrency", event.getMonitorRuleSnapshot().getBaseCurrency());
-            put("quoteCurrency", event.getMonitorRuleSnapshot().getQuoteCurrency());
+            put("baseCurrency", event.getMonitorRuleSnapshot().getBaseCurrency().getCode());
+            put("quoteCurrency", event.getMonitorRuleSnapshot().getQuoteCurrency().getCode());
             put("currentRate", String.valueOf(event.getCurrentRate()));
             put("currencyPair", event.getCurrencyPair());
             put("threshold", String.valueOf(event.getThreshold()));
@@ -71,6 +71,8 @@ public class ExchangeRateMonitorListener {
             put("message", event.getMessage());
             put("detailsUrl", String.format(monitorConfig.getGoogleFinanceLink(),
                     event.getMonitorRuleSnapshot().getBaseCurrency(), event.getMonitorRuleSnapshot().getQuoteCurrency()));
+            put("baseCurrencyName", event.getMonitorRuleSnapshot().getBaseCurrency().getDesc());
+            put("quoteCurrencyName", event.getMonitorRuleSnapshot().getQuoteCurrency().getDesc());
         }};
     }
 

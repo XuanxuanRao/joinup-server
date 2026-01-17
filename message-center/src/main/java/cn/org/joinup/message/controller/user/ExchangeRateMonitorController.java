@@ -5,6 +5,7 @@ import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.domain.dto.request.monitor.AddExchangeRateMonitorRuleDTO;
 import cn.org.joinup.message.domain.dto.request.monitor.UpdateExchangeRateMonitorRuleDTO;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
+import cn.org.joinup.message.enums.CurrencyCode;
 import cn.org.joinup.message.service.IExchangeRateRuleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/message/feature/rate-monitor")
@@ -49,6 +51,11 @@ public class ExchangeRateMonitorController {
             log.error("Update exchange rate monitor rule failed, userId={}, ruleId={}, updateRuleDTO={}", UserContext.getUserId(), ruleId, updateRuleDTO, e);
             return Result.error("Update exchange rate monitor rule failed");
         }
+    }
+
+    @GetMapping("/config/currency")
+    public Result<Map<String, String>> getAvailableCurrencies() {
+        return Result.success(CurrencyCode.getCodeToNameMap());
     }
 
 }
