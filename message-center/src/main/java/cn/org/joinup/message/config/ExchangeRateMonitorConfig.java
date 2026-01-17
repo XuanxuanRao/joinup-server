@@ -27,7 +27,7 @@ public class ExchangeRateMonitorConfig {
     public static class Event {
         private boolean enabled = true;
         private String exchangeName = "exchange.rate.topic";
-        private String routingKey = "rate.cnyjpy.triggered";
+        private String routingKeyFormat = "rate.%s.%s.triggered";
         private int suppressDurationInMinutes = 60;
     }
 }

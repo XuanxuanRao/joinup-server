@@ -149,5 +149,5 @@ exchange:
     event:
       enabled: true
       exchange-name: "exchange.rate.topic"
-      routing-key: "rate.cny.jpy.triggered"
+      routing-key-format: "rate.%s.%s.triggered"
       suppress-duration-in-minutes: 60

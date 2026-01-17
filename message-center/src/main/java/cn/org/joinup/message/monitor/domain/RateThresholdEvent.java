@@ -1,5 +1,6 @@
 package cn.org.joinup.message.monitor.domain;
 
+import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +22,5 @@ public class RateThresholdEvent {
     private String triggerType; // ABSOLUTE_UPPER, ABSOLUTE_LOWER
     private String dataSource;
     private String message;
-    private Long exchangeRateMonitorSubscriptionId;
+    private ExchangeRateMonitorRule monitorRuleSnapshot;
 }

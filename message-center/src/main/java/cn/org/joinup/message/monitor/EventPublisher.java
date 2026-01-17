@@ -39,12 +39,14 @@ public class EventPublisher {
         }
 
         try {
+            String routingKey = String.format(monitorConfig.getEvent().getRoutingKeyFormat(),
+                    event.getMonitorRuleSnapshot().getBaseCurrency(), event.getMonitorRuleSnapshot().getQuoteCurrency());
             log.info("[EventPublisher] Publishing event to Exchange: {}, RoutingKey: {}", 
-                    monitorConfig.getEvent().getExchangeName(), monitorConfig.getEvent().getRoutingKey());
+                    monitorConfig.getEvent().getExchangeName(), routingKey);
             
             rabbitTemplate.convertAndSend(
                     monitorConfig.getEvent().getExchangeName(),
-                    monitorConfig.getEvent().getRoutingKey(),
+                    routingKey,
                     event
             );
             log.info("[EventPublisher] Event published successfully: {}", event);

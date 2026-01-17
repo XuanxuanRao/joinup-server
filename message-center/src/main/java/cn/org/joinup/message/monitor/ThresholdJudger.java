@@ -1,6 +1,5 @@
 package cn.org.joinup.message.monitor;
 
-import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ThresholdJudger {
 
-    private final ExchangeRateMonitorConfig monitorConfig;
     private final EventPublisher eventPublisher;
 
     // State for Hysteresis: true if currently in "High" state
@@ -35,7 +33,7 @@ public class ThresholdJudger {
         // Enter High State
         if (!isHighState && currentRate.compareTo(upper) >= 0) {
             isHighState = true;
-            publishEvent(exchangeRate, upper, "ABSOLUTE_UPPER", 
+            publishEvent(exchangeRate, upper, rule, "ABSOLUTE_UPPER",
                     String.format("人民币兑日元汇率(%s)已超过阈值(%s)，建议关注。", currentRate, upper));
         }
         // Exit High State
@@ -45,7 +43,7 @@ public class ThresholdJudger {
         }
     }
 
-    private void publishEvent(ExchangeRate rate, BigDecimal threshold, String type, String msg) {
+    private void publishEvent(ExchangeRate rate, BigDecimal threshold, ExchangeRateMonitorRule rule, String type, String msg) {
         RateThresholdEvent event = RateThresholdEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .timestamp(LocalDateTime.now())
@@ -55,6 +53,7 @@ public class ThresholdJudger {
                 .triggerType(type)
                 .dataSource(rate.getSource())
                 .message(msg)
+                .monitorRuleSnapshot(rule)
                 .build();
         
         eventPublisher.publish(event);
