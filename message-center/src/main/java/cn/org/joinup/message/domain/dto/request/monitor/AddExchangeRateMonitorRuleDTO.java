@@ -1,4 +1,4 @@
-package cn.org.joinup.message.domain.dto.request.splash;
+package cn.org.joinup.message.domain.dto.request.monitor;
 
 import cn.org.joinup.common.util.RegexUtil;
 import lombok.Data;
