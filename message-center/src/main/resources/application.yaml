@@ -81,6 +81,23 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
             fallback: false
 
+  quartz:
+    startup-delay: 20
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    wait-for-jobs-to-complete-on-shutdown: true
+    properties:
+      org:
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: 10
+          threadPriority: 5
+          threadsInheritContextClassLoaderOfInitializingThread: true
+        quartz:
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+
 
 mybatis-plus:
   configuration:
@@ -114,3 +131,24 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - cn.org.joinup.message.controller
+
+
+exchange:
+  monitor:
+    fetch-rate-cron: "0 0 10 * * ?"
+    retry-times: 3
+    datasource:
+      primary: "exchangerate"
+      secondary: "alpha_vantage"
+      urls:
+        exchangerate: "https://v6.exchangerate-api.com/v6"
+        alpha_vantage: "https://api.tatum.io/v4/data/rate/symbol"
+      api-keys:
+        exchangerate: ${EXCHANGE_RATE_API_KEY}
+        alpha_vantage: ${ALPHA_VANTAGE_API_KEY}
+    event:
+      enabled: true
+      exchange-name: "exchange.rate.topic"
+      routing-key-format: "rate.%s.%s.triggered"
+      suppress-duration-in-minutes: 60
+    google-finance-link: "https://www.google.com/finance/quote/%s-%s"

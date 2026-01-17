@@ -1,0 +1,13 @@
+name: joinup-server
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.8-management
+    environment:
+      RABBITMQ_DEFAULT_USER: joinup
+      RABBITMQ_DEFAULT_PASS: 123456
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    mem_limit: 256m

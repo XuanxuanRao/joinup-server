@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "message-center")
 public interface MessageClient {
-    @PostMapping("/message/email/send")
+    @PostMapping("/integration/message/email/send")
     void sendEmail(@RequestBody SendEmailMessageDTO sendEmailMessageDTO);
 
-    @PostMapping("/message/site/send")
+    @PostMapping("/integration/message/site/send")
     void sendSite(@RequestBody SendSiteMessageDTO sendSiteMessageDTO);
 
 }
