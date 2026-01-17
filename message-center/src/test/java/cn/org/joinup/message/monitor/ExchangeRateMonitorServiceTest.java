@@ -3,6 +3,7 @@ package cn.org.joinup.message.monitor;
 import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule.Thresholds;
+import cn.org.joinup.message.enums.CurrencyCode;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,8 +53,8 @@ class ExchangeRateMonitorServiceTest {
 
     private ExchangeRateMonitorRule createValidRule() {
         return ExchangeRateMonitorRule.builder()
-                .baseCurrency("CNY")
-                .quoteCurrency("JPY")
+                .baseCurrency(CurrencyCode.CNY)
+                .quoteCurrency(CurrencyCode.JPY)
                 .thresholds(Thresholds.builder()
                         .absoluteUpper(new BigDecimal("20"))
                         .absoluteLower(new BigDecimal("15"))
@@ -148,7 +149,7 @@ class ExchangeRateMonitorServiceTest {
     @DisplayName("Invalid rule (same currency): should skip fetch")
     void testPerformCheck_InvalidRule_SameCurrency() {
         ExchangeRateMonitorRule rule = createValidRule();
-        rule.setQuoteCurrency("CNY"); // Same as base
+        rule.setQuoteCurrency(CurrencyCode.CNY); // Same as base
 
         service.performCheck(rule);
 

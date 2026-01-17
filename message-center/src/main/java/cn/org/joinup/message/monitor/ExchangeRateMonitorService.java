@@ -45,10 +45,10 @@ public class ExchangeRateMonitorService {
             return;
         }
 
-        Optional<ExchangeRate> rateOpt = fetchFromPrimary(rule.getBaseCurrency(), rule.getQuoteCurrency());
+        Optional<ExchangeRate> rateOpt = fetchFromPrimary(rule.getBaseCurrency().getCode(), rule.getQuoteCurrency().getCode());
         if (rateOpt.isEmpty()) {
             log.warn("[Monitor] Primary source failed. Switching to secondary.");
-            rateOpt = fetchFromSecondary(rule.getBaseCurrency(), rule.getQuoteCurrency());
+            rateOpt = fetchFromSecondary(rule.getBaseCurrency().getCode(), rule.getQuoteCurrency().getCode());
         }
 
         rateOpt.ifPresentOrElse(rate -> {

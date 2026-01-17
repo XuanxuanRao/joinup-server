@@ -1,6 +1,7 @@
 package cn.org.joinup.message.domain.dto.request.monitor;
 
 import cn.org.joinup.common.util.RegexUtil;
+import cn.org.joinup.message.enums.CurrencyCode;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -12,9 +13,9 @@ public class AddExchangeRateMonitorRuleDTO {
     @Pattern(regexp = RegexUtil.EMAIL_REGEX)
     private String email;
     @NotNull
-    private String baseCurrency;
+    private CurrencyCode baseCurrency;
     @NotNull
-    private String quoteCurrency;
+    private CurrencyCode quoteCurrency;
     private BigDecimal absoluteUpper;
     private BigDecimal absoluteLower;
 }
