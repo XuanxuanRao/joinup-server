@@ -1,6 +1,5 @@
 package cn.org.joinup.message.monitor;
 
-import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.monitor.domain.ExchangeRate;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
@@ -21,10 +20,8 @@ public class ThresholdJudgerTest {
 
     @BeforeEach
     public void setUp() {
-        ExchangeRateMonitorConfig monitorConfig = new ExchangeRateMonitorConfig();
-        
         eventPublisher = Mockito.mock(EventPublisher.class);
-        thresholdJudger = new ThresholdJudger(monitorConfig, eventPublisher);
+        thresholdJudger = new ThresholdJudger(eventPublisher);
     }
 
     @Test
