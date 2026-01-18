@@ -40,9 +40,26 @@ public class TokenUtil {
         }
         // Consume the token
         stringRedisTemplate.delete(key);
-        // Parse the value into a map
+        // Parse the value into a map, handling malformed segments safely
         return java.util.Arrays.stream(value.split("&"))
-                .map(kv -> kv.split("=", 2))
+                .map(part -> {
+                    if (part == null || part.isEmpty()) {
+                        return null;
+                    }
+                    int idx = part.indexOf('=');
+                    if (idx < 0) {
+                        log.warn("Ignoring malformed token segment without '=': {}", part);
+                        return null;
+                    }
+                    String k = part.substring(0, idx);
+                    if (k.isEmpty()) {
+                        log.warn("Ignoring malformed token segment with empty key: {}", part);
+                        return null;
+                    }
+                    String v = (idx == part.length() - 1) ? "" : part.substring(idx + 1);
+                    return new String[]{k, v};
+                })
+                .filter(kv -> kv != null)
                 .collect(java.util.stream.Collectors.toMap(kv -> kv[0], kv -> kv[1]));
     }
 
