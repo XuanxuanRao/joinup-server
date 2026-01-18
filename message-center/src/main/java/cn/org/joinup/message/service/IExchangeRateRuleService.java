@@ -9,4 +9,6 @@ public interface IExchangeRateRuleService extends IService<ExchangeRateMonitorRu
     ExchangeRateMonitorRule addRule(AddExchangeRateMonitorRuleDTO addRuleDTO);
 
     ExchangeRateMonitorRule updateRule(Long ruleId, UpdateExchangeRateMonitorRuleDTO updateRuleDTO);
+
+    void disableRule(Long ruleId, String token);
 }

@@ -70,6 +70,7 @@ joinup:
       - /message/announcement/**
       - /external/**
       - /message/splash/**
+      - /message/feature/rate-monitor/rules/**/unsubscribe
     admin-regex-paths:
       - ^/user/\d+$
       - ^/ws/user/\d+$

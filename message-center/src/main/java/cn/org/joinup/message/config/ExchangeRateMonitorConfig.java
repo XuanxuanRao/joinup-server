@@ -13,6 +13,8 @@ import java.util.Map;
 public class ExchangeRateMonitorConfig {
     private Integer retryTimes = 3;
     private String googleFinanceLink;
+    private String unsubscribeLink;
+    private String unsubscribeBusinessCode;
     private Datasource datasource = new Datasource();
     private Event event = new Event();
 

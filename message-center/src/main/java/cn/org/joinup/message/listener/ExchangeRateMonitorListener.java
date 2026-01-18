@@ -6,6 +6,7 @@ import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
 import cn.org.joinup.message.service.IExchangeRateRuleService;
+import cn.org.joinup.message.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -26,6 +27,7 @@ public class ExchangeRateMonitorListener {
     private final MessageClient messageClient;
     private final ExchangeRateMonitorConfig monitorConfig;
     private final IExchangeRateRuleService exchangeRateRuleService;
+    private final TokenUtil tokenUtil;
 
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "queue.rate.triggered.notification", durable = "true"),
@@ -73,7 +75,19 @@ public class ExchangeRateMonitorListener {
                     event.getMonitorRuleSnapshot().getBaseCurrency(), event.getMonitorRuleSnapshot().getQuoteCurrency()));
             put("baseCurrencyName", event.getMonitorRuleSnapshot().getBaseCurrency().getDesc());
             put("quoteCurrencyName", event.getMonitorRuleSnapshot().getQuoteCurrency().getDesc());
+            put("unsubscribeUrl", buildUnsubscribeUrl(event.getMonitorRuleSnapshot()));
         }};
+    }
+
+    private String buildUnsubscribeUrl(ExchangeRateMonitorRule rule) {
+        String token = tokenUtil.generateToken(
+                monitorConfig.getUnsubscribeBusinessCode(),
+                Map.of(
+                        "ruleId", String.valueOf(rule.getId())
+                ),
+                2 * 24 * 3600L // 2 days expiration
+        );
+        return String.format(monitorConfig.getUnsubscribeLink(), rule.getId(), token);
     }
 
 }
