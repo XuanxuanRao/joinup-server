@@ -58,4 +58,16 @@ public class ExchangeRateMonitorController {
         return Result.success(CurrencyCode.getCodeToNameMap());
     }
 
+    @GetMapping("/rules/{ruleId}/unsubscribe")
+    public Result<Void> unsubscribe(@PathVariable Long ruleId, @RequestParam String token) {
+        try {
+            log.info("Unsubscribe exchange rate monitor rule, ruleId={}, token={}", ruleId, token);
+            exchangeRateRuleService.disableRule(ruleId, token);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("Unsubscribe exchange rate monitor rule failed, ruleId={}, token={}", ruleId, token, e);
+            return Result.error("Unsubscribe exchange rate monitor rule failed");
+        }
+    }
+
 }

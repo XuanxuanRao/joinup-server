@@ -152,3 +152,5 @@ exchange:
       routing-key-format: "rate.%s.%s.triggered"
       suppress-duration-in-minutes: 60
     google-finance-link: "https://www.google.com/finance/quote/%s-%s"
+    unsubscribe-link: "http://39.105.96.112/api/message/feature/rate-monitor/rules/%s/unsubscribe?token=%s"
+    unsubscribe-business-code: "rate-monitor-rule-unsubscribe"
