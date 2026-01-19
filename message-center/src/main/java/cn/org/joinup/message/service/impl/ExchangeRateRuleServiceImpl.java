@@ -59,6 +59,7 @@ public class ExchangeRateRuleServiceImpl extends ServiceImpl<ExchangeRateMonitor
         }
 
         BeanUtil.copyProperties(updateRuleDTO, rule);
+        rule.setUpdateTime(LocalDateTime.now());
         if (updateRuleDTO.getAbsoluteLower() != null) {
             rule.getThresholds().setAbsoluteLower(updateRuleDTO.getAbsoluteLower());
         }
@@ -88,6 +89,7 @@ public class ExchangeRateRuleServiceImpl extends ServiceImpl<ExchangeRateMonitor
         }
 
         rule.setActive(false);
+        rule.setUpdateTime(LocalDateTime.now());
         if (!updateById(rule)) {
             throw new BadRequestException("disable exchange rate monitor rule failed");
         }

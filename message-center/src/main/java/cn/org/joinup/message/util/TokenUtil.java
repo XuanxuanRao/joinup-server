@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,7 +44,7 @@ public class TokenUtil {
         // Parse the value into a map, handling malformed segments safely
         return java.util.Arrays.stream(value.split("&"))
                 .map(part -> {
-                    if (part == null || part.isEmpty()) {
+                    if (part.isEmpty()) {
                         return null;
                     }
                     int idx = part.indexOf('=');
@@ -59,7 +60,7 @@ public class TokenUtil {
                     String v = (idx == part.length() - 1) ? "" : part.substring(idx + 1);
                     return new String[]{k, v};
                 })
-                .filter(kv -> kv != null)
+                .filter(Objects::nonNull)
                 .collect(java.util.stream.Collectors.toMap(kv -> kv[0], kv -> kv[1]));
     }
 
