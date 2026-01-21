@@ -4,8 +4,10 @@ import cn.org.joinup.api.client.MessageClient;
 import cn.org.joinup.api.dto.SendEmailMessageDTO;
 import cn.org.joinup.message.config.ExchangeRateMonitorConfig;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
+import cn.org.joinup.message.domain.po.RateThresholdEventLog;
 import cn.org.joinup.message.monitor.domain.RateThresholdEvent;
 import cn.org.joinup.message.service.IExchangeRateRuleService;
+import cn.org.joinup.message.service.IRateThresholdEventLogService;
 import cn.org.joinup.message.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +30,7 @@ public class ExchangeRateMonitorListener {
     private final MessageClient messageClient;
     private final ExchangeRateMonitorConfig monitorConfig;
     private final IExchangeRateRuleService exchangeRateRuleService;
+    private final IRateThresholdEventLogService eventLogService;
     private final TokenUtil tokenUtil;
 
     @RabbitListener(bindings = @QueueBinding(
@@ -37,7 +41,20 @@ public class ExchangeRateMonitorListener {
     public void handleRateChangeEvent(RateThresholdEvent event) {
         log.info("Received rate change event: {}", event);
 
+        // Idempotency check: check if eventId already exists in database
+        long count = eventLogService.lambdaQuery()
+                .eq(RateThresholdEventLog::getEventId, event.getEventId())
+                .count();
+        if (count > 0) {
+            log.info("Event {} already processed, skipping.", event.getEventId());
+            return;
+        }
+
         try {
+            // 1. Persistence
+            saveEventLog(event);
+
+            // 2. Notification
             ExchangeRateMonitorRule currentRule = exchangeRateRuleService.lambdaQuery()
                     .eq(ExchangeRateMonitorRule::getId, event.getMonitorRuleSnapshot().getId())
                     .eq(ExchangeRateMonitorRule::getActive, Boolean.TRUE)
@@ -53,7 +70,27 @@ public class ExchangeRateMonitorListener {
                     .params(buildParams(event, currentRule))
                     .build());
         } catch (Exception e) {
-            log.error("Failed to send email for rate change event: {}", event, e);
+            log.error("Failed to handle rate change event: {}", event, e);
+        }
+    }
+
+    private void saveEventLog(RateThresholdEvent event) {
+        try {
+            RateThresholdEventLog eventLog = RateThresholdEventLog.builder()
+                    .eventId(event.getEventId())
+                    .ruleId(event.getMonitorRuleSnapshot().getId())
+                    .currencyPair(event.getCurrencyPair())
+                    .currentRate(event.getCurrentRate())
+                    .threshold(event.getThreshold())
+                    .triggerType(event.getTriggerType())
+                    .dataSource(event.getDataSource())
+                    .message(event.getMessage())
+                    .triggerTime(event.getTimestamp())
+                    .createTime(LocalDateTime.now())
+                    .build();
+            eventLogService.save(eventLog);
+        } catch (Exception e) {
+            log.error("Failed to save event log: {}", event, e);
         }
     }
 

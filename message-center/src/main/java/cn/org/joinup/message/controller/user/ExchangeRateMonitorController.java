@@ -2,6 +2,7 @@ package cn.org.joinup.message.controller.user;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.message.annotation.SkipFeatureCheck;
 import cn.org.joinup.message.domain.dto.request.monitor.AddExchangeRateMonitorRuleDTO;
 import cn.org.joinup.message.domain.dto.request.monitor.UpdateExchangeRateMonitorRuleDTO;
 import cn.org.joinup.message.domain.po.ExchangeRateMonitorRule;
@@ -58,6 +59,7 @@ public class ExchangeRateMonitorController {
         return Result.success(CurrencyCode.getCodeToNameMap());
     }
 
+    @SkipFeatureCheck
     @GetMapping("/rules/{ruleId}/unsubscribe")
     public Result<Void> unsubscribe(@PathVariable Long ruleId, @RequestParam String token) {
         try {
