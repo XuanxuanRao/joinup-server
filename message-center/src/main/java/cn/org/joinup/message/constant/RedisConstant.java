@@ -12,4 +12,7 @@ public interface RedisConstant {
     String USER_AT_CONVERSATION = "user:at:conversation:";
     long CONVERSATION_TTL = 60 * 60;                // 1 hour
     long CACHE_NULL_TTL = 60; // 1 minute
+
+    String FEATURE_WHITELIST_KEY_PREFIX = "feature:whitelist:";
+    String FEATURE_PUBLIC_KEY_PREFIX = "feature:public:";
 }
