@@ -2,12 +2,14 @@ package cn.org.joinup.message.interceptor;
 
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.message.annotation.SkipFeatureCheck;
 import cn.org.joinup.message.service.IFeatureService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,14 @@ public class FeatureAccessInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
+        // Check for SkipFeatureCheck annotation
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            if (handlerMethod.hasMethodAnnotation(SkipFeatureCheck.class)) {
+                return true;
+            }
+        }
+        
         String requestURI = request.getRequestURI();
         
         // Expected pattern: /message/feature/{featureName}/...
