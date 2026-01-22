@@ -85,6 +85,8 @@ class AuthGlobalFilterTest {
     void testFilter_ValidToken() {
         // Arrange
         when(authProperties.getExcludePaths()).thenReturn(Collections.emptyList());
+        when(authProperties.getAdminAntPaths()).thenReturn(Collections.emptyList());
+        when(authProperties.getAdminRegexPaths()).thenReturn(Collections.emptyList());
         String token = "valid-token";
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/private")
                 .header("authorization", token)
