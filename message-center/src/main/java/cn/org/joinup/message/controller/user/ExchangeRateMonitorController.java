@@ -1,5 +1,7 @@
 package cn.org.joinup.message.controller.user;
 
+import cn.org.joinup.common.ratelimit.annotation.RateLimit;
+import cn.org.joinup.common.ratelimit.enums.LimitType;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.message.annotation.SkipFeatureCheck;
@@ -60,6 +62,7 @@ public class ExchangeRateMonitorController {
     }
 
     @SkipFeatureCheck
+    @RateLimit(limitType = LimitType.IP, count = 3, time = 10)
     @GetMapping("/rules/{ruleId}/unsubscribe")
     public Result<Void> unsubscribe(@PathVariable Long ruleId, @RequestParam String token) {
         try {

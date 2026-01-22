@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.dto.UserTeamStatisticDTO;
 import cn.org.joinup.common.exception.SystemException;
+import cn.org.joinup.common.ratelimit.annotation.RateLimit;
+import cn.org.joinup.common.ratelimit.enums.LimitType;
 import cn.org.joinup.user.domain.dto.*;
 import cn.org.joinup.user.domain.dto.request.ThirdPartyAuthRequestDTO;
 import cn.org.joinup.user.domain.po.User;
@@ -90,12 +92,14 @@ public class UserController {
 
     @ApiOperation("账号密码登录")
     @PostMapping("/login")
+    @RateLimit(limitType = LimitType.IP, count = 5, time = 30)
     public Result<UserLoginVO> login(@Validated @RequestBody LoginFormDTO loginFormDTO) {
         return Result.success(userService.login(loginFormDTO));
     }
 
     @ApiOperation("进行北航身份验证")
     @PostMapping("/verify")
+    @RateLimit(limitType = LimitType.IP, count = 5, time = 60)
     public Result<Void> verifyIdentity(@Validated @RequestBody VerifyIdentityDTO verifyIdentityDTO) {
         return userService.verifyIdentity(verifyIdentityDTO);
     }
@@ -120,6 +124,7 @@ public class UserController {
 
     @ApiOperation("第三方应用认证登录")
     @PostMapping("/third-auth")
+    @RateLimit(limitType = LimitType.IP, count = 5, time = 30)
     public Result<ThirdPartyAuthResponseVO> thirdPartyAuth(@Validated @RequestBody ThirdPartyAuthRequestDTO authRequestDTO) {
         log.info("Login request from {}, appUUID: {}", authRequestDTO.getAppKey(), authRequestDTO.getAppUUID());
         try {
