@@ -1,7 +1,9 @@
 package cn.org.joinup.common.handler;
 
 import cn.org.joinup.common.exception.BadRequestException;
+import cn.org.joinup.common.exception.RateLimitException;
 import cn.org.joinup.common.result.Result;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -30,6 +32,11 @@ public class BindExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Result<String>> handle(BadRequestException e) {
         return ResponseEntity.badRequest().body(Result.error(e.getMessage()));
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<Result<String>> handle(RateLimitException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Result.error(e.getMessage()));
     }
 
 }
