@@ -1,6 +1,5 @@
 package cn.org.joinup.gateway.filters;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.org.joinup.common.constant.SystemConstant;
 import cn.org.joinup.gateway.constants.MQConstant;
 import cn.org.joinup.gateway.domain.LogEntry;
@@ -65,7 +64,6 @@ public class LoggingFilter implements GlobalFilter, Ordered {
      * 优先从代理头获取，其次获取直接连接IP
      */
     private String getClientIp(ServerHttpRequest request) {
-        ServletUtil.getClientIP(request);
         // 1. 尝试从 X-Forwarded-For 头获取（最常用的代理头）
         List<String> xForwardedFor = request.getHeaders().get("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
