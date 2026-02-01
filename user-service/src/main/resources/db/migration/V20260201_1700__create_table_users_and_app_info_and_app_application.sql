@@ -1,4 +1,4 @@
-create table if not exists app_info
+create table app_info
 (
     id                   bigserial
         primary key,
@@ -14,7 +14,7 @@ create table if not exists app_info
 
 
 
-create table if not exists users
+create table users
 (
     id           bigserial
         primary key,
@@ -57,7 +57,7 @@ create index idx_users_username
 
 
 
-create table if not exists app_application
+create table app_application
 (
     id                bigserial
         primary key,

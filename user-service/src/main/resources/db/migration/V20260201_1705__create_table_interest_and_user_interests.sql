@@ -1,4 +1,4 @@
-create table if not exists interests
+create table interests
 (
     id          bigserial
         primary key,
@@ -25,7 +25,7 @@ create index idx_interests_parent_id
     on interests (parent_id);
 
 
-create table if not exists user_interests
+create table user_interests
 (
     user_id     bigint not null,
     interest_id bigint not null
