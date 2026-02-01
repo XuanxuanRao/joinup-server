@@ -12,9 +12,6 @@ create table if not exists app_info
     update_time          timestamp default CURRENT_TIMESTAMP not null
 );
 
-create index idx_app_info_app_key
-    on app_info (app_key);
-
 
 
 create table if not exists users
@@ -54,9 +51,6 @@ comment on column users.user_type is '用户类型，0表示内部用户，1表�
 
 create unique index idx_users_app_key_app_uuid
     on users (app_key, app_uuid);
-
-create index idx_users_openid
-    on users (openid);
 
 create index idx_users_username
     on users (username);
