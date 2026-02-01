@@ -44,3 +44,4 @@ build/
 /message-center/src/main/resources/application-local.yaml
 /team-service/src/main/resources/application-local.yaml
 /user-service/src/main/resources/application-local.yaml
+/data/

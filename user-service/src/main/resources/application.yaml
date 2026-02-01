@@ -36,6 +36,12 @@ spring:
         min-idle: 5
         time-between-eviction-runs: 10s
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    default-schema: public
+
 
 mybatis-plus:
   configuration:
