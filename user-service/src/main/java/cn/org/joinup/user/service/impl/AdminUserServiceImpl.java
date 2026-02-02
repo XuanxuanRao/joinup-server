@@ -1,21 +1,24 @@
 package cn.org.joinup.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.org.joinup.api.client.WebSocketClient;
 import cn.org.joinup.api.dto.UserDTO;
+import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.user.domain.dto.request.QueryUserInfoDTO;
 import cn.org.joinup.user.domain.po.User;
+import cn.org.joinup.user.domain.vo.AdminUserInfoVO;
 import cn.org.joinup.user.enums.UserType;
 import cn.org.joinup.user.mapper.UserMapper;
 import cn.org.joinup.user.service.IAdminUserService;
 import cn.org.joinup.user.service.IUserService;
-import com.alibaba.nacos.common.utils.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implements IAdminUserService {
 
@@ -34,29 +38,17 @@ public class AdminUserServiceImpl extends ServiceImpl<UserMapper, User> implemen
 
     // 分页获取用户
     @Override
-    public IPage<User> getPageUsers(Pageable pageable) {
-        Page<User> page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
-        return this.page(page);
-    }
+    public PageResult<AdminUserInfoVO> getPageUsers(QueryUserInfoDTO queryUserDTO) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StrUtil.isNotBlank(queryUserDTO.getUsername()), User::getUsername, queryUserDTO.getUsername());
+        wrapper.like(StrUtil.isNotBlank(queryUserDTO.getEmail()), User::getEmail, queryUserDTO.getEmail());
+        wrapper.eq(StrUtil.isNotBlank(queryUserDTO.getAppKey()), User::getAppKey, queryUserDTO.getAppKey());
+        wrapper.eq(queryUserDTO.getVerified() != null, User::getVerified, queryUserDTO.getVerified());
+        wrapper.eq(queryUserDTO.getUserType() != null, User::getUserType, queryUserDTO.getUserType());
+        wrapper.orderByAsc(User::getCreateTime);
 
-    @Override
-    public IPage<User> getPageUsersSearchUsername(String name, Pageable pageable) {
-        Page<User> page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
-
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(name), "username", name);
-
-        return this.baseMapper.selectPage(page, wrapper);
-    }
-
-    @Override
-    public IPage<User> getPageUsersSearchStudentId(String studentId, Pageable pageable) {
-        Page<User> page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
-
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(studentId), "student_id", studentId);
-
-        return this.baseMapper.selectPage(page, wrapper);
+        Page<User> page = page(new Page<>(queryUserDTO.getPageNum(), queryUserDTO.getPageSize()), wrapper);
+        return PageResult.of(page, (user) -> BeanUtil.copyProperties(user, AdminUserInfoVO.class));
     }
 
     @Override

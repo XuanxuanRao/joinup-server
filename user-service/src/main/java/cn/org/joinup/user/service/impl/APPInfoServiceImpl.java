@@ -13,12 +13,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class APPInfoServiceImpl extends ServiceImpl<APPInfoMapper, APPInfo> implements IAPPInfoService {
 
     private final IUserService userService;
@@ -40,28 +40,20 @@ public class APPInfoServiceImpl extends ServiceImpl<APPInfoMapper, APPInfo> impl
 
     @Override
     public PageResult<APPInfoVO> list(Boolean enabled, Integer pageNum, Integer pageSize) {
+        log.info("query with enabled: {}, pageNum: {}, pageSize: {}", enabled, pageNum, pageSize);
         Page<APPInfo> page = page(new Page<>(pageNum, pageSize),
                 new LambdaQueryWrapper<APPInfo>()
                         .eq(enabled != null, APPInfo::getEnabled, enabled)
                         .eq(APPInfo::getDeleted, false)
                         .orderByDesc(APPInfo::getCreateTime));
 
-        List<APPInfoVO> appInfoVOList = page.getRecords()
-                .stream()
-                .map(appInfo -> {
-                    var vo = BeanUtil.copyProperties(appInfo, APPInfoVO.class);
-                    vo.setUsersCount(userService.lambdaQuery()
-                            .eq(User::getAppKey, appInfo.getAppKey())
-                            .count());
-                    return vo;
-                })
-                .collect(Collectors.toList());
-
-        return PageResult.of(new Page<APPInfoVO>()
-                .setRecords(appInfoVOList)
-                .setTotal(page.getTotal())
-                .setSize(page.getSize())
-                .setCurrent(page.getCurrent()));
+        return PageResult.of(page, (appInfo) -> {
+            var vo = BeanUtil.copyProperties(appInfo, APPInfoVO.class);
+            vo.setUsersCount(userService.lambdaQuery()
+                    .eq(User::getAppKey, appInfo.getAppKey())
+                    .count());
+            return vo;
+        });
     }
 
     @Override
