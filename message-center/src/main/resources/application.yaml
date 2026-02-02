@@ -136,7 +136,7 @@ knife4j:
         group-name: default
         api-rule: package
         api-rule-resources:
-          - cn.org.joinup.message.controller
+          - cn.org.joinup.message.interfaces.controller
 
 
 exchange:

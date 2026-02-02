@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface IAPPInfoService {
     Optional<APPInfo> getActiveAPPInfo(String appKey);
 
-    PageResult<APPInfoVO> list(Boolean enabled, Integer page, Integer pageSize);
+    PageResult<APPInfoVO> list(Boolean enabled, Integer pageNum, Integer pageSize);
 
     APPInfo updateAPPInfo(String appKey, AdminUpdateAPPInfoRequestDTO updateAPPInfoDTO);
 }

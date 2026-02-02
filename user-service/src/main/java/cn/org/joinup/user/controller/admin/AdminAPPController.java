@@ -1,4 +1,4 @@
-package cn.org.joinup.user.controller;
+package cn.org.joinup.user.controller.admin;
 
 import cn.org.joinup.common.result.PageResult;
 import cn.org.joinup.common.result.Result;
