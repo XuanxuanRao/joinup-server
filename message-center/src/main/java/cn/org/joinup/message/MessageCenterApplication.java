@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author chenxuanrao06@gmail.com
  */
 @SpringBootApplication
-@MapperScan("cn.org.joinup.message.mapper")
+@MapperScan("cn.org.joinup.message.infrastructure.repository")
 @EnableFeignClients(basePackages = "cn.org.joinup.api.client", defaultConfiguration = DefaultFeignConfig.class)
 @EnableConfigurationProperties
 @EnableScheduling
