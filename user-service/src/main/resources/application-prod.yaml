@@ -22,3 +22,8 @@ joinup:
     miniapp:
       app-id: ${APP_ID}
       app-secret: ${APP_SECRET}
+
+
+spring:
+  flyway:
+    baseline-version: 1

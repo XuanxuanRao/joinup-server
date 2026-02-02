@@ -151,6 +151,12 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- flyway 数据库版本管理 -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

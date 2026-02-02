@@ -98,6 +98,12 @@ spring:
           jobStore:
             driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    default-schema: public
+
 
 mybatis-plus:
   configuration:
