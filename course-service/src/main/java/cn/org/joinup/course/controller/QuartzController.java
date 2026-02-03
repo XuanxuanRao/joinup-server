@@ -29,6 +29,7 @@ public class QuartzController {
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     @GetMapping("/triggers")
+    @ApiOperation("get all triggers")
     public Result<List<QuartzTriggerDTO>> getTriggers() throws SchedulerException {
         List<QuartzTriggerDTO> result = new ArrayList<>();
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
@@ -74,8 +75,8 @@ public class QuartzController {
     @PutMapping("/triggers/{triggerGroupName}/{triggerName}/update-cron-expression")
     @ApiOperation("update cron expression of a trigger")
     public Result<Void> modifyCronExpression(@PathVariable String triggerGroupName,
-                                            @PathVariable String triggerName,
-                                            @RequestParam String cronExpression)
+                                             @PathVariable String triggerName,
+                                             @RequestParam String cronExpression)
             throws SchedulerException, ParseException {
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
         Trigger trigger = scheduler.getTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
@@ -90,6 +91,39 @@ public class QuartzController {
         return Result.success();
     }
 
+    @PutMapping("/triggers/{triggerGroupName}/{triggerName}/pause")
+    @ApiOperation("pause a trigger")
+    public Result<Void> pauseTrigger(@PathVariable String triggerGroupName,
+                                     @PathVariable String triggerName) {
+        try {
+            Scheduler scheduler = schedulerFactoryBean.getScheduler();
+            scheduler.pauseTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
+            return Result.success();
+        } catch (SchedulerException e) {
+            log.error("Failed to pause trigger {}:{}", triggerGroupName, triggerName, e);
+            return Result.error("Failed to pause trigger: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error when pausing trigger {}:{}", triggerGroupName, triggerName, e);
+            return Result.error("Unexpected error: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/triggers/{triggerGroupName}/{triggerName}/resume")
+    @ApiOperation("resume a trigger")
+    public Result<Void> resumeTrigger(@PathVariable String triggerGroupName,
+                                      @PathVariable String triggerName) {
+        try {
+            Scheduler scheduler = schedulerFactoryBean.getScheduler();
+            scheduler.resumeTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
+            return Result.success();
+        } catch (SchedulerException e) {
+            log.error("Failed to resume trigger {}:{}", triggerGroupName, triggerName, e);
+            return Result.error("Failed to resume trigger: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error when resuming trigger {}:{}", triggerGroupName, triggerName, e);
+            return Result.error("Unexpected error: " + e.getMessage());
+        }
+    }
 
     @Data
     public static class QuartzTriggerDTO {
