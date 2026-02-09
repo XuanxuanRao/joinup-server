@@ -58,7 +58,17 @@ public class CaptchaServiceImpl implements ICaptchaService {
             response.flushBuffer();
         } catch (IOException e) {
             log.error("Failed to generate captcha image", e);
-            throw new RuntimeException("验证码生成失败");
+            try {
+                if (!response.isCommitted()) {
+                    response.reset();
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"message\":\"验证码生成失败\"}");
+                    response.flushBuffer();
+                }
+            } catch (IOException ioException) {
+                log.error("Failed to write error response for captcha generation failure", ioException);
+            }
         }
     }
 
