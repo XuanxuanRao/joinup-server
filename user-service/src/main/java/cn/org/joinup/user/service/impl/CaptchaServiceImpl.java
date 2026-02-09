@@ -1,0 +1,84 @@
+package cn.org.joinup.user.service.impl;
+
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
+import cn.org.joinup.user.service.ICaptchaService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 验证码服务实现
+ * @author chenxuanrao06@gmail.com
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class CaptchaServiceImpl implements ICaptchaService {
+
+    private final StringRedisTemplate stringRedisTemplate;
+
+    // 验证码有效期：5分钟
+    private static final long CAPTCHA_EXPIRE_TIME = 5 * 60;
+
+    @Override
+    public void generateCaptcha(HttpServletRequest request, HttpServletResponse response) {
+        // 生成验证码图片
+        LineCaptcha captcha = CaptchaUtil.createLineCaptcha(120, 40, 4, 10);
+        String code = captcha.getCode();
+
+        // 生成唯一key
+        String verifyKey = UUID.randomUUID().toString().replaceAll("-", "");
+        String redisKey = "captcha:" + verifyKey;
+
+        // 存储验证码到Redis
+        stringRedisTemplate.opsForValue().set(redisKey, code, CAPTCHA_EXPIRE_TIME, TimeUnit.SECONDS);
+
+        // 在响应头中设置verifyKey
+        response.setHeader("Access-Control-Expose-Headers", "X-Captcha-Key");
+        response.setHeader("X-Captcha-Key", verifyKey);
+
+        // 直接将图片写入响应流
+        try {
+            // 设置响应头
+            response.setContentType("image/png");
+            response.setHeader("Pragma", "no-cache");
+            response.setHeader("Cache-Control", "no-cache");
+            response.setDateHeader("Expires", 0);
+
+            // 写入图片
+            captcha.write(response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            log.error("Failed to generate captcha image", e);
+            throw new RuntimeException("验证码生成失败");
+        }
+    }
+
+    @Override
+    public boolean validateCaptcha(String verifyKey, String verifyCode) {
+        if (verifyKey == null || verifyCode == null) {
+            return false;
+        }
+
+        String redisKey = "captcha:" + verifyKey;
+        String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
+
+        if (storedCode == null) {
+            return false;
+        }
+
+        // 无论验证成功与否，都删除验证码
+        stringRedisTemplate.delete(redisKey);
+
+        return storedCode.equalsIgnoreCase(verifyCode);
+    }
+
+}

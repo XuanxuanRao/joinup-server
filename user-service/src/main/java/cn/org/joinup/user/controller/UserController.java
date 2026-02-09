@@ -15,6 +15,7 @@ import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.domain.vo.ThirdPartyAuthResponseVO;
 import cn.org.joinup.user.domain.vo.UserLoginVO;
 import cn.org.joinup.user.service.AuthService;
+import cn.org.joinup.user.service.ICaptchaService;
 import cn.org.joinup.user.service.IUserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class UserController {
     private final IUserService userService;
     private final TeamClient teamClient;
     private final AuthService authService;
+    private final ICaptchaService captchaService;
 
     @ApiOperation("获取当前用户信息")
     @GetMapping("/info")
@@ -94,6 +96,10 @@ public class UserController {
     @PostMapping("/login")
     @RateLimit(limitType = LimitType.IP, count = 5, time = 30)
     public Result<UserLoginVO> login(@Validated @RequestBody LoginFormDTO loginFormDTO) {
+        // 验证验证码
+        if (!captchaService.validateCaptcha(loginFormDTO.getVerifyKey(), loginFormDTO.getVerifyCode())) {
+            return Result.error("验证码错误或已过期");
+        }
         return Result.success(userService.login(loginFormDTO));
     }
 

@@ -18,4 +18,12 @@ public class LoginFormDTO {
     @ApiModelProperty(value = "密码", required = true)
     @Pattern(regexp = RegexUtil.PASSWORD_REGEX, message = "密码格式错误")
     private String password;
+
+    @ApiModelProperty(value = "验证码", required = true)
+    @NotNull
+    private String verifyCode;
+
+    @ApiModelProperty(value = "验证码key", required = true)
+    @NotNull
+    private String verifyKey;
 }
