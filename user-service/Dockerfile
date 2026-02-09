@@ -10,7 +10,7 @@ RUN apk add --no-cache \
     ttf-dejavu \
     tzdata \
     && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
+    && echo "Asia/Shanghai" > /etc/timezone
 
 
 RUN mkdir /app/dump
