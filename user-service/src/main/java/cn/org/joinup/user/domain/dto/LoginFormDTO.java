@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Data
@@ -18,4 +18,12 @@ public class LoginFormDTO {
     @ApiModelProperty(value = "密码", required = true)
     @Pattern(regexp = RegexUtil.PASSWORD_REGEX, message = "密码格式错误")
     private String password;
+
+    @ApiModelProperty(value = "验证码", required = true)
+    @NotBlank
+    private String verifyCode;
+
+    @ApiModelProperty(value = "验证码key", required = true)
+    @NotBlank
+    private String verifyKey;
 }
