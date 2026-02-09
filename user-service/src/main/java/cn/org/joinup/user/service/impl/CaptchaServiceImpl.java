@@ -79,15 +79,13 @@ public class CaptchaServiceImpl implements ICaptchaService {
         }
 
         String redisKey = "captcha:" + verifyKey;
-        String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
+        String storedCode = stringRedisTemplate.opsForValue().getAndDelete(redisKey);
 
         if (storedCode == null) {
             return false;
         }
 
-        // 无论验证成功与否，都删除验证码
-        stringRedisTemplate.delete(redisKey);
-
+        // 验证过程中原子性地获取并删除验证码，确保一次性使用
         return storedCode.equalsIgnoreCase(verifyCode);
     }
 
