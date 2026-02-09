@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Data
@@ -20,10 +20,10 @@ public class LoginFormDTO {
     private String password;
 
     @ApiModelProperty(value = "验证码", required = true)
-    @NotNull
+    @NotBlank
     private String verifyCode;
 
     @ApiModelProperty(value = "验证码key", required = true)
-    @NotNull
+    @NotBlank
     private String verifyKey;
 }
