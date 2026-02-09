@@ -2,9 +2,16 @@ FROM azul/zulu-openjdk-alpine:11
 
 WORKDIR /app
 
-# 设定时区
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+USER root
+
+# 设定时区并安装 fontconfig 和字体
+RUN apk add --no-cache \
+    fontconfig \
+    ttf-dejavu \
+    tzdata \
+    && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
+
 
 RUN mkdir /app/dump
 RUN chown -R 1000:1000 /app
@@ -13,6 +20,7 @@ RUN chmod -R 777 /app
 USER 1000
 
 ENV JAVA_OPTS="\
+    -Djava.awt.headless=true \
     -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath=/app/dump \
     -XX:+PrintFlagsFinal \

@@ -2,6 +2,7 @@ package cn.org.joinup.user.service.impl;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import cn.org.joinup.user.constant.RedisConstant;
 import cn.org.joinup.user.service.ICaptchaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +26,6 @@ public class CaptchaServiceImpl implements ICaptchaService {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    // 验证码有效期：5分钟
-    private static final long CAPTCHA_EXPIRE_TIME = 5 * 60;
-
     @Override
     public void generateCaptcha(HttpServletRequest request, HttpServletResponse response) {
         // 生成验证码图片
@@ -36,10 +34,10 @@ public class CaptchaServiceImpl implements ICaptchaService {
 
         // 生成唯一key
         String verifyKey = UUID.randomUUID().toString().replaceAll("-", "");
-        String redisKey = "captcha:" + verifyKey;
+        String redisKey = RedisConstant.CAPTCHA_KEY_PREFIX + verifyKey;
 
         // 存储验证码到Redis
-        stringRedisTemplate.opsForValue().set(redisKey, code, CAPTCHA_EXPIRE_TIME, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set(redisKey, code, RedisConstant.CAPTCHA_TTL, TimeUnit.SECONDS);
 
         // 在响应头中设置verifyKey
         response.setHeader("Access-Control-Expose-Headers", "X-Captcha-Key");
@@ -78,7 +76,7 @@ public class CaptchaServiceImpl implements ICaptchaService {
             return false;
         }
 
-        String redisKey = "captcha:" + verifyKey;
+        String redisKey = RedisConstant.CAPTCHA_KEY_PREFIX + verifyKey;
         String storedCode = stringRedisTemplate.opsForValue().getAndDelete(redisKey);
 
         if (storedCode == null) {
