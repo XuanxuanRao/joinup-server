@@ -181,7 +181,10 @@ public class AuthService {
         scanLoginPayload.setUserId(UserContext.getUserId());
         scanLoginPayload.setStatus(ScanLoginStatus.CONFIRM);
         // 重新计算过期时间
-        long ttl = stringRedisTemplate.getExpire(key, TimeUnit.SECONDS);
+        Long ttl = stringRedisTemplate.getExpire(key, TimeUnit.SECONDS);
+        if (ttl == null || ttl <= 0L) {
+            throw new BadRequestException("二维码已过期");
+        }
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(scanLoginPayload), ttl, TimeUnit.SECONDS);
     }
 
