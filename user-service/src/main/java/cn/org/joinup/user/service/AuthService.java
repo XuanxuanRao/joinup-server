@@ -116,13 +116,13 @@ public class AuthService {
         }
         // 2.2 如果找到
         ScanLoginPayload scanLoginPayload = JSONUtil.toBean(payloadJson, ScanLoginPayload.class);
-        // 2.2.1 如果状态不为已扫码，直接返回当前状态（等待扫码或等待确认）
+        // 2.2.1 如果状态不为已确认，直接返回当前状态（等待扫码或等待确认）
         if (scanLoginPayload.getStatus() != ScanLoginStatus.CONFIRM) {
             return ScanLoginVO.builder()
                     .status(scanLoginPayload.getStatus())
                     .build();
         }
-        // 2.2.2 如果状态为已扫码，生成 token，返回登录成功的响应，并将状态更新为已登录
+        // 2.2.2 如果状态为已确认，生成 token，返回登录成功的响应，并将状态更新为已登录
         User user = userService.getUserById(scanLoginPayload.getUserId());
         if (user == null) {
             throw new BadRequestException("用户不存在");
