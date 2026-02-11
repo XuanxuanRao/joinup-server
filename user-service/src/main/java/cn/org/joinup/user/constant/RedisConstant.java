@@ -6,4 +6,7 @@ public interface RedisConstant {
 
     String CAPTCHA_KEY_PREFIX = "captcha:";
     long CAPTCHA_TTL = 5 * 60;       // 5 minutes
+
+    String SCAN_LOGIN_KEY_PREFIX = "user:auth:scan_login:";
+    long SCAN_LOGIN_TTL = 3 * 60;    // 3 minutes
 }

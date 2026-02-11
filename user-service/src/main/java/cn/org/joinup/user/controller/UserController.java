@@ -3,6 +3,7 @@ package cn.org.joinup.user.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.org.joinup.api.client.TeamClient;
 import cn.org.joinup.api.dto.UserTeamStatisticDTO;
+import cn.org.joinup.common.exception.BadRequestException;
 import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.ratelimit.annotation.RateLimit;
 import cn.org.joinup.common.ratelimit.enums.LimitType;
@@ -12,6 +13,8 @@ import cn.org.joinup.user.domain.po.User;
 import cn.org.joinup.api.dto.UserDTO;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.common.util.UserContext;
+import cn.org.joinup.user.domain.vo.QRCodeVO;
+import cn.org.joinup.user.domain.vo.ScanLoginVO;
 import cn.org.joinup.user.domain.vo.ThirdPartyAuthResponseVO;
 import cn.org.joinup.user.domain.vo.UserLoginVO;
 import cn.org.joinup.user.service.AuthService;
@@ -105,7 +108,7 @@ public class UserController {
 
     @ApiOperation("进行北航身份验证")
     @PostMapping("/verify")
-    @RateLimit(limitType = LimitType.IP, count = 5, time = 60)
+    @RateLimit(limitType = LimitType.IP, count = 3, time = 30)
     public Result<Void> verifyIdentity(@Validated @RequestBody VerifyIdentityDTO verifyIdentityDTO) {
         return userService.verifyIdentity(verifyIdentityDTO);
     }
@@ -139,4 +142,36 @@ public class UserController {
             return Result.error("认证失败: " + e.getMessage());
         }
     }
+
+    @ApiOperation("生成扫码登录二维码")
+    @PostMapping("/auth/qrcode")
+    public Result<QRCodeVO> createQRCode() {
+        try {
+            return Result.success(authService.createQRCode());
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查询扫码登录状态")
+    @GetMapping("/auth/qrcode")
+    public Result<ScanLoginVO> queryQRCode(@RequestParam String scanId) {
+        try {
+            return Result.success(authService.scanLogin(scanId));
+        } catch (BadRequestException e) {
+            return Result.error("扫码登录失败: " + e.getMessage());
+        }
+    }
+
+    @ApiOperation("移动端确认登录授权")
+    @PostMapping("/auth/qrcode/confirm")
+    public Result<Void> confirmLogin(@RequestParam String scanId) {
+        try {
+            authService.appConfirm(scanId);
+            return Result.success();
+        } catch (BadRequestException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
 }
