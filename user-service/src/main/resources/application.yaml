@@ -72,3 +72,7 @@ user:
     external-config:
       buaa-classhopper-android: https://joinup.oss-cn-beijing.aliyuncs.com/app-resources/buaa-school-emblem.png
     default-avatar: https://joinup.oss-cn-beijing.aliyuncs.com/app-resources/wuthering_waves.jpeg
+
+  auth:
+    qrcode:
+     url-prefix: https://classhopper.com/app/scan
