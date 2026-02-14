@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.common.exception.BadRequestException;
+import cn.org.joinup.common.util.RequestUtil;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.constant.RedisConstant;
 import cn.org.joinup.user.domain.dto.RegisterThirdPartyUserDTO;
@@ -28,6 +29,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *
@@ -104,7 +107,7 @@ public class AuthService {
      *
      * @param scanId 服务器生成的唯一扫码ID，移动端扫码后会携带该ID调用此接口进行登录
      */
-    public ScanLoginVO scanLogin(String scanId) {
+    public ScanLoginVO queryScanLoginStatus(String scanId) {
         // 1. 在 redis 中查找 scanId 对应的登录请求
         String key = RedisConstant.SCAN_LOGIN_KEY_PREFIX + scanId;
         String payloadJson = stringRedisTemplate.opsForValue().get(key);
@@ -116,10 +119,15 @@ public class AuthService {
         }
         // 2.2 如果找到
         ScanLoginPayload scanLoginPayload = JSONUtil.toBean(payloadJson, ScanLoginPayload.class);
-        // 2.2.1 如果状态不为已确认，直接返回当前状态（等待扫码或等待确认）
+        // 2.2.1 如果状态不为已确认，直接返回当前状态（等待扫码或等待确认），并包含环境信息
         if (scanLoginPayload.getStatus() != ScanLoginStatus.CONFIRM) {
             return ScanLoginVO.builder()
                     .status(scanLoginPayload.getStatus())
+                    .ipAddress(scanLoginPayload.getIpAddress())
+                    .browser(scanLoginPayload.getBrowser())
+                    .os(scanLoginPayload.getOs())
+                    .device(scanLoginPayload.getDevice())
+                    .requestTime(scanLoginPayload.getCreateTime())
                     .build();
         }
         // 2.2.2 如果状态为已确认，生成 token，返回登录成功的响应，并将状态更新为已登录
@@ -137,6 +145,11 @@ public class AuthService {
                 .status(ScanLoginStatus.CONFIRM)
                 .token(token)
                 .expireAt(LocalDateTime.now().plusMinutes(30))
+                .ipAddress(scanLoginPayload.getIpAddress())
+                .browser(scanLoginPayload.getBrowser())
+                .os(scanLoginPayload.getOs())
+                .device(scanLoginPayload.getDevice())
+                .requestTime(scanLoginPayload.getCreateTime())
                 .build();
     }
 
@@ -148,12 +161,20 @@ public class AuthService {
         );
     }
 
-    public QRCodeVO createQRCode() {
+    public QRCodeVO createQRCode(HttpServletRequest request) {
         // 生成随机 ID
         String scanId = IdUtil.simpleUUID();
         // 构建扫码登录请求
         ScanLoginPayload scanLoginPayload = new ScanLoginPayload();
         scanLoginPayload.setStatus(ScanLoginStatus.WAITING);
+        
+        // 收集登录环境信息（使用RequestUtil工具类）
+        scanLoginPayload.setIpAddress(RequestUtil.getClientIp(request));
+        scanLoginPayload.setBrowser(RequestUtil.getBrowser(request));
+        scanLoginPayload.setOs(RequestUtil.getOs(request));
+        scanLoginPayload.setDevice(RequestUtil.getDevice(request));
+        scanLoginPayload.setCreateTime(LocalDateTime.now());
+        
         // 存储到 Redis 中，过期时间为 5 分钟
         stringRedisTemplate.opsForValue().set(
                 RedisConstant.SCAN_LOGIN_KEY_PREFIX + scanId,
@@ -193,6 +214,11 @@ public class AuthService {
     public static class ScanLoginPayload {
         private ScanLoginStatus status;
         private Long userId;
+        private String ipAddress;
+        private String browser;
+        private String os;
+        private String device;
+        private LocalDateTime createTime;
     }
 
 }

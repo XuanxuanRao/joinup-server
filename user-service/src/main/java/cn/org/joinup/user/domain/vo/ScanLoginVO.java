@@ -20,4 +20,9 @@ public class ScanLoginVO {
     private ScanLoginStatus status;
     private String token;
     private LocalDateTime expireAt;
+    private String ipAddress;
+    private String browser;
+    private String os;
+    private String device;
+    private LocalDateTime requestTime;
 }
