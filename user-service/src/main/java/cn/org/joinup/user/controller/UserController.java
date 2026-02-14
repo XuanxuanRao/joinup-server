@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 /**
  * @author chenxuanrao06@gmail.com
@@ -108,7 +110,7 @@ public class UserController {
 
     @ApiOperation("进行北航身份验证")
     @PostMapping("/verify")
-    @RateLimit(limitType = LimitType.IP, count = 3, time = 30)
+    @RateLimit(limitType = LimitType.IP, count = 2, time = 30)
     public Result<Void> verifyIdentity(@Validated @RequestBody VerifyIdentityDTO verifyIdentityDTO) {
         return userService.verifyIdentity(verifyIdentityDTO);
     }
@@ -143,21 +145,17 @@ public class UserController {
         }
     }
 
-    @ApiOperation("生成扫码登录二维码")
+    @ApiOperation("创建登录二维码")
     @PostMapping("/auth/qrcode")
-    public Result<QRCodeVO> createQRCode() {
-        try {
-            return Result.success(authService.createQRCode());
-        } catch (Exception e) {
-            return Result.error(e.getMessage());
-        }
+    public Result<QRCodeVO> createQRCode(HttpServletRequest request) {
+        return Result.success(authService.createQRCode(request));
     }
 
     @ApiOperation("查询扫码登录状态")
     @GetMapping("/auth/qrcode")
     public Result<ScanLoginVO> queryQRCode(@RequestParam String scanId) {
         try {
-            return Result.success(authService.scanLogin(scanId));
+            return Result.success(authService.queryScanLoginStatus(scanId));
         } catch (BadRequestException e) {
             return Result.error("扫码登录失败: " + e.getMessage());
         }
