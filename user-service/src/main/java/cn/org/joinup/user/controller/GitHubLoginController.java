@@ -85,7 +85,7 @@ public class GitHubLoginController {
                 // 重定向到前端回调页面，携带token参数
                 String redirectUrl = safeFrontendRedirectUri + "?token=" + authResponse.getToken() +
                         "&expireAt=" + authResponse.getExpireAt();
-                log.info("重定向到前端回调页面: {}", redirectUrl);
+                log.info("重定向到前端回调页面: {}", safeFrontendRedirectUri);
                 response.sendRedirect(redirectUrl);
             } else {
                 // 返回JSON响应
