@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * GitHub登录控制器
@@ -69,14 +71,17 @@ public class GitHubLoginController {
             }
         }
 
+        // 对前端回调地址进行校验，防止开放重定向
+        String safeFrontendRedirectUri = sanitizeFrontendRedirectUri(frontendRedirectUri);
+
         try {
             // 处理GitHub回调，获取认证响应（使用原始state值）
             ThirdPartyAuthResponseVO authResponse = gitHubOAuthService.handleCallback(code, originalState);
             log.info("GitHub登录成功");
 
-            if (StrUtil.isNotBlank(frontendRedirectUri)) {
+            if (StrUtil.isNotBlank(safeFrontendRedirectUri)) {
                 // 重定向到前端回调页面，携带token参数
-                String redirectUrl = frontendRedirectUri + "?token=" + authResponse.getToken() +
+                String redirectUrl = safeFrontendRedirectUri + "?token=" + authResponse.getToken() +
                         "&expireAt=" + authResponse.getExpireAt();
                 log.info("重定向到前端回调页面: {}", redirectUrl);
                 response.sendRedirect(redirectUrl);
@@ -87,10 +92,44 @@ public class GitHubLoginController {
             }
         } catch (Exception e) {
             log.error("GitHub登录失败: {}", e.getMessage(), e);
-            if (StrUtil.isNotBlank(frontendRedirectUri)) {
+            if (StrUtil.isNotBlank(safeFrontendRedirectUri)) {
                 // 重定向到前端回调页面，携带错误信息
                 String errorMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-                String redirectUrl = frontendRedirectUri + "?error=" + errorMsg;
+                String redirectUrl = safeFrontendRedirectUri + "?error=" + errorMsg;
+                log.info("GitHub登录失败，重定向到前端回调页面: {}", redirectUrl);
+
+    /**
+     * 校验并清洗前端回调地址，防止开放重定向漏洞。
+     * 允许相对路径，或主机名在允许列表中的绝对 URL。
+     *
+     * @param frontendRedirectUri 原始前端回调地址
+     * @return 安全的回调地址；如果不合法则返回 null
+     */
+    private String sanitizeFrontendRedirectUri(String frontendRedirectUri) {
+        if (StrUtil.isBlank(frontendRedirectUri)) {
+            return null;
+        }
+        try {
+            URI uri = new URI(frontendRedirectUri);
+            // 允许相对路径（无 scheme 和 host）
+            if (uri.isAbsolute()) {
+                String host = uri.getHost();
+                if (host == null) {
+                    return null;
+                }
+                // TODO: 根据实际情况调整允许的前端域名
+                if (!"example.com".equalsIgnoreCase(host)
+                        && !"www.example.com".equalsIgnoreCase(host)) {
+                    log.warn("拒绝不受信任的前端回调地址: {}", frontendRedirectUri);
+                    return null;
+                }
+            }
+            return frontendRedirectUri;
+        } catch (URISyntaxException e) {
+            log.warn("前端回调地址格式非法: {}", frontendRedirectUri, e);
+            return null;
+        }
+    }
                 response.sendRedirect(redirectUrl);
             } else {
                 // 返回错误响应
