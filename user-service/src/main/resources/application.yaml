@@ -54,7 +54,7 @@ mybatis-plus:
 
 logging:
   level:
-    cn.org.joinup: debug
+    cn.org.joinup.user: debug
   pattern:
     dateformat: HH:mm:ss:SSS
   file:
@@ -76,3 +76,12 @@ user:
   auth:
     qrcode:
      url-prefix: https://classhopper.com/app/scan
+
+
+# GitHub OAuth配置
+github:
+  oauth:
+    client-id: ${GITHUB_CLIENT_ID}
+    client-secret: ${GITHUB_CLIENT_SECRET}
+    redirect-uri: http://39.105.96.112/api/user/auth/github/callback
+    scope: user:email
