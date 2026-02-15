@@ -27,3 +27,18 @@ joinup:
 spring:
   flyway:
     baseline-version: 1
+
+
+github:
+  oauth:
+    redirect-uri: http://39.105.96.112/api/user/auth/github/callback
+
+
+frontend:
+  redirect:
+    # 允许的前端回调地址域名白名单
+    allowed-domains:
+      - 101.42.43.228
+      - 39.105.96.112
+    # 是否允许相对路径
+    allow-relative-paths: true

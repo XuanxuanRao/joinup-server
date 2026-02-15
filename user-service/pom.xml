@@ -138,6 +138,12 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
 
+        <!-- GitHub API Client -->
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.315</version>
+        </dependency>
 
     </dependencies>
 

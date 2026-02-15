@@ -51,6 +51,7 @@ public class User implements Serializable {
      */
     private String studentId;
     private String openid;
+    private String githubId;
     private Gender gender;
 
     /**
