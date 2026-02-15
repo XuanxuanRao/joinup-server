@@ -118,41 +118,61 @@ public class GitHubLoginController {
         if (StrUtil.isBlank(frontendRedirectUri)) {
             return null;
         }
-        
+
         try {
             URI uri = new URI(frontendRedirectUri);
-            
+
             // 处理相对路径
             if (!uri.isAbsolute()) {
                 if (frontendRedirectConfig.isAllowRelativePaths()) {
-                    return frontendRedirectUri;
+                    String path = uri.getPath();
+                    // 仅允许以单个 "/" 开头的相对路径，拒绝协议相对（"//"）或异常路径
+                    if (StrUtil.isBlank(path) || !path.startsWith("/") || path.startsWith("//")) {
+                        log.warn("相对回调路径不合法: {}", frontendRedirectUri);
+                        return null;
+                    }
+                    // 拒绝包含可疑片段的路径
+                    if (frontendRedirectUri.contains("://") || frontendRedirectUri.contains("\\")) {
+                        log.warn("相对回调路径包含非法字符: {}", frontendRedirectUri);
+                        return null;
+                    }
+                    // 返回解析后的规范化路径
+                    return uri.toString();
                 } else {
                     return null;
                 }
             }
-            
-            // 处理绝对路径，校验域名
+
+            // 处理绝对路径，校验协议和域名
+            String scheme = uri.getScheme();
+            if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+                log.warn("回调地址使用了不允许的协议: {}", frontendRedirectUri);
+                return null;
+            }
+
             String host = uri.getHost();
             if (host == null) {
                 log.warn("回调地址无主机名: {}", frontendRedirectUri);
                 return null;
             }
-            
+
             // 检查是否在白名单中
             if (frontendRedirectConfig.getAllowedDomains() == null || frontendRedirectConfig.getAllowedDomains().isEmpty()) {
                 log.warn("未配置回调地址白名单，拒绝所有绝对路径: {}", frontendRedirectUri);
                 return null;
             }
-            
+
             boolean isAllowed = frontendRedirectConfig.getAllowedDomains().stream()
-                    .anyMatch(host::equalsIgnoreCase);
-            
+                    .anyMatch(domain -> domain != null && domain.equalsIgnoreCase(host));
+
             if (isAllowed) {
-                return frontendRedirectUri;
+                // 返回解析后的规范化 URL，避免直接回传原始输入
+                return uri.toString();
             } else {
+                log.warn("回调地址域名不在白名单中: {}", frontendRedirectUri);
                 return null;
             }
-            
+
         } catch (URISyntaxException e) {
             log.warn("前端回调地址格式非法: {}", frontendRedirectUri, e);
             return null;
