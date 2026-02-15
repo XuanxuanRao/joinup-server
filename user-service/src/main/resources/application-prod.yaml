@@ -38,8 +38,7 @@ frontend:
   redirect:
     # 允许的前端回调地址域名白名单
     allowed-domains:
-      - https://101.42.43.228
-      - http://101.42.43.228
-      - http://39.105.96.112
+      - 101.42.43.228
+      - 39.105.96.112
     # 是否允许相对路径
     allow-relative-paths: true

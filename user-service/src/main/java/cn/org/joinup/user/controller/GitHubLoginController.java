@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 
+import cn.org.joinup.common.ratelimit.annotation.RateLimit;
 import cn.org.joinup.common.result.Result;
 import cn.org.joinup.user.config.FrontendRedirectConfig;
 import cn.org.joinup.user.domain.vo.ThirdPartyAuthResponseVO;
@@ -41,6 +42,9 @@ public class GitHubLoginController {
     public Result<String> getGitHubAuthorizeUrl(
             @RequestParam(value = "frontend_redirect_uri", required = false) String frontendRedirectUri,
             HttpServletRequest request) {
+        if (StrUtil.isNotBlank(frontendRedirectUri) && sanitizeFrontendRedirectUri(frontendRedirectUri) == null) {
+            return Result.error("前端回调地址不合法");
+        }
         // 生成随机state参数，用于防止CSRF攻击
         String state = IdUtil.simpleUUID();
         // 构建GitHub授权URL
@@ -51,6 +55,7 @@ public class GitHubLoginController {
 
     @ApiOperation("GitHub授权回调")
     @GetMapping("/callback")
+    @RateLimit(count = 10, time = 1)
     public void githubCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state,

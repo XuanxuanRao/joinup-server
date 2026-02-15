@@ -94,6 +94,7 @@ public class GitHubOAuthServiceImpl implements IGitHubOAuthService {
         HttpResponse response = HttpRequest.post(gitHubOAuthConfig.getTokenUrl())
                 .header("Accept", "application/json")
                 .form(params)
+                .timeout((int) Duration.ofSeconds(10).toMillis())
                 .execute();
         
         if (!response.isOk()) {
@@ -106,8 +107,13 @@ public class GitHubOAuthServiceImpl implements IGitHubOAuthService {
             log.error("GitHub授权错误: {}", result.getStr("error_description"));
             throw new BadRequestException("GitHub授权失败: " + result.getStr("error_description"));
         }
-        
-        return result.getStr("access_token");
+
+        String accessToken = result.getStr("access_token");
+        if (StrUtil.isBlank(accessToken)) {
+            log.error("GitHub响应中缺少access_token字段: {}", response.body());
+            throw new BadRequestException("GitHub授权失败：未返回有效的access_token");
+        }
+        return accessToken;
     }
     
     /**
@@ -162,7 +168,7 @@ public class GitHubOAuthServiceImpl implements IGitHubOAuthService {
                     .avatar(avatar)
                     .email(email)
                     .githubId(githubId)
-                    .username(username)
+                    .username("github_" + username.substring(0, Math.min(username.length(), 20)))
                     .userType(UserType.INTERNAL)
                     .role("USER")
                     .build();

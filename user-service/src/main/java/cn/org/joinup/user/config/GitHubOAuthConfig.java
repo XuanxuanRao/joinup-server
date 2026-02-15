@@ -40,9 +40,4 @@ public class GitHubOAuthConfig {
      * GitHub token获取URL
      */
     private String tokenUrl = "https://github.com/login/oauth/access_token";
-    
-    /**
-     * GitHub用户信息URL
-     */
-    private String userInfoUrl = "https://api.github.com/user";
 }
