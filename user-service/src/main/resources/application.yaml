@@ -83,5 +83,15 @@ github:
   oauth:
     client-id: ${GITHUB_CLIENT_ID}
     client-secret: ${GITHUB_CLIENT_SECRET}
-    redirect-uri: http://39.105.96.112/api/user/auth/github/callback
+    redirect-uri: http://127.0.0.1:8088/user/auth/github/callback
     scope: user:email
+
+
+frontend:
+  redirect:
+    # 允许的前端回调地址域名白名单
+    allowed-domains:
+      - localhost
+      - 127.0.0.1
+    # 是否允许相对路径
+    allow-relative-paths: true

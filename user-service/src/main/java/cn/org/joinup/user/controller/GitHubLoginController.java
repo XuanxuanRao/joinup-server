@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 
 import cn.org.joinup.common.result.Result;
+import cn.org.joinup.user.config.FrontendRedirectConfig;
 import cn.org.joinup.user.domain.vo.ThirdPartyAuthResponseVO;
 import cn.org.joinup.user.service.IGitHubOAuthService;
 import io.swagger.annotations.Api;
@@ -33,6 +34,7 @@ import java.net.URISyntaxException;
 public class GitHubLoginController {
 
     private final IGitHubOAuthService gitHubOAuthService;
+    private final FrontendRedirectConfig frontendRedirectConfig;
 
     @ApiOperation("获取GitHub授权URL")
     @GetMapping("/authorize")
@@ -97,11 +99,18 @@ public class GitHubLoginController {
                 String errorMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
                 String redirectUrl = safeFrontendRedirectUri + "?error=" + errorMsg;
                 log.info("GitHub登录失败，重定向到前端回调页面: {}", redirectUrl);
+                response.sendRedirect(redirectUrl);
+            } else {
+                // 返回错误响应
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write(JSONUtil.toJsonStr(Result.error("GitHub登录失败: " + e.getMessage())));
+            }
+        }
+    }
 
     /**
-     * 校验并清洗前端回调地址，防止开放重定向漏洞。
-     * 允许相对路径，或主机名在允许列表中的绝对 URL。
-     *
+     * 校验并清洗前端回调地址，防止开放重定向漏洞
+     * 
      * @param frontendRedirectUri 原始前端回调地址
      * @return 安全的回调地址；如果不合法则返回 null
      */
@@ -109,33 +118,44 @@ public class GitHubLoginController {
         if (StrUtil.isBlank(frontendRedirectUri)) {
             return null;
         }
+        
         try {
             URI uri = new URI(frontendRedirectUri);
-            // 允许相对路径（无 scheme 和 host）
-            if (uri.isAbsolute()) {
-                String host = uri.getHost();
-                if (host == null) {
-                    return null;
-                }
-                // TODO: 根据实际情况调整允许的前端域名
-                if (!"example.com".equalsIgnoreCase(host)
-                        && !"www.example.com".equalsIgnoreCase(host)) {
-                    log.warn("拒绝不受信任的前端回调地址: {}", frontendRedirectUri);
+            
+            // 处理相对路径
+            if (!uri.isAbsolute()) {
+                if (frontendRedirectConfig.isAllowRelativePaths()) {
+                    return frontendRedirectUri;
+                } else {
                     return null;
                 }
             }
-            return frontendRedirectUri;
+            
+            // 处理绝对路径，校验域名
+            String host = uri.getHost();
+            if (host == null) {
+                log.warn("回调地址无主机名: {}", frontendRedirectUri);
+                return null;
+            }
+            
+            // 检查是否在白名单中
+            if (frontendRedirectConfig.getAllowedDomains() == null || frontendRedirectConfig.getAllowedDomains().isEmpty()) {
+                log.warn("未配置回调地址白名单，拒绝所有绝对路径: {}", frontendRedirectUri);
+                return null;
+            }
+            
+            boolean isAllowed = frontendRedirectConfig.getAllowedDomains().stream()
+                    .anyMatch(host::equalsIgnoreCase);
+            
+            if (isAllowed) {
+                return frontendRedirectUri;
+            } else {
+                return null;
+            }
+            
         } catch (URISyntaxException e) {
             log.warn("前端回调地址格式非法: {}", frontendRedirectUri, e);
             return null;
-        }
-    }
-                response.sendRedirect(redirectUrl);
-            } else {
-                // 返回错误响应
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(JSONUtil.toJsonStr(Result.error("GitHub登录失败: " + e.getMessage())));
-            }
         }
     }
 }
