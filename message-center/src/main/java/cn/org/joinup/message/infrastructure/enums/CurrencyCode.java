@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public enum CurrencyCode {
     CNY("CNY", "人民币"),
     JPY("JPY", "日元"),
+    USD("USD", "美元")
     ;
 
     @EnumValue
