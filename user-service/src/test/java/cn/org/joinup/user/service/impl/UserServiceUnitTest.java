@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +54,8 @@ class UserServiceUnitTest {
     private UserMapper userMapper;
     @Mock
     private ValueOperations<String, String> valueOperations;
+    @Mock
+    private RedissonClient redissonClient;
 
     private UserServiceImpl userService;
 
@@ -65,6 +68,7 @@ class UserServiceUnitTest {
                 jwtProperties,
                 stringRedisTemplate,
                 wxMaService,
+                redissonClient,
                 sensitiveWordBs,
                 userRegisterProperties,
                 userDefaultAvatarProperties

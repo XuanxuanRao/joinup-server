@@ -20,4 +20,9 @@ public interface RedisConstant {
     String INTEREST_LIST_PREFIX = "interest:list";
     String INTEREST_LIST_ALL = "interest:list:all";
     String VERIFY_LOCK_PREFIX = "verify:email:lock:";
+    /**
+     * 第三方用户注册锁，防止同一用户重复注册 <br>
+     * 格式：user:register:third_party:{app-key}:{app-uuid}
+     */
+    String REGISTER_THIRD_PARTY_USER_PREFIX = "user:register:third_party:";
 }
