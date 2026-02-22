@@ -24,6 +24,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 
@@ -53,6 +54,8 @@ class UserServiceUnitTest {
     @Mock
     private UserMapper userMapper;
     @Mock
+    private TransactionTemplate transactionTemplate;
+    @Mock
     private ValueOperations<String, String> valueOperations;
     @Mock
     private RedissonClient redissonClient;
@@ -69,6 +72,7 @@ class UserServiceUnitTest {
                 stringRedisTemplate,
                 wxMaService,
                 redissonClient,
+                transactionTemplate,
                 sensitiveWordBs,
                 userRegisterProperties,
                 userDefaultAvatarProperties
