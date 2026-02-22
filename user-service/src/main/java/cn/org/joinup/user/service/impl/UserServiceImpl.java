@@ -33,6 +33,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -58,6 +59,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private final WxMaService wxMaService;
 
     private final RedissonClient redissonClient;
+
+    private final TransactionTemplate transactionTemplate;
 
     private final SensitiveWordBs sensitiveWordBs;
 
@@ -327,42 +330,48 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional
     public User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) throws SystemException {
         String lockKey = RedisConstant.REGISTER_THIRD_PARTY_USER_PREFIX + registerDTO.getAppKey() + ":" + registerDTO.getAppUUID();
         RLock lock = redissonClient.getLock(lockKey);
-        boolean locked = false;
 
+        // 1. 先尝试获取锁，这里增加 leaseTime (例如 10秒) 作为兜底，防止 Redis 节点宕机造成永久死锁
         try {
-            locked = lock.tryLock(5, TimeUnit.SECONDS);
-            if (!locked) {
-                // 锁获取失败，可能是并发请求，尝试查询已存在的用户
-                User existingUser = lambdaQuery()
-                        .eq(User::getAppKey, registerDTO.getAppKey())
-                        .eq(User::getAppUUID, registerDTO.getAppUUID())
-                        .one();
-                if (existingUser != null) {
-                    return existingUser;
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                try {
+                    // 2. 在锁内开启事务
+                    return transactionTemplate.execute(status -> {
+                        // 3. 事务内双重检查（这是在锁内，且事务刚刚开启）
+                        User existingUser = lambdaQuery()
+                                .eq(User::getAppKey, registerDTO.getAppKey())
+                                .eq(User::getAppUUID, registerDTO.getAppUUID())
+                                .one();
+                        if (existingUser != null) {
+                            return existingUser;
+                        }
+
+                        // 4. 执行业务插入
+                        User user = new User();
+                        user.setUsername(registerDTO.getUsername());
+                        user.setAppKey(registerDTO.getAppKey());
+                        user.setAppUUID(registerDTO.getAppUUID());
+                        user.setCreateTime(LocalDateTime.now());
+                        user.setUpdateTime(LocalDateTime.now());
+                        user.setUserType(UserType.EXTERNAL);
+                        user.setAvatar(userDefaultAvatarProperties.getAvatar(UserType.EXTERNAL, registerDTO.getAppKey()));
+                        save(user);
+                        return user;
+                    });
+                } finally {
+                    // 5. 确保事务提交后再释放锁
+                    lock.unlock();
                 }
-                throw new SystemException("注册用户失败，请稍后再试");
+            } else {
+                // 锁获取失败，说明有其他线程在处理，简单轮询或返回
+                throw new SystemException("系统繁忙，请稍后再试");
             }
-            User user = new User();
-            user.setUsername(registerDTO.getUsername());
-            user.setAppKey(registerDTO.getAppKey());
-            user.setAppUUID(registerDTO.getAppUUID());
-            user.setCreateTime(LocalDateTime.now());
-            user.setUpdateTime(LocalDateTime.now());
-            user.setUserType(UserType.EXTERNAL);
-            user.setAvatar(userDefaultAvatarProperties.getAvatar(UserType.EXTERNAL, registerDTO.getAppKey()));
-            save(user);
-            return user;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new SystemException("注册用户失败，请稍后再试");
-        } finally {
-            if (locked) {
-                lock.unlock();
-            }
         }
     }
 }
