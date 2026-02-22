@@ -27,6 +27,8 @@ import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private final StringRedisTemplate stringRedisTemplate;
 
     private final WxMaService wxMaService;
+
+    private final RedissonClient redissonClient;
 
     private final SensitiveWordBs sensitiveWordBs;
 
@@ -323,16 +327,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    public User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) {
-        User user = new User();
-        user.setUsername(registerDTO.getUsername());
-        user.setAppKey(registerDTO.getAppKey());
-        user.setAppUUID(registerDTO.getAppUUID());
-        user.setCreateTime(LocalDateTime.now());
-        user.setUpdateTime(LocalDateTime.now());
-        user.setUserType(UserType.EXTERNAL);
-        user.setAvatar(userDefaultAvatarProperties.getAvatar(UserType.EXTERNAL, registerDTO.getAppKey()));
-        save(user);
-        return user;
+    public User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) throws SystemException {
+        String lockKey = RedisConstant.REGISTER_THIRD_PARTY_USER_PREFIX + registerDTO.getAppKey() + ":" + registerDTO.getAppUUID();
+        RLock lock = redissonClient.getLock(lockKey);
+        boolean locked = false;
+
+        try {
+            locked = lock.tryLock(5, TimeUnit.SECONDS);
+            User user = new User();
+            user.setUsername(registerDTO.getUsername());
+            user.setAppKey(registerDTO.getAppKey());
+            user.setAppUUID(registerDTO.getAppUUID());
+            user.setCreateTime(LocalDateTime.now());
+            user.setUpdateTime(LocalDateTime.now());
+            user.setUserType(UserType.EXTERNAL);
+            user.setAvatar(userDefaultAvatarProperties.getAvatar(UserType.EXTERNAL, registerDTO.getAppKey()));
+            save(user);
+            return user;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SystemException("注册用户失败，请稍后再试");
+        } finally {
+            if (locked) {
+                lock.unlock();
+            }
+        }
     }
 }

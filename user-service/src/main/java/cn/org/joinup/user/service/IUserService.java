@@ -28,5 +28,5 @@ public interface IUserService extends IService<User> {
 
     User getUserById(Long id);
 
-    User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO);
+    User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) throws SystemException;
 }

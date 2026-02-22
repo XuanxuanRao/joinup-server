@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.org.joinup.common.exception.BadRequestException;
+import cn.org.joinup.common.exception.SystemException;
 import cn.org.joinup.common.util.RequestUtil;
 import cn.org.joinup.common.util.UserContext;
 import cn.org.joinup.user.constant.RedisConstant;
@@ -78,11 +79,17 @@ public class AuthService {
         if (user == null) {
             log.info("第三方应用首次登录，自动注册用户，appKey={}, appUUID={}",
                     authRequestDTO.getAppKey(), authRequestDTO.getAppUUID());
-            user = userService.registerThirdPartyUser(RegisterThirdPartyUserDTO.builder()
-                            .appKey(appInfo.getAppKey())
-                            .appUUID(authRequestDTO.getAppUUID())
-                            .username(String.format("%s_%s", appInfo.getAppKey(), authRequestDTO.getAppUUID().substring(0, 8)))
-                            .build());
+            try {
+                user = userService.registerThirdPartyUser(RegisterThirdPartyUserDTO.builder()
+                                .appKey(appInfo.getAppKey())
+                                .appUUID(authRequestDTO.getAppUUID())
+                                .username(String.format("%s_%s", appInfo.getAppKey(), authRequestDTO.getAppUUID().substring(0, 8)))
+                                .build());
+            } catch (Exception e) {
+                log.error("自动注册用户失败，appKey={}, appUUID={}",
+                        authRequestDTO.getAppKey(), authRequestDTO.getAppUUID(), e);
+                throw new BadRequestException("用户注册失败");
+            }
             log.info("{} 用户注册成功，userId={}", authRequestDTO.getAppKey(), user.getId());
         }
         if (user.getUserType() == UserType.INTERNAL) {
