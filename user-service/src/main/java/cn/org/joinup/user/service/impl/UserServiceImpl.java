@@ -327,6 +327,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
+    @Transactional
     public User registerThirdPartyUser(RegisterThirdPartyUserDTO registerDTO) throws SystemException {
         String lockKey = RedisConstant.REGISTER_THIRD_PARTY_USER_PREFIX + registerDTO.getAppKey() + ":" + registerDTO.getAppUUID();
         RLock lock = redissonClient.getLock(lockKey);
