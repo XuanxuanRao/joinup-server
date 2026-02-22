@@ -334,6 +334,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         try {
             locked = lock.tryLock(5, TimeUnit.SECONDS);
+            if (!locked) {
+                // 锁获取失败，可能是并发请求，尝试查询已存在的用户
+                User existingUser = lambdaQuery()
+                        .eq(User::getAppKey, registerDTO.getAppKey())
+                        .eq(User::getAppUUID, registerDTO.getAppUUID())
+                        .one();
+                if (existingUser != null) {
+                    return existingUser;
+                }
+                throw new SystemException("注册用户失败，请稍后再试");
+            }
             User user = new User();
             user.setUsername(registerDTO.getUsername());
             user.setAppKey(registerDTO.getAppKey());
