@@ -40,5 +40,7 @@ frontend:
     allowed-domains:
       - 101.42.43.228
       - 39.105.96.112
+      - joinup-admin.aidanrao.top
+      - aidanrao.top
     # 是否允许相对路径
     allow-relative-paths: true
